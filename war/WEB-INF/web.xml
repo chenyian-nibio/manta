@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+              http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5"
+         xmlns="http://java.sun.com/xml/ns/javaee">
+
+  <!-- Servlets -->
+  <servlet>
+    <servlet-name>gutfloraServlet</servlet-name>
+    <servlet-class>jp.go.nibiohn.bioinfo.server.GutFloraServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>gutfloraServlet</servlet-name>
+    <url-pattern>/manta/analysis</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>gwtExportDataServlet</servlet-name>
+    <servlet-class>jp.go.nibiohn.bioinfo.server.servlet.ExportDataServlet</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>gwtExportDataServlet</servlet-name>
+    <url-pattern>/manta/export</url-pattern>
+  </servlet-mapping>
+  
+  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>Manta.html</welcome-file>
+  </welcome-file-list>
+
+  <session-config>
+    <session-timeout>720</session-timeout>      <!-- 720 = 12 * 60 = 0.5 day -->
+  </session-config>
+  
+  <!-- filter to prevent nocache.js getting cached in browser -->
+  <filter>
+    <filter-name>gwtCacheControlFilter</filter-name>
+    <filter-class>jp.go.nibiohn.bioinfo.server.GWTCacheControlFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>gwtCacheControlFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+</web-app>

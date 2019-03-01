@@ -1,0 +1,393 @@
+.material-icons.md-18 { font-size: 18px; }
+
+.geneListHeader {
+	background-color: #2062B8;
+	color: white;
+	font-style: italic;
+}
+.geneList {
+	border: 1px solid silver;
+	padding: 2px;
+	margin-bottom:6px;
+}
+.infoMessage {
+	background-color: #FFFFCC;
+	border: 2px solid green;
+	padding: 6px;
+	font-size: 14px;
+}
+.warnMessage {
+	background-color: #FFFFCC;
+	border: 2px solid red;
+	padding: 6px;
+	font-size: 14px;
+}
+.infoLabel {
+	padding: 3px;
+	font-size: 14px;
+}
+.warningDialog {
+	vertical-align: middle;
+	padding: 6px;
+	font-size: 14px;
+	color: red;
+}
+.loading {
+	background-color: #999999;
+	opacity:0.5;
+	background-image:url('image/ajax-loader.gif');
+	background-repeat:no-repeat;
+	background-attachment:fixed;
+	background-position:center; 
+}
+div.loading td {
+	padding-top: 120px;
+	font-size: 24px;
+	vertical-align: middle !important;
+	text-align: center;
+}
+
+.naviPanel {
+	color: #FFFFFF;
+	vertical-align: middle;
+	padding: 10px;
+	height: 20px;
+	background-color: #85B27F;
+}
+div.naviLink a, div.naviLink a:visited, div.naviLink a:hover {
+	color: #FFFFFF;
+	padding: 0px 10px;
+	font-size: 14px;
+}
+div.inactiveNaviLink a, div.inactiveNaviLink a:visited, div.inactiveNaviLink a:hover {
+	color: #999999;
+	padding: 0px 10px;
+	font-size: 14px;
+}
+.roundButton {
+	border: 2px outset buttonface;
+}
+
+h1.header {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #333333;
+  margin: 10px 0px 5px;
+  text-align: left;
+}
+
+/** upper right links */
+#topMenu { 
+	margin: 0; 
+	position: absolute; 
+	top: 0; 
+	right: 0; 
+	font: 11px Arial, sans-serif; 
+}
+#topLang { 
+	color: #000; 
+	background-color: #FFF;
+	float: right;
+}
+.langFlagGb {
+	padding: 5px 25px; 
+	background: url('image/gb.png') no-repeat left;
+}
+.langFlagJp {
+	padding: 5px 25px; 
+	background: url('image/ja.png') no-repeat left;
+}
+#topnav { 
+	padding: 5px; 
+	color: #FFF; 
+	background-color: #000;
+	white-space: nowrap;
+	float: right; 
+}
+#topnav a:link, #topnav a:visited, #topnav a:hover {
+	padding: 5px; 
+	color: #FFF;
+	font: 11px Arial, sans-serif;  
+}
+
+/** use panel **/
+#userPanel { 
+	margin: 0; 
+	padding: 0px 8px;
+	position: absolute; 
+	top: 50px; 
+	right: 10px; 
+	border: 2px solid #666;
+}
+#userInfo {
+	padding: 5px 10px 5px 28px; 
+	background: url('image/ic_person_black_24dp.png') no-repeat left;
+}
+.userMenu {
+	padding: 5px 10px !important; 
+}
+.loginInfo {
+	padding: 5px 25px; 
+	background: url('image/information.png') no-repeat left;
+	text-align: left;
+}
+.loginError {
+	padding: 5px 25px; 
+	background: url('image/exclamation.png') no-repeat left;
+	text-align: left;
+}
+
+/** clickable label **/
+.buttonLabel {
+	cursor:pointer;
+	color: #0066CC; 
+	text-decoration: none;
+}
+.buttonLabel:hover {
+	color: #CF4D23;
+	text-decoration: underline;
+}
+
+.historyPanel {
+	width: 120px;
+	border: 1px solid silver;   
+	padding: 12px;
+}
+
+.altPanel {
+	margin: 10px 0px;
+}
+
+.highlightButtonPanel {
+	padding: 3px; 
+	border: 2px solid #FFF;
+	background: #6C6;
+}
+
+.hintInfo {
+	color: blue; 
+	font-weight: bold; 
+	margin: 16px 6px;
+}
+
+.fixlink a, .fixlink a:visited, .fixlink a:hover {
+	padding: 0px 0px;
+	font-size: 14px;
+}
+
+.extLinkInTable div {
+	cursor:pointer;
+	text-decoration: underline;
+}
+
+.disabledSample {
+	color: #CCC;
+}
+
+.clickableTable div {
+	cursor:pointer;
+}
+
+table.sampleInfo {
+	width: 600px;
+	border: 1px solid lightgrey;
+}
+
+table.sampleInfo th {
+	background: #CDDFCA;
+	width: 150px;
+	border: 1px solid lightgrey;
+	text-align: left;
+	padding: 0px 9px;
+}
+
+table.sampleInfo td {
+	border: 1px solid lightgrey;
+	padding: 0px 6px;
+}
+
+table.normalCol th {
+	width: 150px;
+}
+
+table.diverCol th {
+	width: 100px;
+}
+
+.noINfoLabel {
+	margin-left: 36px;
+	font-style: italic;
+	color: #999;
+}
+
+table.wideCol th {
+	width: 300px;
+}
+
+div.longTable {
+	max-height: 200px;
+	overflow-y: scroll;
+}
+
+.optionDec {
+	margin: 12px 0px 12px 12px;
+}
+
+.spacer {
+	border-right: 1px solid black !important;
+}
+
+.noBorder .gwt-TabPanelBottom {
+	border-bottom: none;
+	border-left: none;
+	border-right: none;
+}
+
+.corrLabel {
+	font-size: 10px;
+}
+
+.corrValue {
+	font-size: 24px;
+	font-weight: bold; 
+}
+
+.corrResultDec {
+	margin: 12px;
+	background-color: #FF9;
+}
+
+.nameColumn div {
+	width: 180px;
+}
+
+.wideColumn div {
+	width: 200px;
+}
+
+.selectedColumn div {
+	background: #CC6;
+}
+
+.clickable {
+	cursor: pointer;
+}
+
+.closeLink {
+	cursor: pointer;
+	color: blue;
+	text-decoration: underline;
+	float: right;
+}
+
+.comboBar rect {
+	stroke-width: 1;
+	stroke: none;
+	pointer-events: all;
+}
+
+.comboBar rect:hover {
+	stroke-width: 2;
+	stroke: #000;
+	stroke-opacity: 0.4;
+	pointer-events: all;
+}
+
+.dendroNodes circle {
+	stroke-width: 1;
+	stroke: none;
+	fill: none;
+	pointer-events: all;
+}
+
+.dendroNodes circle:hover {
+	stroke: red;
+	stroke-opacity: 0.4;
+	fill: yellow;
+	fill-opacity: 0.8;
+	pointer-events: all;
+	cursor: pointer;
+}
+
+.selectedLabel {
+	fill: red;
+	stroke: red;
+	stroke-opacity: 0.8;
+}
+
+.viewSamplePanel {
+	background-color: #FFFFCC;
+	margin-left: 36px;
+	border: 2px solid green;
+	padding: 0 12px;
+}
+.taxonBar {
+	cursor: pointer;
+}
+.taxonNaviPanel {
+	color: navy;
+	padding: 12px 0px;
+	font-size: 14px;
+}
+div.taxonNaviLink {
+	color: #008080;
+	padding: 0px 8px;
+	cursor: pointer;
+	text-decoration: none;
+}
+div.taxonNaviLink:hover {
+	color: #800000;
+	text-decoration: underline;
+}
+
+.mlrMicrobiotaList {
+	margin: 3px 3px;
+	padding: 2px 4px;
+	border: 1px solid #999;
+	background-color: #EEE;
+	float: left;
+}
+
+.pairCorrLabel {
+	margin: 0px 0px;
+	padding: 2px 4px;
+	border: 1px solid #999;
+	background-color: #EEE;
+	float: left;
+}
+
+.dataLoading {
+	width: 100%;
+    position: fixed !important;
+	top: 0;
+	text-align: center;
+}
+.dataLoadingContainer {
+    margin: auto;
+}
+.dataLoadingLabel {
+    background: url('image/ajax-loader-wheel2.gif') no-repeat left;
+	padding-left: 42px;
+	margin-top: 20px;
+	font-size: 24px;
+	font-weight: bold;
+	text-shadow: -1px 0 1px white, 0 1px 1px white, 1px 0 1px white, 0 -1px 1px white;
+}
+
+.sampleSelectionHeader {
+	color: #FFFFFF;
+	padding: 6px;
+	width: 150px;
+	background-color: #999;
+	font-size: 16px;
+	font-weight: bold;
+}
+.sampleSelectionContainer {
+	border: 1px solid #999;	
+	padding-bottom: 6px;
+}
+.pcoaListboxHeader {
+	margin-top: 12px;
+	font-weight: bold;
+	font-size: 16px;
+}

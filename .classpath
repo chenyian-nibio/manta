@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="images"/>
+	<classpathentry kind="src" path="resources"/>
+	<classpathentry kind="src" output="test-classes" path="test"/>
+	<classpathentry kind="con" path="com.gwtplugins.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-math3-3.6.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-visualization.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/HikariCP-java7-2.4.11.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/postgresql-42.0.0.jre7.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/REngine.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/RserveEngine.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-simple-1.7.25.jar"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+</classpath>

@@ -1,0 +1,80 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the     -->
+<!-- browser's rendering engine into                -->
+<!-- "Standards Mode". Replacing this declaration   -->
+<!-- with a "Quirks Mode" doctype is not supported. -->
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="author" content="4368656E2C59692D416E">
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link type="text/css" rel="stylesheet" href="Manta.css">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=2">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>MANTA - Microbiota and Phenotype correlation analysis platform</title>
+    
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    <script type="text/javascript" language="javascript" src="manta/manta.nocache.js"></script>
+  </head>
+
+  <!--                                           -->
+  <!-- The body can have arbitrary html, or      -->
+  <!-- you can leave the body empty if you want  -->
+  <!-- to create a completely dynamic UI.        -->
+  <!--                                           -->
+  <body>
+
+    <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+      </div>
+    </noscript>
+
+    <h1 class="header"><img src="image/logo.png" width="500" height="100" style="vertical-align: middle;" title="MANTA"></h1>
+
+	<div id="mesgPanel"></div>
+
+	<div id="naviPanel" class="naviPanel"></div>
+
+	<div id="mainPanel"></div>
+	
+	<div id="infoPanel"></div>
+    
+    <div id="tooltip" class="hidden">
+        <div id="value"></div>
+	</div>
+    
+    <div id="topMenu">
+		<div id="topnav">
+			<a href="https://mizuguchilab.org/manta/">Home</a> | 
+			<a href="https://mizuguchilab.org/">Mizuguchi Lab</a> | 
+			<a href="http://www.nibiohn.go.jp/">NIBIOHN</a>
+	    </div>
+	    <div id="topLang"></div>
+    </div>
+    
+    <div id="userPanel">
+    	<div id="userInfo" title = "current user">
+    		Guest-san
+		</div>
+    </div>
+
+  </body>
+</html>

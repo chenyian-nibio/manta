@@ -1,0 +1,7 @@
+test-classes/
+gwt-unitCache/
+war/WEB-INF/classes/
+war/WEB-INF/deploy/
+war/manta/
+.gwt/
+.settings/
