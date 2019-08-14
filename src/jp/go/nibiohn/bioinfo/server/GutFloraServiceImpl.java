@@ -20,12 +20,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
-import org.rosuda.REngine.REXP;
-import org.rosuda.REngine.REXPDouble;
-import org.rosuda.REngine.REXPMismatchException;
-import org.rosuda.REngine.RList;
-import org.rosuda.REngine.Rserve.RConnection;
-import org.rosuda.REngine.Rserve.RserveException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.zaxxer.hikari.HikariConfig;
@@ -46,6 +40,7 @@ import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 import jp.go.nibiohn.bioinfo.shared.TaxonEntry;
 import jp.go.nibiohn.bioinfo.shared.VisualizationtResult;
+import smile.mds.MDS;
 
 /**
  * The server-side implementation of the RPC service.
@@ -3596,134 +3591,127 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public PcoaResult getPCoAResult(List<String> sampleIdList, Integer distanceType) {
-		PcoaResult ret = null;
-		
 		Map<String, Map<String, Double>> matrix = getSampleDistanceMatrix(sampleIdList, distanceType);
 		
 		List<String> sampleList = new ArrayList<>(matrix.keySet());
 		Collections.sort(sampleList);
-		REXP[] data = new REXP[sampleList.size()];
-		for (int i = 0; i < sampleList.size(); i++) {
-			double[] distValues = new double[sampleList.size()];
-			for (int j = 0; j < sampleList.size(); j++) {
+		
+		int len = sampleList.size();
+		double[][] dmat = new double[len][len];
+		for (int i = 0; i < len; i++) {
+			for (int j = 0; j < len; j++) {
 				if (i==j) {
-					distValues[j] = 0;
+					dmat[i][j] = 0;
 				} else {
-					distValues[j] = matrix.get(sampleList.get(i)).get(sampleList.get(j));
+					dmat[i][j] = matrix.get(sampleList.get(i)).get(sampleList.get(j)); 
 				}
 			}
-			data[i] = new REXPDouble(distValues);
 		}
 		
-		try {
-			REXP dataFrame = REXP.createDataFrame(new RList(data));
-			RConnection connection = new RConnection(GutFloraConfig.RSERVE_IP_ADDRESS);
-			
-			connection.assign("df", dataFrame);
-			connection.voidEval("library(ade4)");
-			connection.voidEval("result <- dudi.pco(as.dist(df), scann = FALSE, nf = 2)");
-			RList pcoList = connection.eval("result").asList();
-			double[] alDoubles = pcoList.at("li").asList().at("A1").asDoubles();
-			double[] a2Doubles = pcoList.at("li").asList().at("A2").asDoubles();
-			Map<String, List<Double>> coordinates = new HashMap<String, List<Double>>();
-			for (int i = 0; i < alDoubles.length; i++) {
-				coordinates.put(sampleList.get(i), Arrays.asList(Double.valueOf(alDoubles[i]), Double.valueOf(a2Doubles[i])));
-			}
-			
-			double a1Pct = connection.eval("result$eig[1]/sum(result$eig)*100").asDouble();
-			double a2Pct = connection.eval("result$eig[2]/sum(result$eig)*100").asDouble();
-			
-			double maxX = connection.eval("max(result$li$A1)").asDouble();
-			double maxY = connection.eval("max(result$li$A2)").asDouble();
-			double minX = connection.eval("min(result$li$A1)").asDouble();
-			double minY = connection.eval("min(result$li$A2)").asDouble();
-			double intervalX = maxX - minX;
-			double intervalY = maxY - minY;
-			
-			double interval = intervalX > intervalY? intervalX: intervalY;
-			double tickIntv = interval / 3;
-			double scale = 100 / tickIntv;
+		MDS mds = new MDS(dmat, dmat.length - 1);
 
-			double shiftX = 0;
-			int zeroX = 0;
-			if (tickIntv *2 > maxX && minX + tickIntv * 2 > 0) {
-				zeroX = 2;
-			} else {
-				while (minX + shiftX < 0) {
-					shiftX += tickIntv;
-					zeroX++;
-				}
-			}
-			
-			double shiftY = 0;
-			int zeroY = 9;
-			if (tickIntv *2 > maxY && minY + tickIntv * 2 > 0) {
-				zeroY = 7;
-			} else {
-				while (minY + shiftY < 0) {
-					shiftY += tickIntv;
-					zeroY--;
-				}
-			}
-			
-			StringBuffer gridSb = new StringBuffer();
-			// TODO draw grid
-			String gridStyle = "style=\"stroke:rgb(0,0,0);stroke-width:0.5;stroke-opacity:0.6;\"";
-			String zeroAxisStyle = "style=\"stroke:rgb(0,0,0);stroke-width:1.0;stroke-opacity:0.8;\"";
-			
-			int[][] gridLines = new int[][] { { 100, 100, 100, 500 }, { 200, 100, 200, 500 }, { 300, 100, 300, 500 },
-					{ 400, 100, 400, 500 }, { 500, 100, 500, 500 }, { 100, 100, 500, 100 }, { 100, 200, 500, 200 },
-					{ 100, 300, 500, 300 }, { 100, 400, 500, 400 }, { 100, 500, 500, 500 } };
-			gridSb.append("<g stroke-width=\"1\" stroke=\"none\" class=\"grid\" id=\"grid\">\n");
-			// vertical
-			for (int i = 0; i < 5; i++) {
-				String style = gridStyle;
-				if (i == zeroX) {
-					style = zeroAxisStyle;
-				}
-				gridSb.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", gridLines[i][0], gridLines[i][1],
-						gridLines[i][2], gridLines[i][3], style));
-			}
-			// horizon
-			for (int i = 5; i < gridLines.length; i++) {
-				String style = gridStyle;
-				if (i == zeroY) {
-					style = zeroAxisStyle;
-				}
-				gridSb.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", gridLines[i][0], gridLines[i][1],
-						gridLines[i][2], gridLines[i][3], style));
-			}
-			// zero text
-			gridSb.append(String
-					.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial;"
-							+ " font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
-							(100 + 100 * zeroX), 520, 16, "0"));
-			gridSb.append(String
-					.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial;"
-							+ " font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
-							80, (105 + 100 * (zeroY -5)), 16, "0"));
-			// axis label
-			gridSb.append(String
-					.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial;"
-							+ " font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
-							300, 560, 16, String.format("PCo1 (%.2f%%)", a1Pct)));
-			gridSb.append(String
-					.format("\t<text x=\"%d\" y=\"%d\" transform=\"rotate(270, %d, %d)\" style=\"text-anchor: middle;"
-							+ " font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
-							40, 300, 40, 305, 16, String.format("PCo2 (%.2f%%)", a2Pct)));
-			gridSb.append("</g>\n");
-			
-			ret = new PcoaResult(coordinates, gridSb.toString(), Double.valueOf(scale), Integer.valueOf(zeroX), Integer.valueOf(zeroY));
-			
-		} catch (REXPMismatchException e) {
-			e.printStackTrace();
-		} catch (RserveException e) {
-			e.printStackTrace();
+		double[][] coordinates = mds.getCoordinates();
+		Map<String, List<Double>> coordinateMap = new HashMap<String, List<Double>>();
+		List<Double> xList = new ArrayList<Double>();
+		List<Double> yList = new ArrayList<Double>();
+		for (int i = 0; i < coordinates.length; i++) {
+			Double xCoord = Double.valueOf(coordinates[i][0]);
+			Double yCoord = Double.valueOf(coordinates[i][1]);
+			coordinateMap.put(sampleList.get(i), Arrays.asList(xCoord, yCoord));
+			xList.add(xCoord);
+			yList.add(yCoord);
 		}
 		
-		return ret;
+		Collections.sort(xList);
+		double minX = xList.get(0).doubleValue();
+		double maxX = xList.get(xList.size() - 1).doubleValue();
+		Collections.sort(yList);
+		double minY = yList.get(0).doubleValue();
+		double maxY = yList.get(yList.size() - 1).doubleValue();
+		
+		double[] proportion = mds.getProportion();
+		double a1Pct = proportion[0] * 100d;
+		double a2Pct = proportion[1] * 100d;
+
+		double intervalX = maxX - minX;
+		double intervalY = maxY - minY;
+		
+		double interval = intervalX > intervalY? intervalX: intervalY;
+		double tickIntv = interval / 3;
+		double scale = 100 / tickIntv;
+
+		double shiftX = 0;
+		int zeroX = 0;
+		if (tickIntv *2 > maxX && minX + tickIntv * 2 > 0) {
+			zeroX = 2;
+		} else {
+			while (minX + shiftX < 0) {
+				shiftX += tickIntv;
+				zeroX++;
+			}
+		}
+		
+		double shiftY = 0;
+		int zeroY = 9;
+		if (tickIntv *2 > maxY && minY + tickIntv * 2 > 0) {
+			zeroY = 7;
+		} else {
+			while (minY + shiftY < 0) {
+				shiftY += tickIntv;
+				zeroY--;
+			}
+		}
+		
+		StringBuffer gridSb = new StringBuffer();
+		// TODO draw grid
+		String gridStyle = "style=\"stroke:rgb(0,0,0);stroke-width:0.5;stroke-opacity:0.6;\"";
+		String zeroAxisStyle = "style=\"stroke:rgb(0,0,0);stroke-width:1.0;stroke-opacity:0.8;\"";
+		
+		int[][] gridLines = new int[][] { { 100, 100, 100, 500 }, { 200, 100, 200, 500 }, { 300, 100, 300, 500 },
+				{ 400, 100, 400, 500 }, { 500, 100, 500, 500 }, { 100, 100, 500, 100 }, { 100, 200, 500, 200 },
+				{ 100, 300, 500, 300 }, { 100, 400, 500, 400 }, { 100, 500, 500, 500 } };
+		gridSb.append("<g stroke-width=\"1\" stroke=\"none\" class=\"grid\" id=\"grid\">\n");
+		// vertical
+		for (int i = 0; i < 5; i++) {
+			String style = gridStyle;
+			if (i == zeroX) {
+				style = zeroAxisStyle;
+			}
+			gridSb.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", gridLines[i][0], gridLines[i][1],
+					gridLines[i][2], gridLines[i][3], style));
+		}
+		// horizon
+		for (int i = 5; i < gridLines.length; i++) {
+			String style = gridStyle;
+			if (i == zeroY) {
+				style = zeroAxisStyle;
+			}
+			gridSb.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", gridLines[i][0], gridLines[i][1],
+					gridLines[i][2], gridLines[i][3], style));
+		}
+		// zero text
+		gridSb.append(String
+				.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial;"
+						+ " font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
+						(100 + 100 * zeroX), 520, 16, "0"));
+		gridSb.append(String
+				.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial;"
+						+ " font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
+						80, (105 + 100 * (zeroY -5)), 16, "0"));
+		// axis label
+		gridSb.append(String
+				.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial;"
+						+ " font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
+						300, 560, 16, String.format("PCo1 (%.2f%%)", a1Pct)));
+		gridSb.append(String
+				.format("\t<text x=\"%d\" y=\"%d\" transform=\"rotate(270, %d, %d)\" style=\"text-anchor: middle;"
+						+ " font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
+						40, 300, 40, 305, 16, String.format("PCo2 (%.2f%%)", a2Pct)));
+		gridSb.append("</g>\n");
+		
+		return new PcoaResult(coordinateMap, gridSb.toString(), Double.valueOf(scale), Integer.valueOf(zeroX), Integer.valueOf(zeroY));
 	}
-
+	
 	/**
 	 * only 3 types: PARA_TYPE_CONTINUOUS, PARA_TYPE_UNRANKED_CATEGORY and PARA_TYPE_RANKED_CATEGORY
 	 */
