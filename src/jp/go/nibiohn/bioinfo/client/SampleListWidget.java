@@ -4,14 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import jp.go.nibiohn.bioinfo.client.generic.DisableableCheckboxCell;
-import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
-import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
-import jp.go.nibiohn.bioinfo.shared.GutFloraLanguagePack;
-import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -46,6 +39,11 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SetSelectionModel;
 
+import jp.go.nibiohn.bioinfo.client.generic.DisableableCheckboxCell;
+import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
+import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
+import jp.go.nibiohn.bioinfo.shared.SampleEntry;
+
 public class SampleListWidget extends BaseWidget {
 
 	private static final String NO_SELECTED_SAMPLE = "No sample is selected.";
@@ -67,8 +65,6 @@ public class SampleListWidget extends BaseWidget {
 		this.currentLang = lang;
 		this.allSamples = result;
 		
-		Map<String, String> displayMap = GutFloraLanguagePack.DISPLAY_MAP.get(currentLang);
-
 		int i = 0;
 		for (SampleEntry se : result) {
 			if (se.hasReads()) {
@@ -94,11 +90,7 @@ public class SampleListWidget extends BaseWidget {
 		header.setStyleName("sampleSelectionHeader");
 		sampleSelectPanel.add(header);
 		
-		String labelString1 = displayMap.get("select all");
-		if (labelString1 == null) {
-			labelString1 = "Select all";
-		}
-		Label label1 = new Label(labelString1);
+		Label label1 = new Label("Select all");
 		label1.setStyleName("buttonLabel");
 		label1.addClickHandler(new ClickHandler() {
 			
@@ -115,11 +107,7 @@ public class SampleListWidget extends BaseWidget {
 		});
 		sampleSelectPanel.add(label1);
 		
-		String labelString2 = displayMap.get("select none");
-		if (labelString2 == null) {
-			labelString2 = "Select none";
-		}
-		Label label2 = new Label(labelString2);
+		Label label2 = new Label("Select none");
 		label2.setStyleName("buttonLabel");
 		label2.addClickHandler(new ClickHandler() {
 			
@@ -131,11 +119,7 @@ public class SampleListWidget extends BaseWidget {
 		});
 		sampleSelectPanel.add(label2);
 		
-		String labelString3 = displayMap.get("select current page");
-		if (labelString3 == null) {
-			labelString3 = "Select current page";
-		}
-		Label label3 = new Label(labelString3);
+		Label label3 = new Label("Select current page");
 		label3.setStyleName("buttonLabel");
 		label3.addClickHandler(new ClickHandler() {
 			
@@ -151,11 +135,7 @@ public class SampleListWidget extends BaseWidget {
 		});
 		sampleSelectPanel.add(label3);
 
-		String labelString4 = displayMap.get("unselect current page");
-		if (labelString4 == null) {
-			labelString4 = "Unselect current page";
-		}
-		Label label4 = new Label(labelString4);
+		Label label4 = new Label("Unselect current page");
 		label4.setStyleName("buttonLabel");
 		label4.addClickHandler(new ClickHandler() {
 			
@@ -288,11 +268,7 @@ public class SampleListWidget extends BaseWidget {
 				return object.getAge().toString();
 			}
 		};
-		if (currentLang.equals(GutFloraConstant.LANG_JP)) {
-			cellTable.addColumn(colAge, "年齢");
-		} else {
-			cellTable.addColumn(colAge, "Age");
-		}
+		cellTable.addColumn(colAge, "Age");
 		colAge.setSortable(true);
 		sortHandler.setComparator(colAge, new Comparator<SampleEntry>() {
 
@@ -309,11 +285,7 @@ public class SampleListWidget extends BaseWidget {
 				return object.getGender();
 			}
 		};
-		if (currentLang.equals(GutFloraConstant.LANG_JP)) {
-			cellTable.addColumn(colGender, "性別");
-		} else {
-			cellTable.addColumn(colGender, "Sex");
-		}
+		cellTable.addColumn(colGender, "Sex");
 		colGender.setSortable(true);
 		sortHandler.setComparator(colGender, new Comparator<SampleEntry>() {
 
@@ -330,11 +302,7 @@ public class SampleListWidget extends BaseWidget {
 				return object.getExpDate().toString();
 			}
 		};
-		if (currentLang.equals(GutFloraConstant.LANG_JP)) {
-			cellTable.addColumn(colExpDate, "測定日");
-		} else {
-			cellTable.addColumn(colExpDate, "Measurement date");
-		}
+		cellTable.addColumn(colExpDate, "Measurement date");
 		colExpDate.setSortable(true);
 		sortHandler.setComparator(colExpDate, new Comparator<SampleEntry>() {
 
@@ -351,11 +319,7 @@ public class SampleListWidget extends BaseWidget {
 				return object.getProject();
 			}
 		};
-		if (currentLang.equals(GutFloraConstant.LANG_JP)) {
-			cellTable.addColumn(colProject, "コホート");
-		} else {
-			cellTable.addColumn(colProject, "Cohort name");
-		}
+		cellTable.addColumn(colProject, "Cohort name");
 		colProject.setSortable(true);
 		sortHandler.setComparator(colProject, new Comparator<SampleEntry>() {
 			

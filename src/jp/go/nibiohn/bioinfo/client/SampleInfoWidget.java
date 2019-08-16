@@ -235,11 +235,7 @@ public class SampleInfoWidget extends Composite {
 				sb.append("<table class=\"sampleInfo normalCol\" >\n");
 				sb.append("<tr><th>Project</th><td colspan=\"2\">" + entry.getProject() + "</td></tr>");
 				sb.append("<tr><th>Sample ID</th><td>" + entry.getSampleId() + "</td>");
-				if (currentLang.equals(GutFloraConstant.LANG_JP)) {
-					sb.append("<td colspan=\"2\">年齢 " + entry.getAge() + " 歳, " + entry.getGender() + "</td></tr>\n");
-				} else {
-					sb.append("<td colspan=\"2\">Age " + entry.getAge() + ", " + entry.getGender() + "</td></tr>\n");
-				}
+				sb.append("<td colspan=\"2\">Age " + entry.getAge() + ", " + entry.getGender() + "</td></tr>\n");
 				sb.append("</table>");
 				sampleInfoPanel.setWidget(new HTML(sb.toString()));
 			}

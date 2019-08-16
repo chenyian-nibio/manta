@@ -89,23 +89,9 @@ public class Manta extends BasePage {
 
 		String option = event.getValue();
 		String value = option.substring(3);
-		// TODO the language switch will be only appeared at sample selection page (home), so far...
 		String lang = option.substring(0, 3);
 		this.currentLang = lang;
-		RootPanel langLabelPanel = RootPanel.get("topLang");
-		langLabelPanel.clear();
 		if (value.equals(GutFloraConstant.NAVI_LINK_SAMPLE)) {
-			if (lang.equals(GutFloraConstant.LANG_EN)) {
-				Hyperlink langLink = new Hyperlink("日本語", GutFloraConstant.LANG_JP + GutFloraConstant.NAVI_LINK_SAMPLE);
-				langLink.addStyleName("langFlagJp");
-				langLabelPanel.add(langLink);
-			} else {
-				Hyperlink langLink = new Hyperlink("English", GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_SAMPLE);
-				langLink.addStyleName("langFlagGb");
-				langLabelPanel.add(langLink);
-			}
-			
-			// TODO should provide different language
 			infoMessage(WELCOME_MSG);
 			service.getSampleEntryList(currentLang, new AsyncCallback<List<SampleEntry>>() {
 				

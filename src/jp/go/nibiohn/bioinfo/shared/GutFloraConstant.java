@@ -42,7 +42,6 @@ public class GutFloraConstant {
 	public static final String NAVI_LINK_MLR = "-mlr";
 	
 	public static final String LANG_EN = "en_";
-	public static final String LANG_JP = "jp_";
 
 	public static final String COLUMN_HEADER_OTHERS = "Others";
 

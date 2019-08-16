@@ -25,7 +25,7 @@ public abstract class BasePage implements EntryPoint, ValueChangeHandler<String>
 	protected boolean hasMessage = false;
 	protected Label info = new Label("Message will be shown here.");
 	
-	// default is English
+	// AT the moment, only English
 	protected String currentLang = "en_";
 
 	protected void init() {

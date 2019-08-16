@@ -95,9 +95,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 
 			String query_pjname = " pj.name as pj_name ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				query_pjname = " pj.name_jp as pj_name ";
-			}
 
 			Statement statement = connection.createStatement();
 			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, " + query_pjname + " from sample as s "
@@ -111,7 +108,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			List<SampleEntry> ret = new ArrayList<SampleEntry>();
 			while (results.next()) {
 				String sampleId = results.getString("id");
-				ret.add(new SampleEntry(sampleId, results.getInt("age"), getGenderValue(results.getInt("gender"), lang),
+				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
 						results.getString("pj_name"), results.getDate("exp_date"), sampleSet.contains(sampleId)));
 
 			}
@@ -148,9 +145,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement = connection.createStatement();
 			
 			String queryFields = " select title, parameter_value, unit, choice_value ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select title_jp as title, parameter_value, unit_jp as unit, choice_value_jp as choice_value ";
-			}
 			
 			String sqlQuery = queryFields  
 					+ " from parameter_value as pv "
@@ -219,9 +213,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement = connection.createStatement();
 			
 			String queryFields = " select title, parameter_value, unit, choice_value ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select title_jp as title, parameter_value, unit_jp as unit, choice_value_jp as choice_value ";
-			}
 
 			String groupIdConstraint = " and pi.group_id in (select group_id "
 					+ " from parameter_category as pc "  
@@ -389,7 +380,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Set<SampleEntry> ret = new HashSet<SampleEntry>();
 			while (results.next()) {
 				String sampleId = results.getString("id");
-				ret.add(new SampleEntry(sampleId, results.getInt("age"), getGenderValue(results.getInt("gender"), lang),
+				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
 						results.getDate("exp_date"), true));
 			}
 			
@@ -422,9 +413,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			
 			String query_pjname = " pj.name as pj_name ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				query_pjname = " pj.name_jp as pj_name ";
-			}
 
 			Statement statement = connection.createStatement();
 			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, " + query_pjname
@@ -437,7 +425,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			SampleEntry ret = null;
 			while (results.next()) {
 				ret = new SampleEntry(results.getString("id"), results.getInt("age"),
-						getGenderValue(results.getInt("gender"), lang), results.getString("pj_name"),
+						results.getString("gender"), results.getString("pj_name"),
 						results.getDate("exp_date"), null);
 			}
 			
@@ -1571,9 +1559,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement0 = connection.createStatement();
 			
 			String queryFields = "select pi.id as id, pi.title as title, pi.unit as unit, pt.type_name as type ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = "select pi.id as id, pi.title_jp as title, pi.unit_jp as unit, pt.type_name as type ";
-			}
 			
 			String groupIdConstraint = " where pg.id in (select group_id "
 					+ " from parameter_category as pc "  
@@ -1617,9 +1602,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement2 = connection.createStatement();
 			String queryFields2 = " select sample_id, pi.title as title, pv.parameter_value, choice_value ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields2 = " select sample_id, pi.title_jp as title, pv.parameter_value, choice_value_jp as choice_value ";
-			}
 			String sqlQuery2 = queryFields2 + " from parameter_value as pv "
 					+ " join parameter_info as pi on pi.id = pv.parameter_id "
 					+ " left outer join choice as ch on ch.parameter_id = pi.id and pv.parameter_value = ch.choice_option "
@@ -1699,10 +1681,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			// then we don'nt need this query...
 			String sqlQuery0 = " select id " + " from parameter_info where title in ("
 					+ columnString + ") ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				sqlQuery0 = " select id " + " from parameter_info where title_jp in ("
-						+ columnString + ") ";
-			}
 			
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
 			List<String> profileIdList = new ArrayList<String>();
@@ -1716,9 +1694,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement2 = connection.createStatement();
 			
 			String queryFields2 = " select sample_id, pi.title as title, pv.parameter_value, choice_value, pt.type_name as type ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields2 = " select sample_id, pi.title_jp as title, pv.parameter_value, choice_value_jp as choice_value, pt.type_name as type ";
-			}
 			String sqlQuery2 = queryFields2 + " from parameter_value as pv "
 					+ " join parameter_info as pi on pi.id = parameter_id " 
 					+ " join parameter_type as pt on pt.id = pi.type_id "
@@ -1836,9 +1811,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement0 = connection.createStatement();
 			String queryFields = " select pi.id as id, pi.title as title, pi.unit as unit ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select pi.id as id, pi.title_jp as title, pi.unit_jp as unit ";
-			}
 			String sqlQuery0 = queryFields + " from parameter_info as pi "
 					+ " join parameter_type as pt on pt.id = pi.type_id "
 					+ " join parameter_group as pg on pg.id = pi.group_id " 
@@ -1891,9 +1863,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement = connection.createStatement();
 			
 			String queryFields = "select distinct pg.id as id, group_name ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select distinct pg.id as id, group_name_jp as group_name ";
-			}
 			
 			// TODO seems good enough? should I rewrite the SQL?
 			String sqlQuery = queryFields + " from parameter_info as pi "
@@ -1952,9 +1921,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement0 = connection.createStatement();
 			
 			String queryFields = " select distinct pc.id as id, category_name ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select distinct pc.id as id, category_name_jp as category_name ";
-			}
 
 			// TODO seems good enough? should I rewrite the SQL?
 			String sqlQuery0 = queryFields
@@ -2007,9 +1973,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement0 = connection.createStatement();
 			
 			String queryFields = "select distinct pc.id as id, category_name ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select distinct pc.id as id, category_name_jp as category_name ";
-			}
 			
 			String sqlQuery0 = queryFields + " from parameter_info as pi "
 					+ " join parameter_type as pt on pt.id = pi.type_id "
@@ -2063,9 +2026,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement0 = connection.createStatement();
 			
 			String queryFields = "select distinct pc.id as id, category_name ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select distinct pc.id as id, category_name_jp as category_name ";
-			}
 			
 			String sqlQuery0 = queryFields + " from parameter_info as pi "
 					+ " join parameter_type as pt on pt.id = pi.type_id "
@@ -2300,9 +2260,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement2 = connection.createStatement();
 
 			String queryFields2 = " and pi.title = '";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields2 = " and pi.title_jp = '";
-			}
 			
 			String sqlQuery2 = " select sample_id, parameter_value " + " from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id " 
@@ -2465,9 +2422,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			
 			String queryFields = " select sample_id, pi.title as title, parameter_value ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select sample_id, pi.title_jp as title, parameter_value ";
-			}
 			String sqlQuery2 = queryFields + " from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id "
 					+ " join parameter_type as pt on pt.id = pi.type_id " 
@@ -2594,9 +2548,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			
 			String queryFields = " select sample_id, pi.title as title, parameter_value ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select sample_id, pi.title_jp as title, parameter_value ";
-			}
 			String sqlQuery2 = queryFields + " from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id "
 					+ " join parameter_type as pt on pt.id = pi.type_id " 
@@ -2676,9 +2627,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement2 = connection.createStatement();
 			String constraint2 = " and pi.title = '";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				constraint2 = " and pi.title_jp = '";
-			}
 			String sqlQuery2 = " select sample_id, parameter_value from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id " + " where sample_id in (" + sampleIdString
 					+ ") " + constraint2 + name + "' ";
@@ -2776,9 +2724,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement1 = connection.createStatement();
 			String constraint1 = " and pi.title = '";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				constraint1 = " and pi.title_jp = '";
-			}
 			String sqlQuery1 = " select sample_id, parameter_value from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id " + " where sample_id in (" + sampleIdString
 					+ ") " + constraint1 + name + "' ";
@@ -2818,9 +2763,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			
 			String queryFields = " select sample_id, pi.title as title, parameter_value ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select sample_id, pi.title_jp as title, parameter_value ";
-			}
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = queryFields + " from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id "
@@ -3726,9 +3668,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement0 = connection.createStatement();
 			String queryFields = " select pi.id as id, pi.title as title ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select pi.id as id, pi.title_jp as title ";
-			}
 			
 			String groupConstraint;
 			if (groupId == null) {
@@ -3829,10 +3768,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement = connection.createStatement();
 			String selectFields = "select pi.id as id, pi.unit as unit ";
 			String constraintFields = " pi.title = '";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				selectFields = "select pi.id as id, pi.unit_jp as unit ";
-				constraintFields = " pi.title_jp = '";
-			}
 			String sqlQuery0 = selectFields + ", pt.type_name as type "
 					+ " from parameter_info as pi "
 					+ " join parameter_type as pt on pt.id = pi.type_id "
@@ -3848,9 +3783,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 			Statement statement2 = connection.createStatement();
 			String queryFields2 = " and pi.title = '";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields2 = " and pi.title_jp = '";
-			}
 			String sqlQuery2 = " select sample_id, parameter_value " + " from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id " 
 					+ " where sample_id in (" + ("'" + StringUtils.join(sampleIds, "','") + "'") + ") "
@@ -3869,9 +3801,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			if (!isContinous) {
 				Statement statement3 = connection.createStatement();
 				String queryFields3 = " choice_value as value";
-				if (lang.equals(GutFloraConstant.LANG_JP)) {
-					queryFields3 = " choice_value_jp as value";
-				}
 				String sqlQuery3 = "select choice_option, " + queryFields3 + " from choice where parameter_id = " + piId;				
 				ResultSet results3 = statement3.executeQuery(sqlQuery3);
 				while (results3.next()) {
@@ -4123,46 +4052,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		ret.append("</svg>\n");
 		
 		return ret.toString();
-	}
-	
-	Map<String, String> genderMap = new HashMap<String, String>();
-	private String getGenderValue(Integer option, String lang) {
-		if (genderMap == null || genderMap.isEmpty()) {
-			HikariDataSource ds = getHikariDataSource();
-			Connection connection = null;
-			try {
-				connection = ds.getConnection();
-				
-				Statement statSex = connection.createStatement();
-				String sqlQuerySex = " select choice_option, choice_value, choice_value_jp "
-						+ " from choice as ch join parameter_info as pi on pi.id = ch.parameter_id where db_code = 'sex' ";
-				ResultSet resultsSex = statSex.executeQuery(sqlQuerySex);
-				while (resultsSex.next()) {
-					String key = resultsSex.getString("choice_option");
-					String valueE = resultsSex.getString("choice_value");
-					String valueJ = resultsSex.getString("choice_value_jp");
-					genderMap.put(String.format("%s-%s", GutFloraConstant.LANG_EN, key), valueE);
-					genderMap.put(String.format("%s-%s", GutFloraConstant.LANG_JP, key), valueJ);
-				}
-				
-				connection.close();
-				ds.close();
-				
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			
-			try {
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			ds.close();
-		}
-
-		return genderMap.get(String.format("%s-%d", lang, option));
 	}
 	
 	private int getMaxItemLength(List<String> itemStringList) {
