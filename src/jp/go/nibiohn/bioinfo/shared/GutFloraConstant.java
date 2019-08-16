@@ -27,7 +27,7 @@ public class GutFloraConstant {
 	public static final String[] DIVERSITY_INDEX = new String[]{"Shannon index", "Simpson index", "Chao1 index"};
 
 	public static final String[] ANALYSIS_TAB_TITLES = new String[] { "Microbiota composition",
-			"Diet and fitness parameters", "Immunological parameters", "Compare two parameters" };
+			"Diet and fitness parameters", "Compare two parameters" };
 
 	public static final String NAVI_LINK_SAMPLE = "sample";
 	public static final String NAVI_LINK_ANALYSIS = "analysis";
@@ -37,7 +37,6 @@ public class GutFloraConstant {
 	public static final String NAVI_LINK_VIEW_PCOA = "pcoa";
 	public static final String NAVI_LINK_SUFFIX_PROFILE = "-profile";
 	public static final String NAVI_LINK_SUFFIX_READ = "-read";
-	public static final String NAVI_LINK_SUFFIX_IMMUN = "-immun";
 	public static final String NAVI_LINK_SUBSET_SUFFIX = "-subset";
 	public static final String NAVI_LINK_MLR = "-mlr";
 	

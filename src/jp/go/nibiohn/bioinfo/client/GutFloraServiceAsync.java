@@ -68,8 +68,6 @@ public interface GutFloraServiceAsync {
 
 	void getDietFitnessGroupNames(String lang, AsyncCallback<List<List<String>>> callback);
 
-	void getImmunologicalGroupNames(String lang, AsyncCallback<List<List<String>>> callback);
-
 	void getProfileGroupNames(String lang, AsyncCallback<List<List<String>>> callback);
 
 	void getAllParameterGroupNames(String lang, AsyncCallback<List<List<String>>> callback);

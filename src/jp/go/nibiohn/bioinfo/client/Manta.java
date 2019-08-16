@@ -178,8 +178,6 @@ public class Manta extends BasePage {
 					int tabIndex = 0;
 					if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
 						tabIndex = 1;
-					} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_IMMUN + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
-						tabIndex = 2;
 					}
 					SearchResultData searchResultData = subsetAnalysisWidget.getCorrectionResults(tabIndex);
 					
@@ -188,7 +186,7 @@ public class Manta extends BasePage {
 						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 						return;
 					}
-					// TODO uncheck!
+					// TODO unchecked!
 					Set<SampleEntry> selectedSamples = subsetAnalysisWidget.getSelectedSamples();
 					BaseWidget resultWidget;
 					if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {
@@ -300,8 +298,6 @@ public class Manta extends BasePage {
 				int tabIndex = 0;
 				if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE)) {
 					tabIndex = 1;
-				} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_IMMUN)) {
-					tabIndex = 2;
 				}
 				SearchResultData searchResultData = analysisWidget.getCorrectionResults(tabIndex);
 				
@@ -309,7 +305,7 @@ public class Manta extends BasePage {
 					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
 					return;
 				}
-				// TODO uncheck!
+				// TODO unchecked!
 				Set<SampleEntry> selectedSamples = analysisWidget.getSelectedSamples();
 				BaseWidget resultWidget;
 				if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {

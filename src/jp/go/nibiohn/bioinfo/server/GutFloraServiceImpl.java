@@ -1905,11 +1905,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return getCategoryNames("fitness", lang);
 	}
 
-	@Override
-	public List<List<String>> getImmunologicalGroupNames(String lang) {
-		return getCategoryNames("immuno", lang);
-	}
-	
 	private List<List<String>> getCategoryNames(String classCode, String lang) {
 		String currentUser = getUserForQuery();
 
@@ -2400,19 +2395,13 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join dbuser as du on du.id = pp.user_id "  
 					+ " where du.username = '" + currentUser + "' ) ";
 			
-			// TODO need refactoring in the future. use class id instead of using F & I
+			// TODO need refactoring in the future.
 			String groupState = "";
 			if (paraType.equals("F")) {
 				groupState = " and group_id in (" + " select pg.id from parameter_group as pg "
 						+ " join parameter_category as pc on pc.id = pg.category_id "
 						+ " join parameter_class as cl on cl.id = pc.class_id "
 						+ " where class_code = 'fitness' " + userPrivilege
-						+ " ) ";
-			} else if (paraType.equals("I")) {
-				groupState = " and group_id in (" + " select pg.id from parameter_group as pg "
-						+ " join parameter_category as pc on pc.id = pg.category_id "
-						+ " join parameter_class as cl on cl.id = pc.class_id "
-						+ " where class_code = 'immuno' " + userPrivilege
 						+ " ) ";
 			} else {
 				groupState = " and group_id in (" + " select group_id "
@@ -2526,19 +2515,13 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join dbuser as du on du.id = pp.user_id "  
 					+ " where du.username = '" + currentUser + "' ) ";
 			
-			// TODO need refactoring in the future. use class id instead of using F & I
+			// TODO need refactoring in the future.
 			String groupState = "";
 			if (paraType.equals("F")) {
 				groupState = " and group_id in (" + " select pg.id from parameter_group as pg "
 						+ " join parameter_category as pc on pc.id = pg.category_id "
 						+ " join parameter_class as cl on cl.id = pc.class_id "
 						+ " where class_code = 'fitness' " + userPrivilege
-						+ " ) ";
-			} else if (paraType.equals("I")) {
-				groupState = " and group_id in (" + " select pg.id from parameter_group as pg "
-						+ " join parameter_category as pc on pc.id = pg.category_id "
-						+ " join parameter_class as cl on cl.id = pc.class_id "
-						+ " where class_code = 'immuno' " + userPrivilege
 						+ " ) ";
 			} else {
 				groupState = " and group_id in (" + " select group_id "
@@ -2741,19 +2724,13 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join dbuser as du on du.id = pp.user_id "  
 					+ " where du.username = '" + currentUser + "' ) ";
 			
-			// TODO need refactoring in the future. use class id instead of using F & I
+			// TODO need refactoring in the future.
 			String groupState = "";
 			if (paraType.equals("F")) {
 				groupState = " and group_id in (" + " select pg.id from parameter_group as pg "
 						+ " join parameter_category as pc on pc.id = pg.category_id "
 						+ " join parameter_class as cl on cl.id = pc.class_id "
 						+ " where class_code = 'fitness' " + userPrivilege
-						+ " ) ";
-			} else if (paraType.equals("I")) {
-				groupState = " and group_id in (" + " select pg.id from parameter_group as pg "
-						+ " join parameter_category as pc on pc.id = pg.category_id "
-						+ " join parameter_class as cl on cl.id = pc.class_id "
-						+ " where class_code = 'immuno' " + userPrivilege
 						+ " ) ";
 			} else {
 				groupState = " and group_id in (" + " select group_id "

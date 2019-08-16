@@ -110,7 +110,6 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		readListBox.setWidth("200px");
 		
 		paraTypeListBox.addItem("diet and fitness", "F");
-		paraTypeListBox.addItem("immunological", "I");
 		paraTypeListBox.addItem("all available", "A");
 
 		itemSelectionHp.add(new Label("Search "));
@@ -341,22 +340,6 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		loadingVp.add(loadingLabel);
 		loadingPopupPanel.add(loadingVp);
 		
-		service.getImmunologicalGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				if (result == null || result.size() == 0) {
-					paraTypeListBox.removeItem(1);
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				// remove it, whatever ...
-				paraTypeListBox.removeItem(1);
-			}
-		});
-
 		initWidget(vp);
 	}
 

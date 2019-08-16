@@ -61,8 +61,6 @@ public interface GutFloraService extends RemoteService {
 
 	List<List<String>> getDietFitnessGroupNames(String lang);
 
-	List<List<String>> getImmunologicalGroupNames(String lang);
-
 	List<List<String>> getProfileGroupNames(String lang);
 	
 	List<List<String>> getAllParameterGroupNames(String lang);

@@ -98,7 +98,6 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		itemSelectionHp.add(refTypeListBox);
 		refTypeListBox.addItem("gut microbiota compositions", "R");
 		refTypeListBox.addItem("other diet and fitness parameters", "F");
-		refTypeListBox.addItem("immunological parameters", "I");
 		refTypeListBox.addItem("all other available parameters", "A");
 		
 		final Label rankLabel1 = new Label("at the");
@@ -282,24 +281,6 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		loadingVp.add(loadingLabel);
 		loadingPopupPanel.add(loadingVp);
 		
-		service.getImmunologicalGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				if (result == null || result.size() == 0) {
-					refTypeListBox.removeItem(3);
-					refTypeListBox.removeItem(2);
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-
-
 		initWidget(vp);
 	}
 	

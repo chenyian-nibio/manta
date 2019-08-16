@@ -29,23 +29,19 @@ public class SampleInfoWidget extends Composite {
 	
 	private Label loadingLabel = new Label("Retrieving Sample info...");
 	private Label noParaInfoLabel = new Label("No diet and fitness parameters.");
-	private Label noImmuInfoLabel = new Label("No immunological parameters.");
 	private Label noReadInfoLabel = new Label("No gut microbiota data.");
 	private SimplePanel sampleInfoPanel = new SimplePanel();
 	private SimplePanel diversityPanel = new SimplePanel();
 	private SimplePanel readPanel = new SimplePanel();
 	private SimplePanel dietPanel = new SimplePanel();
-	private SimplePanel immuPanel = new SimplePanel();
 
 	private ListBox rankListBox = new ListBox();
 	private ListBox dietListBox = new ListBox();
 	private ListBox profileGroupListBox = new ListBox();
-	private ListBox immuListBox = new ListBox();
 	private HorizontalPanel dietListHP = new HorizontalPanel();
 	
 	private boolean readInfoDisplay = true;
 	private boolean dietInfoDisplay = false;
-	private boolean immuInfoDisplay = false;
 	
 	private String currentLang;
 
@@ -168,59 +164,6 @@ public class SampleInfoWidget extends Composite {
 			}
 		});
 		
-		final HorizontalPanel immuHp = new HorizontalPanel();
-		immuHp.setSpacing(6);
-		immuHp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		// default is closed (right)
-		final Image immuChevron = new Image(resources.getChevronRightImageResource());
-		immuChevron.addStyleName("clickable");
-		immuChevron.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				if (immuInfoDisplay) {
-					immuChevron.setResource(resources.getChevronRightImageResource());
-				} else {
-					immuChevron.setResource(resources.getChevronDownImageResource());
-				}
-				immuInfoDisplay = !immuInfoDisplay;
-				immuListBox.setVisible(immuInfoDisplay);
-				immuPanel.setVisible(immuInfoDisplay);
-			}
-		});
-		immuHp.add(immuChevron);
-		immuHp.add(new HTML("<h3>Immunological parameters</h3>"));
-		thisWidget.add(immuHp);
-		thisWidget.add(immuListBox);
-		thisWidget.add(immuPanel);
-		immuPanel.add(loadingLabel);
-		immuListBox.setVisible(immuInfoDisplay);
-		immuPanel.setVisible(immuInfoDisplay);
-		
-		thisWidget.add(new HTML("<div>&nbsp;</div>"));
-		
-		service.getImmunologicalGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				if (result == null || result.size() == 0) {
-					immuHp.setVisible(false);
-					immuListBox.setVisible(false);
-					immuPanel.setVisible(false);
-				} else {
-					immuListBox.clear();
-					for (List<String> item : result) {
-						immuListBox.addItem(item.get(0), item.get(1));
-					}
-					getImmunData(sampleId, result.get(0).get(1));
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				immuPanel.add(new Label(BaseWidget.SERVER_ERROR));				
-			}
-		});
 		
 		thisWidget.add(new HTML("<div>&nbsp;</div>"));
 		initWidget(thisWidget);
@@ -353,43 +296,6 @@ public class SampleInfoWidget extends Composite {
 			@Override
 			public void onFailure(Throwable caught) {
 				dietPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
-			}
-		});
-	}
-
-	private void getImmunData(String sampleId, String categoryId) {
-		service.getSampleProfile(sampleId, categoryId, currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				if (result == null) {
-					immuPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
-				}
-				if (result.size() == 0) {
-					noImmuInfoLabel.addStyleName("noINfoLabel");
-					immuPanel.setWidget(noImmuInfoLabel);
-				} else {
-					StringBuffer sb = new StringBuffer();
-					sb.append("<div class=\"longTable\">\n");
-					sb.append("<table class=\"sampleInfo wideCol\">\n");
-					for (List<String> row: result) {
-						if (row.get(2) == null || row.get(2).equals("") || row.get(1).equals("-")) {
-							sb.append("<tr><th>" + row.get(0) + "</th><td colspan=\"2\">" + row.get(1) + "</td></tr>\n");
-						} else {
-							sb.append("<tr><th>" + row.get(0) + "</th><td>" + row.get(1) + "</td><td>"
-									+ row.get(2) + "</td></tr>\n");
-						}
-					}
-					sb.append("</table>\n");
-					sb.append("</div>\n");
-					immuPanel.setWidget(new HTML(sb.toString()));
-					
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				immuPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
 			}
 		});
 	}
