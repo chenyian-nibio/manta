@@ -6,5 +6,4 @@ public class GutFloraConfig {
 	
 	public static final String FOOTER = "Developed by the <a href=\"https://mizuguchilab.org/\" target=\"_new\" title=\"The Mizuguchi Laboratory\"><img src=\"https://targetmine.mizuguchilab.org/images/mizuguchilab.png\" border=\"0\" alt=\"Mizuguchi Lab\" style=\"vertical-align: middle;\"></a> @ <a href=\"http://www.nibiohn.go.jp/\" target=\"_new\" title=\"National Institutes of Biomedical Innovation, Health and Nutrition\"><img src=\"https://targetmine.mizuguchilab.org/images/nibiohn_logo_s.png\" border=\"0\" alt=\"NIBIOHN_logo\" style=\"vertical-align: middle;\"></a>";
 
-	public static final String RSERVE_IP_ADDRESS= "10.100.0.34";
 }

@@ -40,7 +40,7 @@ import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 import jp.go.nibiohn.bioinfo.shared.TaxonEntry;
 import jp.go.nibiohn.bioinfo.shared.VisualizationtResult;
-import smile.mds.MDS;
+import smile.mds.MDSTweak;
 
 /**
  * The server-side implementation of the RPC service.
@@ -3608,7 +3608,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 		}
 		
-		MDS mds = new MDS(dmat, dmat.length - 1);
+		MDSTweak mds = new MDSTweak(dmat, dmat.length - 1);
 
 		double[][] coordinates = mds.getCoordinates();
 		Map<String, List<Double>> coordinateMap = new HashMap<String, List<Double>>();
