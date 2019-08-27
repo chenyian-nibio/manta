@@ -15,6 +15,7 @@ import jp.go.nibiohn.bioinfo.shared.PcoaResult;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 import jp.go.nibiohn.bioinfo.shared.TaxonEntry;
+import jp.go.nibiohn.bioinfo.shared.UserInfo;
 import jp.go.nibiohn.bioinfo.shared.VisualizationtResult;
 
 /**
@@ -93,7 +94,7 @@ public interface GutFloraService extends RemoteService {
 
 	List<String> getSampleDiversity(String sampleId);
 	
-	String getCurrentUser();
+	UserInfo getCurrentUser();
 
 	boolean loginUser(String username, String password);
 

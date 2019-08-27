@@ -32,6 +32,7 @@ import jp.go.nibiohn.bioinfo.shared.GutFloraConfig;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
+import jp.go.nibiohn.bioinfo.shared.UserInfo;
 
 /**
  * 
@@ -440,17 +441,17 @@ public class Manta extends BasePage {
 	}
 
 	private void getUserInfo() {
-		service.getCurrentUser(new AsyncCallback<String>() {
+		service.getCurrentUser(new AsyncCallback<UserInfo>() {
 			
 			@Override
-			public void onSuccess(String result) {
+			public void onSuccess(UserInfo result) {
 				RootPanel userInfo = RootPanel.get("userInfo");
 				userInfo.clear(true);
 				// TODO should not hard coded here
 				MenuBar menuBar = new MenuBar();
 				MenuBar userMenu = new MenuBar(true);
-				if (result != null) {
-					menuBar.addItem(result, userMenu);
+				menuBar.addItem(result.getDisplayName(), userMenu);
+				if (result.isLogin()) {
 					MenuItem logoutMenu = new MenuItem("Logout", new Command() {
 						
 						@Override
@@ -465,7 +466,7 @@ public class Manta extends BasePage {
 					logoutMenu.addStyleName("userMenu");
 					userMenu.addItem(logoutMenu);
 				} else {
-					menuBar.addItem(GutFloraConstant.USER_NAME_GUEST, userMenu);
+//					menuBar.addItem(GutFloraConstant.USER_NAME_GUEST, userMenu);
 					MenuItem loginMenu = new MenuItem("Login", new Command() {
 						
 						@Override
@@ -487,7 +488,7 @@ public class Manta extends BasePage {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(SERVER_ERROR);
+				warnMessage(SERVER_ERROR + "; unable to get the user info.");
 			}
 		});
 	}

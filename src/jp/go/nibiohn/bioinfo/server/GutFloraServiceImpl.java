@@ -39,6 +39,7 @@ import jp.go.nibiohn.bioinfo.shared.PcoaResult;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 import jp.go.nibiohn.bioinfo.shared.TaxonEntry;
+import jp.go.nibiohn.bioinfo.shared.UserInfo;
 import jp.go.nibiohn.bioinfo.shared.VisualizationtResult;
 import smile.mds.MDSTweak;
 
@@ -72,7 +73,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public List<SampleEntry> getSampleEntryList(String lang) {
-		String currentUser = getUserForQuery();
+		String userName = getUserNameForQuery();
 		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -85,7 +86,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join project as pj on pj.id = ps.project_id "
 					+ " join project_privilege as pp on pp.project_id = pj.id "
 					+ " join dbuser as du on du.id = pp.user_id " 
-					+ " where du.username = '" + currentUser + "'";
+					+ " where du.username = '" + userName + "'";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
 			Set<String> sampleSet = new HashSet<String>();
@@ -102,7 +103,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join project as pj on pj.id = ps.project_id "
 					+ " join project_privilege as pp on pp.project_id = pj.id "
 					+ " join dbuser as du on du.id = pp.user_id " 
-					+ " where du.username = '" + currentUser + "' " + " order by s.id ";
+					+ " where du.username = '" + userName + "' " + " order by s.id ";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
 			List<SampleEntry> ret = new ArrayList<SampleEntry>();
@@ -135,7 +136,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<List<String>> getSampleProfile(String sampleId, String categoryId, String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -203,7 +204,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<List<String>> getSampleProfile(String sampleId, String categoryId, String groupId, String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -1544,7 +1545,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	// TODO consider to create a class for the parameter, which holds title, id and a boolean (isNumeric)
 	private GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String categoryId, String groupId,
 			int numOfColumns, String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 		
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
@@ -1802,7 +1803,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<ParameterEntry> getAllNumericParameterEntry(String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -1853,7 +1854,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public List<List<String>> getProfileGroups(String categoryId, String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -1906,7 +1907,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	private List<List<String>> getCategoryNames(String classCode, String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -1958,7 +1959,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public List<List<String>> getProfileGroupNames(String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -2011,7 +2012,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public List<List<String>> getAllParameterGroupNames(String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -2356,7 +2357,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	public SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank,
 			List<String> taxonNames, String paraType, String lang) {
 		// do multiple linear regression (MLR)
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
@@ -2482,7 +2483,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	@Override
 	public SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
 			String paraType, Integer correlationMethod, String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 		
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
@@ -2694,7 +2695,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	@Override
 	public SearchResultData searchForSimilerProfilesbyProfile(Set<SampleEntry> selectedSamples, String name,
 			String paraType, Integer correlationMethod, String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
@@ -2947,67 +2948,38 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return ret;
 	}
 	
-	private static String CURRENT_USER = "currentUser";
+	private static String SESSION_NAME_CURRENT_USER = "currentUser";
 
-	private String getUserForQuery() {
-		String currentUser = getCurrentUserFromSession();
+	private String getUserNameForQuery() {
+		UserInfo currentUser = getCurrentUserFromSession();
 		if (currentUser == null) {
-			// TODO or use "guest"?
-			currentUser = "demo";
+			currentUser = UserInfo.getGuestUser();
 		}
-		return currentUser;
+		return currentUser.getUserName();
 	}
 	
-	private String getCurrentUserFromSession() {
-		return (String) this.getThreadLocalRequest().getSession().getAttribute(CURRENT_USER);
+	private UserInfo getCurrentUserFromSession() {
+		return (UserInfo) this.getThreadLocalRequest().getSession().getAttribute(SESSION_NAME_CURRENT_USER);
 	}
 
-	private void saveCurrentUserToSession(String user) {
-		this.getThreadLocalRequest().getSession().setAttribute(CURRENT_USER, user);
+	private void saveCurrentUserToSession(UserInfo user) {
+		this.getThreadLocalRequest().getSession().setAttribute(SESSION_NAME_CURRENT_USER, user);
 	}
 
 	private void clearCurrentUserInSession() {
-		this.getThreadLocalRequest().getSession().removeAttribute(CURRENT_USER);
+		this.getThreadLocalRequest().getSession().removeAttribute(SESSION_NAME_CURRENT_USER);
 	}
 
 	/**
 	 * get display name (not account) 
 	 */
 	@Override
-	public String getCurrentUser() {
-		String ret = null;
-		String username = getCurrentUserFromSession();
-		
-		if (username != null) {
-			HikariDataSource ds = getHikariDataSource();
-			Connection connection = null;
-			try {
-				connection = ds.getConnection();
-				
-				Statement statement = connection.createStatement();
-				String sqlQuery = "select name from dbuser where username = '" + username + "'";
-				
-				ResultSet results = statement.executeQuery(sqlQuery);
-				if (results.next()) {
-					ret = results.getString("name");
-				}
-				
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					if (connection != null) {
-						connection.close();
-					}
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-				if (ds != null) {
-					ds.close();
-				}
-			}
+	public UserInfo getCurrentUser() {
+		UserInfo currentUser = getCurrentUserFromSession();
+		if (currentUser == null) {
+			currentUser = UserInfo.getGuestUser();
 		}
-		return ret;
+		return currentUser;
 	}
 
 	@Override
@@ -3019,14 +2991,19 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			connection = ds.getConnection();
 			
 			Statement statement = connection.createStatement();
-			String sqlQuery = "select password from dbuser where username = '" + username + "'";
+			String sqlQuery = "select password, display_name, user_role "
+					+ " from dbuser join user_role on user_role.id = dbuser.role_id "
+					+ " where username = '" + username + "'";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
 			if (results.next()) {
 				String pw = results.getString("password");
 				if (pw.equals(password)) {
 					ret = true;
-					saveCurrentUserToSession(username);
+					String displayName = results.getString("display_name");
+					String userRole = results.getString("user_role");
+					UserInfo user = new UserInfo(username, displayName, userRole.equals(UserInfo.ADMIN_ROLE), true);
+					saveCurrentUserToSession(user);
 				}
 			}
 			
@@ -3636,7 +3613,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 */
 	@Override
 	public List<String> getProfileNames(String categoryId, String groupId, String lang) {
-		String currentUser = getUserForQuery();
+		String currentUser = getUserNameForQuery();
 		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
