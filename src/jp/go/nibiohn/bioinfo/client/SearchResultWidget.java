@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import jp.go.nibiohn.bioinfo.client.analysis.VisualizeResultWidget;
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;

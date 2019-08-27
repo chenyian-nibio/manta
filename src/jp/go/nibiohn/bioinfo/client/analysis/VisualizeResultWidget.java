@@ -1,10 +1,11 @@
-package jp.go.nibiohn.bioinfo.client;
+package jp.go.nibiohn.bioinfo.client.analysis;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.PairListData;

@@ -1,4 +1,4 @@
-package jp.go.nibiohn.bioinfo.client;
+package jp.go.nibiohn.bioinfo.client.analysis;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jp.go.nibiohn.bioinfo.client.BaseWidget;
+import jp.go.nibiohn.bioinfo.client.GutFloraResources;
+import jp.go.nibiohn.bioinfo.client.ItemSelectionWidget;
+import jp.go.nibiohn.bioinfo.client.SampleInfoWidget;
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
 import jp.go.nibiohn.bioinfo.shared.GutFloraAnalysisData;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;

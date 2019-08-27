@@ -1,7 +1,8 @@
-package jp.go.nibiohn.bioinfo.client;
+package jp.go.nibiohn.bioinfo.client.readvis;
 
 import java.util.Set;
 
+import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 
 public abstract class ReadVisualizeWidget extends BaseWidget {

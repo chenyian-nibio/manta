@@ -1,8 +1,10 @@
-package jp.go.nibiohn.bioinfo.client;
+package jp.go.nibiohn.bioinfo.client.analysis;
 
 import java.util.Set;
 import java.util.logging.Logger;
 
+import jp.go.nibiohn.bioinfo.client.GutFloraService;
+import jp.go.nibiohn.bioinfo.client.GutFloraServiceAsync;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 

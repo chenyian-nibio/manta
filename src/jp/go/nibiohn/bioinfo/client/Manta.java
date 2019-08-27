@@ -28,6 +28,11 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import jp.go.nibiohn.bioinfo.client.analysis.ReadsAnalysisWidget;
+import jp.go.nibiohn.bioinfo.client.readvis.ClusteredBarChartWidget;
+import jp.go.nibiohn.bioinfo.client.readvis.MicrobiotaHeatmapWidget;
+import jp.go.nibiohn.bioinfo.client.readvis.PcoaAnalysisWidget;
+import jp.go.nibiohn.bioinfo.client.readvis.ReadVisualizeWidget;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConfig;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;

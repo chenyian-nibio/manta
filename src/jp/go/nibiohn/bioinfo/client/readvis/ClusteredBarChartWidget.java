@@ -1,4 +1,4 @@
-package jp.go.nibiohn.bioinfo.client;
+package jp.go.nibiohn.bioinfo.client.readvis;
 
 import java.util.ArrayList;
 import java.util.Iterator;

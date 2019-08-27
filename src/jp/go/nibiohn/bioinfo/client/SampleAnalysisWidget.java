@@ -5,6 +5,10 @@ import java.util.Set;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import jp.go.nibiohn.bioinfo.client.analysis.AnalysisWidget;
+import jp.go.nibiohn.bioinfo.client.analysis.PairAnalysisWidget;
+import jp.go.nibiohn.bioinfo.client.analysis.ProfilesAnalysisWidget;
+import jp.go.nibiohn.bioinfo.client.analysis.ReadsAnalysisWidget;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
