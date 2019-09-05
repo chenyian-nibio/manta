@@ -2991,7 +2991,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			connection = ds.getConnection();
 			
 			Statement statement = connection.createStatement();
-			String sqlQuery = "select password, display_name, user_role "
+			// TODO change name to display_name
+			String sqlQuery = "select password, name, user_role "
 					+ " from dbuser join user_role on user_role.id = dbuser.role_id "
 					+ " where username = '" + username + "'";
 			
@@ -3000,7 +3001,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String pw = results.getString("password");
 				if (pw.equals(password)) {
 					ret = true;
-					String displayName = results.getString("display_name");
+					// TODO change name to display_name
+					String displayName = results.getString("name");
 					String userRole = results.getString("user_role");
 					UserInfo user = new UserInfo(username, displayName, userRole.equals(UserInfo.ADMIN_ROLE), true);
 					saveCurrentUserToSession(user);

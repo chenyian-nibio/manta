@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import jp.go.nibiohn.bioinfo.client.analysis.ReadsAnalysisWidget;
+import jp.go.nibiohn.bioinfo.client.manage.DataManageWidget;
 import jp.go.nibiohn.bioinfo.client.readvis.ClusteredBarChartWidget;
 import jp.go.nibiohn.bioinfo.client.readvis.MicrobiotaHeatmapWidget;
 import jp.go.nibiohn.bioinfo.client.readvis.PcoaAnalysisWidget;
@@ -59,6 +60,8 @@ public class Manta extends BasePage {
 	
 	private ReadVisualizeWidget readVisualizeWidget;
 	
+	private UserInfo currentUser;
+
 	/**
 	 * This is the entry point method.
 	 */
@@ -419,6 +422,20 @@ public class Manta extends BasePage {
 				
 				subsetAnalysisWidget = null;
 			}
+		} else if (value.equals(GutFloraConstant.NAVI_LINK_UPLOAD)) {
+			// check if the user is admin
+			if (currentUser == null || !currentUser.isAdmin()) {
+				History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_SAMPLE);
+			} else {
+				// load the page
+				widgetTrails.clear();
+				DataManageWidget dataManageWidget = new DataManageWidget(currentLang);
+				widgetTrails.add(dataManageWidget);
+				mainPanel.clear();
+				mainPanel.add(dataManageWidget);
+				infoPanel.setVisible(true);
+				setNaviBar();
+			}
 		} else {
 			warnMessage("Illegal URL.");
 			// choose English as default
@@ -450,6 +467,8 @@ public class Manta extends BasePage {
 			
 			@Override
 			public void onSuccess(UserInfo result) {
+				currentUser = result;
+				
 				RootPanel userInfo = RootPanel.get("userInfo");
 				userInfo.clear(true);
 				// TODO should not hard coded here
@@ -470,6 +489,18 @@ public class Manta extends BasePage {
 					});
 					logoutMenu.addStyleName("userMenu");
 					userMenu.addItem(logoutMenu);
+					if (result.isAdmin()) {
+						MenuItem uploadMenu = new MenuItem("Upload", new Command() {
+							
+							@Override
+							public void execute() {
+								History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_UPLOAD);
+								History.fireCurrentHistoryState();
+							}
+						});
+						uploadMenu.addStyleName("userMenu");
+						userMenu.addItem(uploadMenu);
+					} 
 				} else {
 //					menuBar.addItem(GutFloraConstant.USER_NAME_GUEST, userMenu);
 					MenuItem loginMenu = new MenuItem("Login", new Command() {
