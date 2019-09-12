@@ -7,16 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
-import jp.go.nibiohn.bioinfo.client.GutFloraResources;
-import jp.go.nibiohn.bioinfo.client.ItemSelectionWidget;
-import jp.go.nibiohn.bioinfo.client.SampleInfoWidget;
-import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
-import jp.go.nibiohn.bioinfo.shared.GutFloraAnalysisData;
-import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
-import jp.go.nibiohn.bioinfo.shared.SampleEntry;
-import jp.go.nibiohn.bioinfo.shared.SearchResultData;
-
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -40,7 +30,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -52,6 +41,16 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
+
+import jp.go.nibiohn.bioinfo.client.BaseWidget;
+import jp.go.nibiohn.bioinfo.client.GutFloraResources;
+import jp.go.nibiohn.bioinfo.client.ItemSelectionWidget;
+import jp.go.nibiohn.bioinfo.client.SampleInfoWidget;
+import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
+import jp.go.nibiohn.bioinfo.shared.GutFloraAnalysisData;
+import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
+import jp.go.nibiohn.bioinfo.shared.SampleEntry;
+import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 
 /**
  * 
@@ -66,8 +65,6 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 
 	private ListBox refTypeListBox = new ListBox();
 
-	private ListBox profileGroupListBox = new ListBox();
-	
 	private ListBox correlationListBox = new ListBox();
 	
 	private List<String> currentColumns = new ArrayList<String>();
@@ -196,25 +193,6 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		}
 		rankListBox.setSelectedIndex(1);
 
-		profileCategoryListBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				String categoryId = profileCategoryListBox.getSelectedValue();
-				getProfileGroup(categoryId);
-				updateTable(categoryId);
-			}
-		});
-
-		profileGroupListBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				String categoryId = profileCategoryListBox.getSelectedValue();
-				updateTable(categoryId);
-			}
-		});
-		
 		HorizontalPanel profileGroupHp = new HorizontalPanel();
 		profileGroupHp.setSpacing(6);
 		profileGroupHp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -244,36 +222,13 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		});
 		changeColumnIcon.addStyleName("clickable");
 		changeColumnIcon.setTitle("Column Management");
-		profileGroupHp.add(new HTML("&nbsp;&nbsp;"));
-
-		profileGroupHp.add(new Label("Category: "));
-		profileGroupHp.add(profileCategoryListBox);
-		profileGroupHp.add(profileGroupListBox);
-		
-		profileGroupHp.add(new HTML("&nbsp;&nbsp;&nbsp;&nbsp;"));
-		
-		service.getProfileGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				profileCategoryListBox.clear();
-				for (List<String> item: result) {
-					profileCategoryListBox.addItem(item.get(0), item.get(1));
-				}
-				getProfileGroup(result.get(0).get(1));
-				updateTable(result.get(0).get(1));
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
-			}
-		});
 		
 		vp.add(profileGroupHp);
 		
 		vp.add(analysisTabelPanel);
 
+		updateTable();
+		
 		// ajax loading ...
 		loadingPopupPanel.setGlassEnabled(true);
 		VerticalPanel loadingVp = new VerticalPanel();
@@ -288,35 +243,11 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		initWidget(vp);
 	}
 	
-	protected void getProfileGroup(String categoryId) {
-		profileGroupListBox.clear();
-		service.getProfileGroups(categoryId, currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				profileGroupListBox.addItem("", "");
-				if (result.size() > 1) {
-					for (List<String> item: result) {
-						profileGroupListBox.addItem(item.get(0), item.get(1));
-					}
-					profileGroupListBox.setVisible(true);
-				} else {
-					profileGroupListBox.setVisible(false);
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
-			}
-		});
-	}
-
-	private void updateTable(String categoryId) {
+	private void updateTable() {
 		loadingPopupPanel.show();
 
 		// TODO have to show non-value type data
-		service.getProfilesAnalysisData(selectedSamples, categoryId, profileGroupListBox.getSelectedValue(), currentLang, new AsyncCallback<GutFloraAnalysisData>() {
+		service.getProfilesAnalysisData(selectedSamples, currentLang, new AsyncCallback<GutFloraAnalysisData>() {
 			
 			@Override
 			public void onSuccess(GutFloraAnalysisData result) {

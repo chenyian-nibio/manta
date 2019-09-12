@@ -15,7 +15,6 @@ import jp.go.nibiohn.bioinfo.shared.PcoaResult;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 import jp.go.nibiohn.bioinfo.shared.TaxonEntry;
-import jp.go.nibiohn.bioinfo.shared.UserInfo;
 import jp.go.nibiohn.bioinfo.shared.VisualizationtResult;
 
 /**
@@ -30,9 +29,7 @@ public interface GutFloraService extends RemoteService {
 	
 	SampleEntry getSampleEntry(String sampleId, String lang);
 
-	List<List<String>> getSampleProfile(String sampleId, String categoryId, String lang);
-
-	List<List<String>> getSampleProfile(String sampleId, String categoryId, String groupId, String lang);
+	List<List<String>> getSampleProfile(String sampleId, String lang);
 
 	List<List<String>> getMicrobiota(String sampleId, String rank);
 
@@ -50,7 +47,7 @@ public interface GutFloraService extends RemoteService {
 	
 	GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, List<String> selectedcolumns);
 
-	GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String categoryId, String groupId, String lang);
+	GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String lang);
 
 	GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns, String lang);
 
@@ -58,14 +55,6 @@ public interface GutFloraService extends RemoteService {
 
 	List<ParameterEntry> getAllNumericParameterEntry(String lang);
 	
-	List<List<String>> getProfileGroups(String categoryId, String lang);
-
-	List<List<String>> getDietFitnessGroupNames(String lang);
-
-	List<List<String>> getProfileGroupNames(String lang);
-	
-	List<List<String>> getAllParameterGroupNames(String lang);
-
 	PairListData getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId);
 	
 	PairListData getReadsAndPctList(Set<SampleEntry> selectedSamples, String rank, String taxonName);
@@ -77,10 +66,10 @@ public interface GutFloraService extends RemoteService {
 	String getCorrelationString(Integer correlationMethod, List<String> list1, List<String> list2);
 	
 	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
-			String paraType, Integer correlationMethod, String lang);
+			Integer correlationMethod, String lang);
 
 	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames,
-			String paraType, String lang);
+			String lang);
 
 	SearchResultData searchForSimilerProfilesbyProfile(Set<SampleEntry> selectedSamples, String profileName,
 			String paraType, Integer correlationMethod, String lang);
@@ -94,12 +83,6 @@ public interface GutFloraService extends RemoteService {
 
 	List<String> getSampleDiversity(String sampleId);
 	
-	UserInfo getCurrentUser();
-
-	boolean loginUser(String username, String password);
-
-	void logoutCurrentUser();
-
 	VisualizationtResult getReadsHeatmap(Set<SampleEntry> selectedSamples, String rank);
 
 	VisualizationtResult getClusteredReadsHeatmap(Set<SampleEntry> selectedSamples, String rank, int distanceType, int linkageType, Map<Integer, DendrogramCache> cacheMap);
@@ -108,7 +91,7 @@ public interface GutFloraService extends RemoteService {
 	
 	PcoaResult getPCoAResult(List<String> sampleIdList, Integer distanceType);
 	
-	List<String> getProfileNames(String categoryId, String groupId, String lang);
+	List<String> getProfileNames(String lang);
 
 	String getPCoAScatterPlot(PcoaResult pcoaResult);
 	

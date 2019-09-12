@@ -110,31 +110,22 @@ h1.header {
 	font: 11px Arial, sans-serif;  
 }
 
-/** use panel **/
-#userPanel { 
+/** menu style **/
+#menuPanel { 
 	margin: 0; 
-	padding: 0px 8px;
+	padding: 0px 0px;
 	position: absolute; 
 	top: 50px; 
-	right: 10px; 
-	border: 2px solid #666;
+	right: 20px; 
+	border: none;
 }
-#userInfo {
-	padding: 5px 10px 5px 28px; 
-	background: url('image/ic_person_black_24dp.png') no-repeat left;
+.actionMenu {
+	padding: 5px 10px !important;
 }
-.userMenu {
-	padding: 5px 10px !important; 
-}
-.loginInfo {
-	padding: 5px 25px; 
-	background: url('image/information.png') no-repeat left;
-	text-align: left;
-}
-.loginError {
-	padding: 5px 25px; 
-	background: url('image/exclamation.png') no-repeat left;
-	text-align: left;
+.menuFont {
+	font: 18px Arial, sans-serif;
+	vertical-align: 3px;
+	padding-left: 8px;
 }
 
 /** clickable label **/

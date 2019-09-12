@@ -46,6 +46,8 @@ import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 
 public class SampleListWidget extends BaseWidget {
 
+	private static final String WELCOME_MSG = "Select samples and click the 'Start' button to start analysis.";
+
 	private static final String NO_SELECTED_SAMPLE = "No sample is selected.";
 
 	private static final int PAGE_SIZE = 20;
@@ -61,7 +63,7 @@ public class SampleListWidget extends BaseWidget {
 	private List<SampleEntry> allSamples;
 
 	public SampleListWidget(final List<SampleEntry> result, String lang) {
-		super("Select samples", lang + GutFloraConstant.NAVI_LINK_SAMPLE);
+		super("Data Analysis", lang + GutFloraConstant.NAVI_LINK_SAMPLE);
 		this.currentLang = lang;
 		this.allSamples = result;
 		
@@ -168,6 +170,12 @@ public class SampleListWidget extends BaseWidget {
 			}
 		});
 		sampleSelectPanel.add(label5);
+		
+		if (result.isEmpty()) {
+			sampleSelectPanel.setVisible(false);
+		} else {
+			infoMessage(WELCOME_MSG);
+		}
 
 		initWidget(hp);
 	}
@@ -342,6 +350,9 @@ public class SampleListWidget extends BaseWidget {
 		pager.setDisplay(cellTable);
 		pager.setPageSize(PAGE_SIZE);
 		vp.add(pager);
+		
+		// TODO to be improved
+		cellTable.setEmptyTableWidget(new Label("No data"));
 
 		cellTable.addCellPreviewHandler(new CellPreviewEvent.Handler<SampleEntry>() {
 
@@ -387,6 +398,9 @@ public class SampleListWidget extends BaseWidget {
 		});
 		button.setWidth("80px");
 		vp.add(button);
+		if (result.isEmpty()) {
+			button.setVisible(false);
+		}
 
 		return vp;
 	}

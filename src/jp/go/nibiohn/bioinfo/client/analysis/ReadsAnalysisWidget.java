@@ -75,8 +75,6 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 	
 	private ListBox readListBox = new ListBox();
 
-	private ListBox paraTypeListBox = new ListBox();
-
 	// the second rank list box which will synchronize with the other one, just for convenience (suggested by Yayoi) 
 	private ListBox rankListBox2 = new ListBox();
 
@@ -113,12 +111,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		readListBox.addItem("");
 		readListBox.setWidth("200px");
 		
-		paraTypeListBox.addItem("diet and fitness", "F");
-		paraTypeListBox.addItem("all available", "A");
-
-		itemSelectionHp.add(new Label("Search "));
-		itemSelectionHp.add(paraTypeListBox);
-		itemSelectionHp.add(new Label(" parameters correlated with:"));
+		itemSelectionHp.add(new Label("Search parameters correlated with:"));
 		rankListBox2.setWidth("80px");
 		itemSelectionHp.add(rankListBox2);
 		itemSelectionHp.add(readListBox);
@@ -139,11 +132,10 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 					return;
 				} 
 				loadingPopupPanel.show();
-				String paraType = paraTypeListBox.getValue(paraTypeListBox.getSelectedIndex());
 				if (taxonName.equals(GutFloraConstant.ALL_ABOVE_MICROBIOTA)) {
 					// Do multiple linear regression
 					service.searchForSimilerProfiles(ReadsAnalysisWidget.this.selectedSamples, rank, currentColumns,
-							paraType, currentLang,
+							currentLang,
 							new AsyncCallback<SearchResultData>() {
 						
 						@Override
@@ -163,7 +155,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 					
 				} else {
 					service.searchForSimilerProfiles(ReadsAnalysisWidget.this.selectedSamples, rank, taxonName,
-							paraType, Integer.valueOf(correlationListBox.getSelectedValue()), currentLang,
+							Integer.valueOf(correlationListBox.getSelectedValue()), currentLang,
 							new AsyncCallback<SearchResultData>() {
 						
 						@Override

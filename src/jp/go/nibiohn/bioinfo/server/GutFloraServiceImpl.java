@@ -39,7 +39,6 @@ import jp.go.nibiohn.bioinfo.shared.PcoaResult;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 import jp.go.nibiohn.bioinfo.shared.TaxonEntry;
-import jp.go.nibiohn.bioinfo.shared.UserInfo;
 import jp.go.nibiohn.bioinfo.shared.VisualizationtResult;
 import smile.mds.MDSTweak;
 
@@ -73,20 +72,13 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public List<SampleEntry> getSampleEntryList(String lang) {
-		String userName = getUserNameForQuery();
-		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
 
 			Statement statement1 = connection.createStatement();
-			String sqlQuery1 = " select distinct mb.sample_id " + " from microbiota as mb "
-					+ " join project_sample as ps on ps.sample_id = mb.sample_id "
-					+ " join project as pj on pj.id = ps.project_id "
-					+ " join project_privilege as pp on pp.project_id = pj.id "
-					+ " join dbuser as du on du.id = pp.user_id " 
-					+ " where du.username = '" + userName + "'";
+			String sqlQuery1 = " select distinct mb.sample_id " + " from microbiota as mb ";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
 			Set<String> sampleSet = new HashSet<String>();
@@ -95,22 +87,18 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				sampleSet.add(string);
 			}
 
-			String query_pjname = " pj.name as pj_name ";
-
 			Statement statement = connection.createStatement();
-			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, " + query_pjname + " from sample as s "
-					+ " join project_sample as ps on ps.sample_id = s.id "
-					+ " join project as pj on pj.id = ps.project_id "
-					+ " join project_privilege as pp on pp.project_id = pj.id "
-					+ " join dbuser as du on du.id = pp.user_id " 
-					+ " where du.username = '" + userName + "' " + " order by s.id ";
+			String sqlQuery = " select s.id, s.create_date from sample as s " + " order by s.id ";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
 			List<SampleEntry> ret = new ArrayList<SampleEntry>();
 			while (results.next()) {
 				String sampleId = results.getString("id");
-				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
-						results.getString("pj_name"), results.getDate("exp_date"), sampleSet.contains(sampleId)));
+				// TODO ... should consider the display column options
+//				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
+//						results.getString("pj_name"), results.getDate("exp_date"), sampleSet.contains(sampleId)));
+				ret.add(new SampleEntry(sampleId, null, null,
+						null, results.getDate("create_date"), sampleSet.contains(sampleId)));
 
 			}
 			
@@ -135,9 +123,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public List<List<String>> getSampleProfile(String sampleId, String categoryId, String lang) {
-		String currentUser = getUserNameForQuery();
-		
+	public List<List<String>> getSampleProfile(String sampleId, String lang) {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -145,19 +131,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement = connection.createStatement();
 			
-			String queryFields = " select title, parameter_value, unit, choice_value ";
-			
-			String sqlQuery = queryFields  
+			String sqlQuery = " select title, parameter_value "  
 					+ " from parameter_value as pv "
 					+ " join parameter_info as pi on pi.id = pv.parameter_id "  
-					+ " left outer join choice as ch on ch.parameter_id = pi.id and parameter_value = ch.choice_option "  
 					+ " where sample_id = '" + sampleId + "'  "
-					+ " and pi.group_id in (select group_id "
-					+ " from parameter_category as pc "  
-					+ " join parameter_group as pg on pg.category_id = pc.id "  
-					+ " join parameter_privilege as pp on pp.group_id = pg.id "  
-					+ " join dbuser as du on du.id = pp.user_id "
-					+ " where pc.id = " + categoryId + " and du.username = '" + currentUser + "') "
 					+ " order by pi.id ";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
@@ -165,85 +142,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			while (results.next()) {
 				String parameter;
 				String valueString = results.getString("parameter_value");
-				String unit = results.getString("unit");
-				String choiceValue = results.getString("choice_value");
+				// TODO
+				String unit = null;
 				if (valueString == null) {
 					parameter = "-";
-				} else if (choiceValue != null){
-					parameter = choiceValue;
-				} else {
-					// trim the decimal
-					if (valueString.contains(".") && valueString.indexOf('.') + 3 < valueString.length()) {
-						parameter = valueString.substring(0, valueString.indexOf('.') + 3);
-					} else {
-						parameter = valueString;
-					}
-				}
-				ret.add(Arrays.asList(results.getString("title"), parameter, unit));
-			}
-			connection.close();
-			ds.close();
-			return ret;
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-			ds.close();
-		}
-		
-		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		ds.close();
-
-		return null;
-	}
-
-	@Override
-	public List<List<String>> getSampleProfile(String sampleId, String categoryId, String groupId, String lang) {
-		String currentUser = getUserNameForQuery();
-		
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		try {
-			connection = ds.getConnection();
-			
-			Statement statement = connection.createStatement();
-			
-			String queryFields = " select title, parameter_value, unit, choice_value ";
-
-			String groupIdConstraint = " and pi.group_id in (select group_id "
-					+ " from parameter_category as pc "  
-					+ " join parameter_group as pg on pg.category_id = pc.id "  
-					+ " join parameter_privilege as pp on pp.group_id = pg.id "  
-					+ " join dbuser as du on du.id = pp.user_id "
-					+ " where pc.id = " + categoryId + " and du.username = '" + currentUser + "') ";
-			if (groupId != null && !groupId.equals("")) {
-				groupIdConstraint = " and pi.group_id = " + groupId + " ";
-			}
-			
-			String sqlQuery = queryFields  
-					+ " from parameter_value as pv "
-					+ " join parameter_info as pi on pi.id = pv.parameter_id "  
-					+ " left outer join choice as ch on ch.parameter_id = pi.id and parameter_value = ch.choice_option "  
-					+ " where sample_id = '" + sampleId + "'  "
-					+ groupIdConstraint
-					+ " order by pi.id ";
-			
-			ResultSet results = statement.executeQuery(sqlQuery);
-			List<List<String>> ret = new ArrayList<List<String>>();
-			while (results.next()) {
-				String parameter;
-				String valueString = results.getString("parameter_value");
-				String unit = results.getString("unit");
-				String choiceValue = results.getString("choice_value");
-				if (valueString == null) {
-					parameter = "-";
-				} else if (choiceValue != null){
-					parameter = choiceValue;
 				} else {
 					// trim the decimal
 					if (valueString.contains(".") && valueString.indexOf('.') + 3 < valueString.length()) {
@@ -371,18 +273,17 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			// processing the string...
 			String[] ids = sampleIdString.split(",");
 			
-			// no need to check if reads data is available, since the request is from the cluster
-			
+			// TODO should consider the displayed column
 			Statement statement = connection.createStatement();
-			String sqlQuery = " select id, age, gender, exp_date from sample where id in ('"
+			String sqlQuery = " select id, create_date from sample where id in ('"
 					+ StringUtils.join(ids, "','") + "')";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
 			Set<SampleEntry> ret = new HashSet<SampleEntry>();
 			while (results.next()) {
 				String sampleId = results.getString("id");
-				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
-						results.getDate("exp_date"), true));
+				ret.add(new SampleEntry(sampleId, null, null,
+						results.getDate("create_date"), true));
 			}
 			
 			connection.close();
@@ -1538,15 +1439,12 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 		
 	@Override
-	public GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String categoryId, String groupId, 
-			String lang) {
-		return getProfilesAnalysisData(selectedSamples, categoryId, groupId, GutFloraConstant.DEFAULT_NUM_OF_COLUMNS, lang);
+	public GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String lang) {
+		return getProfilesAnalysisData(selectedSamples, GutFloraConstant.DEFAULT_NUM_OF_COLUMNS, lang);
 	}
 	// TODO consider to create a class for the parameter, which holds title, id and a boolean (isNumeric)
-	private GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String categoryId, String groupId,
-			int numOfColumns, String lang) {
-		String currentUser = getUserNameForQuery();
-		
+	private GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, int numOfColumns,
+			String lang) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -1559,23 +1457,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Map<String, Map<String, String>> rows = new HashMap<String, Map<String,String>>();
 			Statement statement0 = connection.createStatement();
 			
-			String queryFields = "select pi.id as id, pi.title as title, pi.unit as unit, pt.type_name as type ";
-			
-			String groupIdConstraint = " where pg.id in (select group_id "
-					+ " from parameter_category as pc "  
-					+ " join parameter_group as pg on pg.category_id = pc.id "  
-					+ " join parameter_privilege as pp on pp.group_id = pg.id "  
-					+ " join dbuser as du on du.id = pp.user_id "
-					+ " where pc.id = " + categoryId + " and du.username = '" + currentUser + "') ";
-			if (groupId != null && !groupId.equals("")) {
-				groupIdConstraint = " where pg.id = " + groupId + " ";
-			}
-
-			String sqlQuery0 = queryFields + " from parameter_info as pi "
-					+ " join parameter_type as pt on pt.id = pi.type_id "
-					+ " join parameter_group as pg on pg.id = pi.group_id "
-					+ " join parameter_category as pc on pc.id = pg.category_id "
-					+ groupIdConstraint + " order by pi.id";
+			String sqlQuery0 = "select pi.id as id, pi.title as title, pi.unit as unit, pt.type_name as type "
+					+ " from parameter_info as pi " + " join parameter_type as pt on pt.id = pi.type_id "
+					+ " order by pi.id";
 
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
 			List<String> profileNameList = new ArrayList<String>();
@@ -1602,11 +1486,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String topIdString = StringUtils.join(topNIdList, ",");
 			
 			Statement statement2 = connection.createStatement();
-			String queryFields2 = " select sample_id, pi.title as title, pv.parameter_value, choice_value ";
-			String sqlQuery2 = queryFields2 + " from parameter_value as pv "
-					+ " join parameter_info as pi on pi.id = pv.parameter_id "
-					+ " left outer join choice as ch on ch.parameter_id = pi.id and pv.parameter_value = ch.choice_option "
-					+ " where sample_id in (" + sampleIdString + ") "
+			String sqlQuery2 = " select sample_id, pi.title as title, pv.parameter_value "
+					+ " from parameter_value as pv " + " join parameter_info as pi on pi.id = pv.parameter_id "
+					+ " where sample_id in (" + sampleIdString + ") " 
 					+ " and pv.parameter_id in (" + topIdString + ") ";
 			
 			ResultSet results2 = statement2.executeQuery(sqlQuery2);
@@ -1614,14 +1496,11 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String sid = results2.getString("sample_id");
 				String name = results2.getString("title");
 				String valueString = results2.getString("parameter_value");
-				String choiceValue = results2.getString("choice_value");
 				if (rows.get(sid) == null) {
 					rows.put(sid, new HashMap<String, String>());
 				}
 				String para = "-";
-				if (choiceValue != null) {
-					para = choiceValue;
-				} else if (valueString != null) {
+				if (valueString != null) {
 					if (valueString.contains(".") && valueString.indexOf('.') + 3 < valueString.length()) {
 						para = valueString.substring(0, valueString.indexOf('.') + 3);
 					} else {
@@ -1644,7 +1523,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			ret.setProfilesData(phList, profileNameList, numericProfiles);
 			ret.setMetadataMap(unitMap);
 			return ret;
-			
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1803,8 +1681,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<ParameterEntry> getAllNumericParameterEntry(String lang) {
-		String currentUser = getUserNameForQuery();
-		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -1816,10 +1692,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join parameter_type as pt on pt.id = pi.type_id "
 					+ " join parameter_group as pg on pg.id = pi.group_id " 
 					+ " where pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' " 
-					+ " and pg.id in (" + " select group_id "
-					+ " from parameter_privilege as pp "
-					+ " join dbuser as du on du.id = pp.user_id "  
-					+ " where du.username = '" + currentUser + "' ) "
 					+ " order by pg.id ";
 			
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
@@ -1829,215 +1701,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				int paraId = results0.getInt("id");
 				String unit = results0.getString("unit");
 				profileNameList.add(new ParameterEntry(String.valueOf(paraId), name, unit));
-			}
-			
-			connection.close();
-			ds.close();
-			
-			return profileNameList;
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		ds.close();
-		
-		return null;
-	}
-	
-	@Override
-	public List<List<String>> getProfileGroups(String categoryId, String lang) {
-		String currentUser = getUserNameForQuery();
-
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		try {
-			connection = ds.getConnection();
-			
-			Statement statement = connection.createStatement();
-			
-			String queryFields = "select distinct pg.id as id, group_name ";
-			
-			// TODO seems good enough? should I rewrite the SQL?
-			String sqlQuery = queryFields + " from parameter_info as pi "
-					+ " join parameter_group as pg on pg.id = pi.group_id "
-					+ " join parameter_privilege as pp on pp.group_id = pg.id "
-					+ " join dbuser as du on du.id = pp.user_id "
-					+ " where pg.category_id = " + categoryId 
-					+ " and du.username = '" + currentUser + "' "
-					+ " order by pg.id";
-
-			ResultSet results = statement.executeQuery(sqlQuery);
-			List<List<String>> ret = new ArrayList<List<String>>();
-			while (results.next()) {
-				ret.add(Arrays.asList(results.getString("group_name"), String.valueOf(results.getInt("id"))));
-			}
-			
-			connection.close();
-			ds.close();
-			
-			return ret;
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		ds.close();
-
-		return null;
-	}
-	
-	@Override
-	public List<List<String>> getDietFitnessGroupNames(String lang) {
-		return getCategoryNames("fitness", lang);
-	}
-
-	private List<List<String>> getCategoryNames(String classCode, String lang) {
-		String currentUser = getUserNameForQuery();
-
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		try {
-			connection = ds.getConnection();
-			
-			Statement statement0 = connection.createStatement();
-			
-			String queryFields = " select distinct pc.id as id, category_name ";
-
-			// TODO seems good enough? should I rewrite the SQL?
-			String sqlQuery0 = queryFields
-					+ " from parameter_category as pc "
-					+ " join parameter_class as cl on cl.id = pc.class_id "
-					+ " join parameter_group as pg on pg.category_id = pc.id "
-					+ " join parameter_privilege as pp on pp.group_id = pg.id "
-					+ " join dbuser as du on du.id = pp.user_id "
-					+ " where class_code = '" + classCode + "'"
-					+ " and du.username = '" + currentUser + "' "
-					+ " order by pc.id ";
-			
-			ResultSet results0 = statement0.executeQuery(sqlQuery0);
-			List<List<String>> profileNameList = new ArrayList<List<String>>();
-			while (results0.next()) {
-				String name = results0.getString("category_name");
-				profileNameList.add(Arrays.asList(name, String.valueOf(results0.getInt("id"))));
-			}
-			
-			connection.close();
-			ds.close();
-
-			return profileNameList;
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		ds.close();
-
-		return null;
-	}
-	
-	@Override
-	public List<List<String>> getProfileGroupNames(String lang) {
-		String currentUser = getUserNameForQuery();
-		
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		try {
-			connection = ds.getConnection();
-			
-			Statement statement0 = connection.createStatement();
-			
-			String queryFields = "select distinct pc.id as id, category_name ";
-			
-			String sqlQuery0 = queryFields + " from parameter_info as pi "
-					+ " join parameter_type as pt on pt.id = pi.type_id "
-					+ " join parameter_group as pg on pg.id = pi.group_id "
-					+ " join parameter_category as pc on pc.id = pg.category_id "
-					+ " join parameter_class as cl on cl.id = pc.class_id "
-					+ " where class_code = 'fitness' "
-					+ " and pg.id in (" + " select group_id "
-					+ " from parameter_privilege as pp "
-					+ " join dbuser as du on du.id = pp.user_id "  
-					+ " where du.username = '" + currentUser + "' ) "
-					+ " order by pc.id";
-
-			ResultSet results0 = statement0.executeQuery(sqlQuery0);
-			List<List<String>> profileNameList = new ArrayList<List<String>>();
-			while (results0.next()) {
-				String name = results0.getString("category_name");
-				profileNameList.add(Arrays.asList(name, String.valueOf(results0.getInt("id"))));
-			}
-			
-			connection.close();
-			ds.close();
-
-			return profileNameList;
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		ds.close();
-
-		return null;
-	}
-	
-	@Override
-	public List<List<String>> getAllParameterGroupNames(String lang) {
-		String currentUser = getUserNameForQuery();
-		
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		try {
-			connection = ds.getConnection();
-			
-			Statement statement0 = connection.createStatement();
-			
-			String queryFields = "select distinct pc.id as id, category_name ";
-			
-			String sqlQuery0 = queryFields + " from parameter_info as pi "
-					+ " join parameter_type as pt on pt.id = pi.type_id "
-					+ " join parameter_group as pg on pg.id = pi.group_id "
-					+ " join parameter_category as pc on pc.id = pg.category_id "
-					+ " where pg.id in (" + " select group_id "
-					+ " from parameter_privilege as pp "
-					+ " join dbuser as du on du.id = pp.user_id "  
-					+ " where du.username = '" + currentUser + "' ) "
-					+ " order by pc.id";
-			
-			ResultSet results0 = statement0.executeQuery(sqlQuery0);
-			List<List<String>> profileNameList = new ArrayList<List<String>>();
-			while (results0.next()) {
-				String name = results0.getString("category_name");
-				profileNameList.add(Arrays.asList(name, String.valueOf(results0.getInt("id"))));
 			}
 			
 			connection.close();
@@ -2355,10 +2018,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 */
 	@Override
 	public SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank,
-			List<String> taxonNames, String paraType, String lang) {
+			List<String> taxonNames, String lang) {
 		// do multiple linear regression (MLR)
-		String currentUser = getUserNameForQuery();
-
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -2391,32 +2052,12 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement2 = connection.createStatement();
 			
-			String userPrivilege = " and pg.id in (" + " select group_id "
-					+ " from parameter_privilege as pp "
-					+ " join dbuser as du on du.id = pp.user_id "  
-					+ " where du.username = '" + currentUser + "' ) ";
-			
-			// TODO need refactoring in the future.
-			String groupState = "";
-			if (paraType.equals("F")) {
-				groupState = " and group_id in (" + " select pg.id from parameter_group as pg "
-						+ " join parameter_category as pc on pc.id = pg.category_id "
-						+ " join parameter_class as cl on cl.id = pc.class_id "
-						+ " where class_code = 'fitness' " + userPrivilege
-						+ " ) ";
-			} else {
-				groupState = " and group_id in (" + " select group_id "
-						+ " from parameter_privilege as pp "
-						+ " join dbuser as du on du.id = pp.user_id "  
-						+ " where du.username = '" + currentUser + "' ) ";
-			}
-			
 			String queryFields = " select sample_id, pi.title as title, parameter_value ";
 			String sqlQuery2 = queryFields + " from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id "
 					+ " join parameter_type as pt on pt.id = pi.type_id " 
 					+ " where sample_id in (" + sampleIdString + ") " 
-					+ " and pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' " + groupState;
+					+ " and pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' ";
 			
 			// key: profile_name -> value: (key: sample_id -> value: profile_value)
 			Map<String, Map<String, Double>> rows = new HashMap<String, Map<String,Double>>();
@@ -2482,9 +2123,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
-			String paraType, Integer correlationMethod, String lang) {
-		String currentUser = getUserNameForQuery();
-		
+			Integer correlationMethod, String lang) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -2511,32 +2150,12 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement2 = connection.createStatement();
 			
-			String userPrivilege = " and pg.id in (" + " select group_id "
-					+ " from parameter_privilege as pp "
-					+ " join dbuser as du on du.id = pp.user_id "  
-					+ " where du.username = '" + currentUser + "' ) ";
-			
-			// TODO need refactoring in the future.
-			String groupState = "";
-			if (paraType.equals("F")) {
-				groupState = " and group_id in (" + " select pg.id from parameter_group as pg "
-						+ " join parameter_category as pc on pc.id = pg.category_id "
-						+ " join parameter_class as cl on cl.id = pc.class_id "
-						+ " where class_code = 'fitness' " + userPrivilege
-						+ " ) ";
-			} else {
-				groupState = " and group_id in (" + " select group_id "
-						+ " from parameter_privilege as pp "
-						+ " join dbuser as du on du.id = pp.user_id "  
-						+ " where du.username = '" + currentUser + "' ) ";
-			}
-			
 			String queryFields = " select sample_id, pi.title as title, parameter_value ";
 			String sqlQuery2 = queryFields + " from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id "
 					+ " join parameter_type as pt on pt.id = pi.type_id " 
 					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' " + groupState;
+					+ " and pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' ";
 			
 			// key: profile_name -> value: (key: sample_id -> value: profile_value)
 			Map<String, Map<String, Double>> rows = new HashMap<String, Map<String,Double>>();
@@ -2695,8 +2314,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	@Override
 	public SearchResultData searchForSimilerProfilesbyProfile(Set<SampleEntry> selectedSamples, String name,
 			String paraType, Integer correlationMethod, String lang) {
-		String currentUser = getUserNameForQuery();
-
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -2720,33 +2337,13 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				readMap.put(sid, Double.valueOf(value));
 			}
 			
-			String userPrivilege = " and pg.id in (" + " select group_id "
-					+ " from parameter_privilege as pp "
-					+ " join dbuser as du on du.id = pp.user_id "  
-					+ " where du.username = '" + currentUser + "' ) ";
-			
-			// TODO need refactoring in the future.
-			String groupState = "";
-			if (paraType.equals("F")) {
-				groupState = " and group_id in (" + " select pg.id from parameter_group as pg "
-						+ " join parameter_category as pc on pc.id = pg.category_id "
-						+ " join parameter_class as cl on cl.id = pc.class_id "
-						+ " where class_code = 'fitness' " + userPrivilege
-						+ " ) ";
-			} else {
-				groupState = " and group_id in (" + " select group_id "
-						+ " from parameter_privilege as pp "
-						+ " join dbuser as du on du.id = pp.user_id "  
-						+ " where du.username = '" + currentUser + "' ) ";
-			}
-			
 			String queryFields = " select sample_id, pi.title as title, parameter_value ";
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = queryFields + " from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id "
 					+ " join parameter_type as pt on pt.id = pi.type_id " 
 					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' " + groupState;
+					+ " and pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' ";
 			
 			// key: profile_name -> value: (key: sample_id -> value: profile_value)
 			Map<String, Map<String, Double>> rows = new HashMap<String, Map<String,Double>>();
@@ -2946,89 +2543,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 		}
 		return ret;
-	}
-	
-	private static String SESSION_NAME_CURRENT_USER = "currentUser";
-
-	private String getUserNameForQuery() {
-		UserInfo currentUser = getCurrentUserFromSession();
-		if (currentUser == null) {
-			currentUser = UserInfo.getGuestUser();
-		}
-		return currentUser.getUserName();
-	}
-	
-	private UserInfo getCurrentUserFromSession() {
-		return (UserInfo) this.getThreadLocalRequest().getSession().getAttribute(SESSION_NAME_CURRENT_USER);
-	}
-
-	private void saveCurrentUserToSession(UserInfo user) {
-		this.getThreadLocalRequest().getSession().setAttribute(SESSION_NAME_CURRENT_USER, user);
-	}
-
-	private void clearCurrentUserInSession() {
-		this.getThreadLocalRequest().getSession().removeAttribute(SESSION_NAME_CURRENT_USER);
-	}
-
-	/**
-	 * get display name (not account) 
-	 */
-	@Override
-	public UserInfo getCurrentUser() {
-		UserInfo currentUser = getCurrentUserFromSession();
-		if (currentUser == null) {
-			currentUser = UserInfo.getGuestUser();
-		}
-		return currentUser;
-	}
-
-	@Override
-	public boolean loginUser(String username, String password) {
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		boolean ret = false;
-		try {
-			connection = ds.getConnection();
-			
-			Statement statement = connection.createStatement();
-			// TODO change name to display_name
-			String sqlQuery = "select password, name, user_role "
-					+ " from dbuser join user_role on user_role.id = dbuser.role_id "
-					+ " where username = '" + username + "'";
-			
-			ResultSet results = statement.executeQuery(sqlQuery);
-			if (results.next()) {
-				String pw = results.getString("password");
-				if (pw.equals(password)) {
-					ret = true;
-					// TODO change name to display_name
-					String displayName = results.getString("name");
-					String userRole = results.getString("user_role");
-					UserInfo user = new UserInfo(username, displayName, userRole.equals(UserInfo.ADMIN_ROLE), true);
-					saveCurrentUserToSession(user);
-				}
-			}
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			if (ds != null) {
-				ds.close();
-			}
-		}
-		return ret;
-	}
-
-	@Override
-	public void logoutCurrentUser() {
-		clearCurrentUserInSession();
 	}
 	
 	@Override
@@ -3614,38 +3128,20 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 * only 3 types: PARA_TYPE_CONTINUOUS, PARA_TYPE_UNRANKED_CATEGORY and PARA_TYPE_RANKED_CATEGORY
 	 */
 	@Override
-	public List<String> getProfileNames(String categoryId, String groupId, String lang) {
-		String currentUser = getUserNameForQuery();
-		
+	public List<String> getProfileNames(String lang) {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
 			
 			Statement statement0 = connection.createStatement();
-			String queryFields = " select pi.id as id, pi.title as title ";
-			
-			String groupConstraint;
-			if (groupId == null) {
-				groupConstraint = " and pg.id in (select group_id "
-						+ " from parameter_category as pc "  
-						+ " join parameter_group as pg on pg.category_id = pc.id "  
-						+ " join parameter_privilege as pp on pp.group_id = pg.id "  
-						+ " join dbuser as du on du.id = pp.user_id "
-						+ " where pc.id = " + categoryId + " and du.username = '" + currentUser + "') ";
-			} else {
-				groupConstraint = " and pg.id = " + groupId;
-			}
-			
-			String sqlQuery0 = queryFields + " from parameter_info as pi "
+			String sqlQuery0 = " select pi.id as id, pi.title as title " 
+					+ " from parameter_info as pi "
 					+ " join parameter_type as pt on pt.id = pi.type_id "
-					+ " join parameter_group as pg on pg.id = pi.group_id " 
 					+ " where pt.type_name in ('" 
 					+ GutFloraConstant.PARA_TYPE_CONTINUOUS + "','" 
 					+ GutFloraConstant.PARA_TYPE_UNRANKED_CATEGORY + "','"
-					+ GutFloraConstant.PARA_TYPE_RANKED_CATEGORY + "') "
-					+ groupConstraint
-					+ " order by pg.id ";
+					+ GutFloraConstant.PARA_TYPE_RANKED_CATEGORY + "') ";
 			
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
 			List<String> profileNameList = new ArrayList<String>();

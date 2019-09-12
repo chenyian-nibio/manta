@@ -6,26 +6,18 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
-import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import jp.go.nibiohn.bioinfo.client.analysis.ReadsAnalysisWidget;
@@ -38,7 +30,6 @@ import jp.go.nibiohn.bioinfo.shared.GutFloraConfig;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
-import jp.go.nibiohn.bioinfo.shared.UserInfo;
 
 /**
  * 
@@ -46,7 +37,7 @@ import jp.go.nibiohn.bioinfo.shared.UserInfo;
  */
 public class Manta extends BasePage {
 
-	private static final String WELCOME_MSG = "Select samples and click the 'Start' button to start analysis.";
+	private GutFloraResources resources = GWT.create(GutFloraResources.class);
 
 	private final GutFloraServiceAsync service = GWT.create(GutFloraService.class);
 
@@ -60,8 +51,6 @@ public class Manta extends BasePage {
 	
 	private ReadVisualizeWidget readVisualizeWidget;
 	
-	private UserInfo currentUser;
-
 	/**
 	 * This is the entry point method.
 	 */
@@ -83,8 +72,40 @@ public class Manta extends BasePage {
 		footer.add(new HTML("<p><hr style=\"margin-top: 48px;\"/></p>"));
 		footer.add(new HTML("<p style=\"text-align: center;\" class=\"fixlink\">" + GutFloraConfig.FOOTER + "</p>"));
 		infoPanel.add(footer);
+
+		RootPanel menuPanel = RootPanel.get("menuBar");
+		menuPanel.clear(true);
+		MenuBar menuBar = new MenuBar();
+		MenuBar actionMenu = new MenuBar(true);
+		menuBar.addItem(AbstractImagePrototype.create(resources.getMenuIconImageResource()).getSafeHtml(), actionMenu);
+		MenuItem maindMenu = new MenuItem(
+				AbstractImagePrototype.create(resources.getTimelineIconImageResource()).getHTML()
+						+ "<span class=\"menuFont\">" + "Data Analysis" + "</span>",
+				true, new Command() {
+
+					@Override
+					public void execute() {
+						History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_SAMPLE);
+						History.fireCurrentHistoryState();
+					}
+				});
+		maindMenu.addStyleName("actionMenu");
+		actionMenu.addItem(maindMenu);
+		MenuItem uploadMenu = new MenuItem(
+				AbstractImagePrototype.create(resources.getStorageIconImageResource()).getHTML()
+						+ "<span class=\"menuFont\">" + "Data Management" + "</span>",
+				true, new Command() {
+
+					@Override
+					public void execute() {
+						History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_UPLOAD);
+						History.fireCurrentHistoryState();
+					}
+				});
+		uploadMenu.addStyleName("actionMenu");
+		actionMenu.addItem(uploadMenu);
 		
-		getUserInfo();
+		menuPanel.add(menuBar);
 	}
 
 	@Override
@@ -101,7 +122,6 @@ public class Manta extends BasePage {
 		String lang = option.substring(0, 3);
 		this.currentLang = lang;
 		if (value.equals(GutFloraConstant.NAVI_LINK_SAMPLE)) {
-			infoMessage(WELCOME_MSG);
 			service.getSampleEntryList(currentLang, new AsyncCallback<List<SampleEntry>>() {
 				
 				@Override
@@ -423,19 +443,14 @@ public class Manta extends BasePage {
 				subsetAnalysisWidget = null;
 			}
 		} else if (value.equals(GutFloraConstant.NAVI_LINK_UPLOAD)) {
-			// check if the user is admin
-			if (currentUser == null || !currentUser.isAdmin()) {
-				History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_SAMPLE);
-			} else {
-				// load the page
-				widgetTrails.clear();
-				DataManageWidget dataManageWidget = new DataManageWidget(currentLang);
-				widgetTrails.add(dataManageWidget);
-				mainPanel.clear();
-				mainPanel.add(dataManageWidget);
-				infoPanel.setVisible(true);
-				setNaviBar();
-			}
+			// load the page
+			widgetTrails.clear();
+			DataManageWidget dataManageWidget = new DataManageWidget(currentLang);
+			widgetTrails.add(dataManageWidget);
+			mainPanel.clear();
+			mainPanel.add(dataManageWidget);
+			infoPanel.setVisible(true);
+			setNaviBar();
 		} else {
 			warnMessage("Illegal URL.");
 			// choose English as default
@@ -459,210 +474,5 @@ public class Manta extends BasePage {
 		}
 		naviPanel.clear();
 		naviPanel.add(naviBar);
-		
-	}
-
-	private void getUserInfo() {
-		service.getCurrentUser(new AsyncCallback<UserInfo>() {
-			
-			@Override
-			public void onSuccess(UserInfo result) {
-				currentUser = result;
-				
-				RootPanel userInfo = RootPanel.get("userInfo");
-				userInfo.clear(true);
-				// TODO should not hard coded here
-				MenuBar menuBar = new MenuBar();
-				MenuBar userMenu = new MenuBar(true);
-				menuBar.addItem(result.getDisplayName(), userMenu);
-				if (result.isLogin()) {
-					MenuItem logoutMenu = new MenuItem("Logout", new Command() {
-						
-						@Override
-						public void execute() {
-							DialogBox dialogBox = createLogoutDialogBox();
-							dialogBox.setGlassEnabled(true);
-							dialogBox.setAnimationEnabled(true);
-							dialogBox.setAutoHideEnabled(false);
-							dialogBox.center();
-						}
-					});
-					logoutMenu.addStyleName("userMenu");
-					userMenu.addItem(logoutMenu);
-					if (result.isAdmin()) {
-						MenuItem uploadMenu = new MenuItem("Upload", new Command() {
-							
-							@Override
-							public void execute() {
-								History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_UPLOAD);
-								History.fireCurrentHistoryState();
-							}
-						});
-						uploadMenu.addStyleName("userMenu");
-						userMenu.addItem(uploadMenu);
-					} 
-				} else {
-//					menuBar.addItem(GutFloraConstant.USER_NAME_GUEST, userMenu);
-					MenuItem loginMenu = new MenuItem("Login", new Command() {
-						
-						@Override
-						public void execute() {
-							DialogBox dialogBox = createLoginDialogBox();
-							dialogBox.setGlassEnabled(true);
-							dialogBox.setAnimationEnabled(true);
-							dialogBox.setAutoHideEnabled(false);
-							dialogBox.center();
-							userIdTb.setFocus(true);
-						}
-					});
-					loginMenu.addStyleName("userMenu");
-					userMenu.addItem(loginMenu);
-				}
-				userInfo.add(menuBar);
-				
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				warnMessage(SERVER_ERROR + "; unable to get the user info.");
-			}
-		});
-	}
-	
-	private TextBox userIdTb = new TextBox();
-	private DialogBox createLoginDialogBox() {
-		// Create a dialog box and set the caption text
-		final DialogBox dialogBox = new DialogBox(true);
-		dialogBox.setText("Login");
-		VerticalPanel vp = new VerticalPanel();
-		vp.setSpacing(6);
-		vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-		
-		final Label infoLabel = new Label("Input your ID & password:");
-		infoLabel.setStyleName("loginInfo");
-		vp.add(infoLabel);
-
-		userIdTb.setSize("150px", "18px");
-		final TextBox passwordTb = new PasswordTextBox();
-		passwordTb.setSize("150px", "18px");
-
-		Button okBtn = new Button("OK", new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				service.loginUser(userIdTb.getText(), passwordTb.getText(), new AsyncCallback<Boolean>() {
-					
-					@Override
-					public void onSuccess(Boolean result) {
-						if (result.booleanValue()) {
-							getUserInfo();
-							dialogBox.hide();
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
-							History.fireCurrentHistoryState();
-						} else {
-							infoLabel.setText("ERROR! Incorrect ID or password.");
-							infoLabel.setStyleName("loginError");
-						}
-					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						infoLabel.setText(SERVER_ERROR);
-						infoLabel.setStyleName("loginError");
-					}
-				});
-			}
-		});
-		Button cancelBtn = new Button("Cancel", new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				dialogBox.hide();
-			}
-		});
-		okBtn.setWidth("80px");
-		cancelBtn.setWidth("80px");
-
-		Grid grid = new Grid(2, 2);
-		Label idLabel = new Label("User ID:");
-		idLabel.setWidth("80px");
-		idLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		grid.setWidget(0, 0, idLabel);
-		grid.setWidget(0, 1, userIdTb);
-		Label pwLabel = new Label("Password:");
-		pwLabel.setWidth("80px");
-		pwLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		grid.setWidget(1, 0, pwLabel);
-		grid.setWidget(1, 1, passwordTb);
-
-		HorizontalPanel hp = new HorizontalPanel();
-		hp.setSpacing(6);
-		hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		hp.add(okBtn);
-		hp.add(cancelBtn);
-
-		vp.add(grid);
-		vp.add(hp);
-
-		dialogBox.add(vp);
-		// Return the dialog box
-		return dialogBox;
-	}
-	
-	private DialogBox createLogoutDialogBox() {
-		// Create a dialog box and set the caption text
-		final DialogBox dialogBox = new DialogBox(true);
-		dialogBox.setText("Logout");
-		VerticalPanel vp = new VerticalPanel();
-		vp.setSpacing(16);
-		vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-		
-		final Label infoLabel = new Label("Logout current user?");
-		infoLabel.setStyleName("loginInfo");
-		vp.add(infoLabel);
-		
-		Button okBtn = new Button("Yes", new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				service.logoutCurrentUser(new AsyncCallback<Void>() {
-					
-					@Override
-					public void onSuccess(Void result) {
-						getUserInfo();
-						dialogBox.hide();
-						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
-						History.fireCurrentHistoryState();
-					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						infoLabel.setText("System ERROR!");
-						infoLabel.setStyleName("loginError");
-					}
-				});
-			}
-		});
-		Button cancelBtn = new Button("No", new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				dialogBox.hide();
-			}
-		});
-		okBtn.setWidth("80px");
-		cancelBtn.setWidth("80px");
-		
-		HorizontalPanel hp = new HorizontalPanel();
-		hp.setSpacing(6);
-		hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		hp.add(okBtn);
-		hp.add(cancelBtn);
-		
-		vp.add(hp);
-		
-		dialogBox.add(vp);
-		// Return the dialog box
-		return dialogBox;
 	}
 }

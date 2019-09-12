@@ -25,6 +25,15 @@ public interface GutFloraResources extends ClientBundle {
 	  @Source("ic_settings_black_24dp_1x.png")
 	  ImageResource getSettingIconImageResource();
 	  
+	  @Source("ic_menu_black_24dp.png")
+	  ImageResource getMenuIconImageResource();
+
+	  @Source("ic_storage_black_18dp.png")
+	  ImageResource getStorageIconImageResource();
+	  
+	  @Source("ic_timeline_black_18dp.png")
+	  ImageResource getTimelineIconImageResource();
+	  
 	  @Source("clustering.png")
 	  ImageResource getClusteringImageResource();
 

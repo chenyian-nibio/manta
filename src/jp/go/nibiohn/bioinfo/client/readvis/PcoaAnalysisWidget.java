@@ -42,8 +42,6 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 
 	private Map<Integer, PcoaResult> pcoaResultMap = new HashMap<Integer, PcoaResult>();
 
-	private ListBox profileCategoryListBox = new ListBox();
-	private ListBox profileGroupListBox = new ListBox();
 	private ListBox profileListBox = new ListBox();
 	
 	private ListBox sampleDistanceListBox = new ListBox();
@@ -79,21 +77,6 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 		loadingVp.add(loadingLabel);
 		loadingPopupPanel.add(loadingVp);
 
-		profileCategoryListBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				getProfileGroup(profileCategoryListBox.getSelectedValue());
-				getProfileList();
-			}
-		});
-		profileGroupListBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				getProfileList();
-			}
-		});
 		profileListBox.addChangeHandler(new ChangeHandler() {
 			
 			@Override
@@ -120,9 +103,10 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 			}
 		});
 		
-		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
-		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE.toString());
-		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
+		// TODO need to read the available distance type from the database
+//		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
+//		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE.toString());
+//		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
 		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE.toString());
 		sampleDistanceListBox.addChangeHandler(new ChangeHandler() {
 			
@@ -188,11 +172,9 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 		profileVp.add(sampleDistanceListBox);
 		
 		
-		Label header2 = new Label("Diet and fitness parameters:");
+		Label header2 = new Label("Phenotype parameters:");
 		header2.setStyleName("pcoaListboxHeader");
 		profileVp.add(header2);
-		profileVp.add(profileCategoryListBox);
-		profileVp.add(profileGroupListBox);
 		profileVp.add(profileListBox);
 		
 		// customized tags
@@ -244,29 +226,10 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 		});
 		profileVp.add(label5);
 		
-		profileCategoryListBox.setWidth("300px");
-		profileGroupListBox.setWidth("300px");
 		profileListBox.setWidth("300px");
 		profileListBox.setVisibleItemCount(10);
+		getProfileList();
 		
-		service.getAllParameterGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				profileCategoryListBox.clear();
-				for (List<String> item: result) {
-					profileCategoryListBox.addItem(item.get(0), item.get(1));
-				}
-				getProfileGroup(result.get(0).get(1));
-				getProfileList();
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
-			}
-		});
-
 		thisWidget.add(chartVp);
 		thisWidget.add(profileVp);
 
@@ -405,34 +368,8 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 		return dialogBox;
 	}
 
-	private void getProfileGroup(String categoryId) {
-		profileGroupListBox.clear();
-		service.getProfileGroups(categoryId, currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				profileGroupListBox.addItem("", "");
-				if (result.size() > 1) {
-					for (List<String> item: result) {
-						profileGroupListBox.addItem(item.get(0), item.get(1));
-					}
-					profileGroupListBox.setVisible(true);
-				} else {
-					profileGroupListBox.setVisible(false);
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
-			}
-		});
-	}
-	
 	private void getProfileList() {
-		String categoryId = profileCategoryListBox.getSelectedValue();
-		String groupId = profileGroupListBox.getSelectedValue();
-		service.getProfileNames(categoryId, groupId, currentLang, new AsyncCallback<List<String>>() {
+		service.getProfileNames(currentLang, new AsyncCallback<List<String>>() {
 			
 			@Override
 			public void onSuccess(List<String> result) {

@@ -36,8 +36,6 @@ public class AnalysisWidget extends Composite {
 
 	protected ListBox rankListBox = new ListBox();
 
-	protected ListBox profileCategoryListBox = new ListBox();
-
 	protected SimplePanel analysisTabelPanel = new SimplePanel();
 
 	// default is English

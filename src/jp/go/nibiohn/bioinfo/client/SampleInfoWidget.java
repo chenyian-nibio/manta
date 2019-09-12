@@ -28,7 +28,7 @@ public class SampleInfoWidget extends Composite {
 	private final GutFloraServiceAsync service = GWT.create(GutFloraService.class);
 	
 	private Label loadingLabel = new Label("Retrieving Sample info...");
-	private Label noParaInfoLabel = new Label("No diet and fitness parameters.");
+	private Label noParaInfoLabel = new Label("No phenotype parameter data.");
 	private Label noReadInfoLabel = new Label("No gut microbiota data.");
 	private SimplePanel sampleInfoPanel = new SimplePanel();
 	private SimplePanel diversityPanel = new SimplePanel();
@@ -36,9 +36,6 @@ public class SampleInfoWidget extends Composite {
 	private SimplePanel dietPanel = new SimplePanel();
 
 	private ListBox rankListBox = new ListBox();
-	private ListBox dietListBox = new ListBox();
-	private ListBox profileGroupListBox = new ListBox();
-	private HorizontalPanel dietListHP = new HorizontalPanel();
 	
 	private boolean readInfoDisplay = true;
 	private boolean dietInfoDisplay = false;
@@ -111,60 +108,17 @@ public class SampleInfoWidget extends Composite {
 					dietChevron.setResource(resources.getChevronDownImageResource());
 				}
 				dietInfoDisplay = !dietInfoDisplay;
-				dietListHP.setVisible(dietInfoDisplay);
 				dietPanel.setVisible(dietInfoDisplay);
 			}
 		});
 		dietHp.add(dietChevron);
-		dietHp.add(new HTML("<h3>Diet and fitness parameters</h3>"));
+		dietHp.add(new HTML("<h3>Phenotype parameters</h3>"));
 		thisWidget.add(dietHp);
-		dietListHP.add(dietListBox);
-		dietListHP.add(new HTML("&nbsp;"));
-		dietListHP.add(profileGroupListBox);
-		thisWidget.add(dietListHP);
 		thisWidget.add(dietPanel);
 		dietPanel.add(loadingLabel);
-		dietListHP.setVisible(dietInfoDisplay);
 		dietPanel.setVisible(dietInfoDisplay);
+		getProfileData(sampleId);
 
-		service.getDietFitnessGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				dietListBox.clear();
-				for (List<String> item : result) {
-					dietListBox.addItem(item.get(0), item.get(1));
-				}
-				getProfileData(sampleId);
-				getProfileGroup();
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				dietPanel.add(new Label(BaseWidget.SERVER_ERROR));				
-			}
-		});
-		
-		dietListBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				String selectedValue = dietListBox.getSelectedValue();
-				if (selectedValue != null) {
-					getProfileData(sampleId);
-					getProfileGroup();
-				}
-			}
-		});
-		profileGroupListBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				getProfileData(sampleId);
-			}
-		});
-		
-		
 		thisWidget.add(new HTML("<div>&nbsp;</div>"));
 		initWidget(thisWidget);
 	}
@@ -257,9 +211,7 @@ public class SampleInfoWidget extends Composite {
 	}
 	
 	private void getProfileData(String sampleId) {
-		String categoryId = dietListBox.getSelectedValue();
-		String groupId = profileGroupListBox.getSelectedValue();
-		service.getSampleProfile(sampleId, categoryId, groupId, currentLang, new AsyncCallback<List<List<String>>>() {
+		service.getSampleProfile(sampleId, currentLang, new AsyncCallback<List<List<String>>>() {
 			
 			@Override
 			public void onSuccess(List<List<String>> result) {
@@ -299,30 +251,4 @@ public class SampleInfoWidget extends Composite {
 			}
 		});
 	}
-
-	protected void getProfileGroup() {
-		String categoryId = dietListBox.getSelectedValue();
-		profileGroupListBox.clear();
-		service.getProfileGroups(categoryId, currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				profileGroupListBox.addItem("", "");
-				if (result.size() > 1) {
-					for (List<String> item: result) {
-						profileGroupListBox.addItem(item.get(0), item.get(1));
-					}
-					profileGroupListBox.setVisible(true);
-				} else {
-					profileGroupListBox.setVisible(false);
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
-			}
-		});
-	}
-
 }
