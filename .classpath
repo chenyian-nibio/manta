@@ -15,5 +15,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-simple-1.7.25.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/com.github.haifengl.smile-core-1.5.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/com.github.haifengl.smile-math-1.5.3.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-fileupload-1.4.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

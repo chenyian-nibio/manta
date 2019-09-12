@@ -382,3 +382,22 @@ div.taxonNaviLink:hover {
 	font-weight: bold;
 	font-size: 16px;
 }
+
+table.paraPreview {
+	border: 1px solid lightgrey;
+}
+table.paraPreview th {
+	background: #CDDFCA;
+	border: 1px solid lightgrey;
+	text-align: left;
+	padding: 0px 6px;
+}
+
+table.paraPreview td {
+	border: 1px solid lightgrey;
+	padding: 0px 6px;
+}
+
+table.paraPreview th.firstColumn {
+	background: #DFDF33;
+}

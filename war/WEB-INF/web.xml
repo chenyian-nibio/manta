@@ -26,6 +26,16 @@
     <url-pattern>/manta/export</url-pattern>
   </servlet-mapping>
   
+  <servlet>
+    <servlet-name>gwtUploadDataServlet</servlet-name>
+    <servlet-class>jp.go.nibiohn.bioinfo.server.servlet.UploadDataServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>gwtUploadDataServlet</servlet-name>
+    <url-pattern>/manta/upload</url-pattern>
+  </servlet-mapping>
+
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>Manta.html</welcome-file>

@@ -95,4 +95,8 @@ public class GutFloraConstant {
 			"#a73f3f", "#2074a6", "#8855aa", "#3399aa", "#99bb22", "#7744bb", "#d58411", "#7a1818",
 			"#2277dd", "#cb4a23", "#ee8811", "#218529", "#8811aa", "#1188d7", "#ee3388", "#779911", 
 			"#c91d3f", "#4252a6", "#aa5588", "#11bbaa", "#bb9922", "#5544dd", "#d56211", "#9c1818");
+	
+	public static final String UPLOAD_DATA_TYPE_MICROBIOTA = "Micorbiota";
+	public static final String UPLOAD_DATA_TYPE_PARAMETERS = "Phenotype parameters";
+	
 }

@@ -1,75 +1,265 @@
 package jp.go.nibiohn.bioinfo.client.manage;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DecoratorPanel;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
+import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.NoSelectionModel;
 
 import jp.go.nibiohn.bioinfo.client.GutFloraService;
 import jp.go.nibiohn.bioinfo.client.GutFloraServiceAsync;
+import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 
 public class UploadDataWidget extends Composite {
 	
-	protected static Logger rootLogger = Logger.getLogger("");
+	private static Logger rootLogger = Logger.getLogger("");
 	
-	protected final GutFloraServiceAsync service = GWT.create(GutFloraService.class);
+	private final GutFloraServiceAsync service = GWT.create(GutFloraService.class);
 
-	public UploadDataWidget(String tableName) {
+	private RootPanel mesgPanel = RootPanel.get("mesgPanel");
+	
+	private ListBox typeListBox = new ListBox();
+
+	private SimplePanel filePreviewPanel = new SimplePanel();
+	
+	private DialogBox dialogBox = new DialogBox();
+	
+	private FormPanel formPanel = new FormPanel();
+
+	public UploadDataWidget() {
 		VerticalPanel thisWidget = new VerticalPanel();
 		
+		// TODO add some statistics here
+		
+		formPanel.setAction(GWT.getModuleBaseURL() + "upload");
+		formPanel.setMethod(FormPanel.METHOD_POST);
+		formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
+		
+		DecoratorPanel itemSelectionDec = new DecoratorPanel();
+		itemSelectionDec.setTitle("File upload");
+		itemSelectionDec.addStyleName("optionDec");
+		
 		HorizontalPanel fileUploadHp = new HorizontalPanel();
-		FileUpload fileUpload = new FileUpload();
-		Button uploadBtn = new Button("Upload");
+		fileUploadHp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		fileUploadHp.setSpacing(12);
+		itemSelectionDec.add(formPanel);
+		
+		fileUploadHp.add(new Label("File type: "));
+		
+		typeListBox.setName("type");
+		typeListBox.addItem(GutFloraConstant.UPLOAD_DATA_TYPE_PARAMETERS);
+		typeListBox.addItem(GutFloraConstant.UPLOAD_DATA_TYPE_MICROBIOTA);
+		fileUploadHp.add(typeListBox);
+		
+		final FileUpload fileUpload = new FileUpload();
 		fileUploadHp.add(fileUpload);
+		fileUpload.setName("uploadFile");
+		fileUpload.setWidth("300px");
+		
+		Button uploadBtn = new Button("Upload", new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				clearMessage();
+				
+				JavaScriptObject files = fileUpload.getElement().getPropertyJSO("files");
+				readTextFile(UploadDataWidget.this, typeListBox.getSelectedValue(), files);
+				
+				createPreviewDialogBox();
+
+//				int left = 10;
+//				if (Window.getClientWidth() > 610) {
+//					left = (Window.getClientWidth() - 600) / 2;
+//				}
+//				dialogBox.setPopupPosition(left, 70);
+//				dialogBox.show();
+				
+//				dialogBox.center();
+				
+//				formPanel.submit();
+			}
+		});
+		
+		uploadBtn.setWidth("80px");
+		formPanel.addSubmitHandler(new SubmitHandler() {
+			
+			@Override
+			public void onSubmit(SubmitEvent event) {
+				if (fileUpload.getFilename().equals("")) {
+					warnMessage("No file is selected.");
+					event.cancel();
+				}
+			}
+		});
+		formPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
+			
+			@Override
+			public void onSubmitComplete(SubmitCompleteEvent event) {
+				String results = event.getResults();
+				if (results != null) {
+				}
+			}
+		});
+		
 		fileUploadHp.add(uploadBtn);
-		thisWidget.add(fileUploadHp);
+		formPanel.setWidget(fileUploadHp);
 		
-		CellTable<List<String>> table = createTable();
-		
-		thisWidget.add(table);
-		
+		thisWidget.add(itemSelectionDec);
 		initWidget(thisWidget);
 	}
-
-	private CellTable<List<String>> createTable() {
-		CellTable<List<String>> ret = new CellTable<List<String>>();
-		ret.setSelectionModel(new NoSelectionModel<List<String>>());
-		ret.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
-
-		List<List<String>> dummy = new ArrayList<List<String>>();
-		dummy.add(Arrays.asList("A1", "A2"));
-		dummy.add(Arrays.asList("B1", "B2"));
-		dummy.add(Arrays.asList("C1", "C2"));
+	
+	private void createPreviewDialogBox() {
+		dialogBox.ensureDebugId("previewDialogBox");
+		dialogBox.setText("Upload Preview");
 		
-		ListDataProvider<List<String>> dataProvider = new ListDataProvider<List<String>>(dummy);
-		List<String> columns = Arrays.asList("column1","column2");
-		for (int i = 0; i < columns.size(); i++) {
-			final Integer[] index = new Integer[] {i};
-			TextColumn<List<String>> column = new TextColumn<List<String>>() {
-				
-				@Override
-				public String getValue(List<String> object) {
-					return object.get(index[0]);
-				}
-			};
-			ret.addColumn(column, columns.get(i));
-		}
-		dataProvider.addDataDisplay(ret);
-		return ret;
+		VerticalPanel dialogContents = new VerticalPanel();
+		dialogContents.setSpacing(4);
+		dialogBox.setWidget(dialogContents);
+
+		dialogContents.add(filePreviewPanel);
+		
+		HorizontalPanel buttonHp = new HorizontalPanel();
+		buttonHp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		buttonHp.setSpacing(12);
+		
+		Button cancelButton = new Button("Cancel", new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				dialogBox.hide();
+			}
+		});
+		cancelButton.setWidth("100px");
+		buttonHp.add(cancelButton);
+		
+		Button okButton = new Button("OK", new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				formPanel.submit();
+				dialogBox.hide();
+			}
+		});
+		okButton.setWidth("100px");
+		buttonHp.add(okButton);
+		
+		dialogContents.add(buttonHp);
+		dialogContents.setCellHorizontalAlignment(buttonHp, HasHorizontalAlignment.ALIGN_CENTER);
+		
+		dialogBox.setGlassEnabled(true);
+		dialogBox.setAnimationEnabled(false);
+		dialogBox.setAutoHideEnabled(true);
 	}
 
-	
+	protected void warnMessage(String message) {
+		Label label = (Label) ((HorizontalPanel) mesgPanel.getWidget(0)).getWidget(0);
+		label.setText(message);
+		mesgPanel.setStyleName("warnMessage");
+		mesgPanel.setVisible(true);
+	}
 
+	protected void clearMessage() {
+		mesgPanel.setVisible(false);
+	}
+
+	// Use html5 file reader to read the file contents on client side 
+	public static native void readTextFile(UploadDataWidget widget, String type, JavaScriptObject files)
+	/*-{
+	    var reader = new FileReader();
+
+	    reader.onload = function(e) {
+	        widget.@jp.go.nibiohn.bioinfo.client.manage.UploadDataWidget::showFileContents(*)(type, reader.result);
+	    }
+
+	    reader.readAsText(files[0]);
+	}-*/;
+	
+	public void showFileContents(String type, String contents) {
+		String[] lines = contents.split("[\r|\n]+");
+		
+		StringBuffer sb = new StringBuffer();
+		
+		sb.append("<p><b>File type:</b> " + type + "</p>\n");
+		
+		// For GutFloraConstant.UPLOAD_DATA_TYPE_PARAMETERS
+		String columnType = "Parameters";
+		String rowType = "Sample IDs";
+		if (type.equals(GutFloraConstant.UPLOAD_DATA_TYPE_MICROBIOTA)) {
+			columnType = "Sample IDs";
+			rowType = "Taxonomy";
+		}
+		
+		String[] headers = lines[0].split("\t");
+		sb.append("<table class=\"paraPreview\"><thead>");
+		
+		sb.append("<tr><td>&nbsp;</td><th colspan=\"" + (headers.length > 11 ? 11 : headers.length - 1)
+				+ "\" style=\"text-align: center;\">" + columnType + "</th></tr>\n");
+		
+		sb.append("<tr><th class=\"firstColumn\">" + rowType + "</th>\n");
+		for (int i = 1; i < headers.length; i++) {
+			if (i > 10) {
+				sb.append("<th> ... </th>");
+				break;
+			}
+			sb.append("<th>" + headers[i] + "</th>");
+		}
+		sb.append("</tr>\n");
+
+		sb.append("</thead>\n");
+		sb.append("<tbody>\n");
+		for (int j = 1; j < lines.length; j++) {
+			sb.append("<tr class=\"\">\n");
+			String[] cols = lines[j].split("\t");
+			if (j > 10) {
+				sb.append("<th class=\"firstColumn\"> : </th>");
+				for (int i = 1; i < cols.length; i++) {
+					if (i > 10) {
+						sb.append("<td>&nbsp;</td>");
+						break;
+					}
+					sb.append("<td> : </td>");
+				}
+				break;
+			} else {
+				String firstColumn = cols[0];
+				if (firstColumn.length() > 32) {
+					firstColumn = firstColumn.substring(0, 31) + "...";
+				}
+				sb.append("<th class=\"firstColumn\">" + firstColumn + "</th>");
+				for (int i = 1; i < cols.length; i++) {
+					if (i > 10) {
+						sb.append("<td> ... </td>");
+						break;
+					}
+					String value = cols[i];
+					if (value.length() > 12) {
+						value = value.substring(0, 11) + "...";
+					}
+					sb.append("<td>" + value + "</td>");
+				}
+			}
+			sb.append("</tr>\n");
+		}
+		sb.append("</tbody>\n");
+		sb.append("</table>\n");
+		
+		filePreviewPanel.setWidget(new HTML(sb.toString()));
+		dialogBox.center();
+	}
 }
