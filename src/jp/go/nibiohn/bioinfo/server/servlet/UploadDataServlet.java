@@ -1,10 +1,10 @@
 package jp.go.nibiohn.bioinfo.server.servlet;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,12 +17,17 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
+import com.google.gwt.dev.util.collect.HashMap;
+
+import jp.go.nibiohn.bioinfo.server.UploadProcessService;
+
 @SuppressWarnings("serial")
 public class UploadDataServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		Map<String, String> paraMap = new HashMap<String, String>();
 		// deal with the upload file
 		response.setContentType("text/html");
 		DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -32,20 +37,32 @@ public class UploadDataServlet extends HttpServlet {
 			List<FileItem> items = upload.parseRequest(request);
 			for (FileItem item : items) {
 				if (item.isFormField()) {
-//					String type = item.getString();
-//					String fieldName = item.getFieldName();
-//					System.out.println(fieldName + ":" + type);
+					paraMap.put(item.getFieldName(), item.getString());
 				} else {
 					InputStream inputStream = item.getInputStream();
-					BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-					String line = reader.readLine();
-//					PrintWriter writer = response.getWriter();
-					while (line != null) {
-						// TODO process the upload data and store in the database  
+					String type = paraMap.get("type");
+					if (type == null) {
+						// unexpected 
+					}
+					UploadProcessService service = new UploadProcessService();
+					boolean res = service.processAndSaveUploadData(type, inputStream);
+
+					PrintWriter writer = response.getWriter();
+					if (res) {
+						writer.write("OK");
+					} else {
+						writer.write("Upload failed.");
+					}
+					
+//					BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+//					String line = reader.readLine();
+//					while (line != null) {
+						// TODO process the upload data and store in the database
+						
 //						System.out.println(line);
 //						writer.write(line + "\n");
-						line = reader.readLine();
-					}
+//						line = reader.readLine();
+//					}
 				}
 			}
 		} catch (FileSizeLimitExceededException e) {
@@ -54,6 +71,14 @@ public class UploadDataServlet extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
+		// TODO for test; to be removed
+//		try {
+//			System.out.println("Wait 5 seconds.");
+//			Thread.sleep(5000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 }

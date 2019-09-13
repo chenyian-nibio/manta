@@ -1,21 +1,6 @@
-CREATE TABLE project (
-	id integer PRIMARY KEY,
-	code text,
-	name text,
-	name_jp text
-);
-
 CREATE TABLE sample (
 	id text PRIMARY KEY,
-	subject_id text,
-	exp_date date,
-	age integer,
-	gender integer
-);
-
-CREATE TABLE project_sample (
-	project_id integer REFERENCES project NOT NULL,
-	sample_id text REFERENCES sample NOT NULL
+	create_date date
 );
 
 CREATE TABLE taxon_rank (
@@ -29,12 +14,6 @@ CREATE TABLE taxonomy (
 	name text
 );
 
-CREATE TABLE reference_db (
-	id integer PRIMARY KEY,
-	refdb_name text,
-	website_url text
-);
-
 CREATE TABLE microbiota (
 	sample_id text REFERENCES sample NOT NULL,
 	kingdom_id text REFERENCES taxonomy,
@@ -45,50 +24,20 @@ CREATE TABLE microbiota (
 	genus_id text REFERENCES taxonomy,
 	species_id text REFERENCES taxonomy,
 	read_num integer,
-	read_pct numeric,
-	refdb_id integer REFERENCES reference_db
-);
-
-CREATE TABLE parameter_class (
-	id integer PRIMARY KEY,
-	class_code text,
-	class_name text,
-	class_name_jp text
-);
-
-CREATE TABLE parameter_category (
-	id integer PRIMARY KEY,
-	category_code text,
-	category_name text,
-	category_name_jp text,
-	class_id integer REFERENCES parameter_class
-);
-
-CREATE TABLE parameter_group (
-	id integer PRIMARY KEY,
-	group_code text,
-	group_name text,
-	group_name_jp text,
-	category_id integer REFERENCES parameter_category
+	read_pct numeric
 );
 
 CREATE TABLE parameter_type (
 	id integer PRIMARY KEY,
 	type_name text,
-	description text,
-	description_jp text
+	description text
 );
 
 CREATE TABLE parameter_info (
-	id integer PRIMARY KEY,
-	db_code text,
+	id text PRIMARY KEY,
 	title text,
-	title_jp text,
 	unit text,
-	unit_jp text,
 	note text,
-	note_jp text,
-	group_id integer REFERENCES parameter_group,
 	type_id integer REFERENCES parameter_type,
 	visible boolean
 );
@@ -98,38 +47,6 @@ CREATE TABLE parameter_value (
 	parameter_id integer REFERENCES parameter_info NOT NULL,
 	parameter_value text,
 	parameter_flag text
-);
-
-CREATE TABLE choice (
-	id integer PRIMARY KEY,
-	parameter_id integer REFERENCES parameter_info,
-	choice_option text,
-	choice_value text,
-	choice_value_jp text
-);
-
-CREATE TABLE user_role (
-	id integer PRIMARY KEY,
-	user_role text
-);
-
-CREATE TABLE dbuser (
-	id integer PRIMARY KEY,
-	username text,
-	password text,
-	is_active boolean NOT NULL,
-	role_id integer REFERENCES user_role,
-	name text
-);
-
-CREATE TABLE project_privilege (
-	user_id integer REFERENCES dbuser NOT NULL,
-	project_id integer REFERENCES project NOT NULL
-);
-
-CREATE TABLE parameter_privilege (
-	user_id integer REFERENCES dbuser NOT NULL,
-	group_id integer REFERENCES parameter_group NOT NULL
 );
 
 CREATE TABLE dominant_taxon (
@@ -156,4 +73,10 @@ CREATE TABLE sample_diversity (
 	shannon numeric,
 	simpson numeric,
 	chao1 integer
+);
+
+CREATE TABLE sample_display_columns (
+	sysid SERIAL NOT NULL,
+	position integer PRIMARY KEY,
+	parameter_id integer REFERENCES parameter_info NOT NULL
 );

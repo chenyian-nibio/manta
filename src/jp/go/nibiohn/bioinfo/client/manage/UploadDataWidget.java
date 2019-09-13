@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -45,6 +46,8 @@ public class UploadDataWidget extends Composite {
 	private DialogBox dialogBox = new DialogBox();
 	
 	private FormPanel formPanel = new FormPanel();
+
+	private PopupPanel loadingPopupPanel = new PopupPanel();
 
 	public UploadDataWidget() {
 		VerticalPanel thisWidget = new VerticalPanel();
@@ -86,17 +89,6 @@ public class UploadDataWidget extends Composite {
 				readTextFile(UploadDataWidget.this, typeListBox.getSelectedValue(), files);
 				
 				createPreviewDialogBox();
-
-//				int left = 10;
-//				if (Window.getClientWidth() > 610) {
-//					left = (Window.getClientWidth() - 600) / 2;
-//				}
-//				dialogBox.setPopupPosition(left, 70);
-//				dialogBox.show();
-				
-//				dialogBox.center();
-				
-//				formPanel.submit();
 			}
 		});
 		
@@ -115,8 +107,12 @@ public class UploadDataWidget extends Composite {
 			
 			@Override
 			public void onSubmitComplete(SubmitCompleteEvent event) {
+				loadingPopupPanel.hide();
 				String results = event.getResults();
-				if (results != null) {
+				if (results.startsWith("OK")) {
+					infoMessage("Data successfully uploaded.");
+				} else {
+					warnMessage(results);
 				}
 			}
 		});
@@ -125,6 +121,18 @@ public class UploadDataWidget extends Composite {
 		formPanel.setWidget(fileUploadHp);
 		
 		thisWidget.add(itemSelectionDec);
+		
+		// ajax loading ...
+		loadingPopupPanel.setGlassEnabled(true);
+		VerticalPanel loadingVp = new VerticalPanel();
+		loadingVp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		Label loadingLabel = new Label("Please wait...");
+		loadingPopupPanel.setStyleName("dataLoading");
+		loadingVp.setStyleName("dataLoadingContainer");
+		loadingLabel.setStyleName("dataLoadingLabel");
+		loadingVp.add(loadingLabel);
+		loadingPopupPanel.add(loadingVp);
+
 		initWidget(thisWidget);
 	}
 	
@@ -154,6 +162,7 @@ public class UploadDataWidget extends Composite {
 			public void onClick(ClickEvent event) {
 				formPanel.submit();
 				dialogBox.hide();
+				loadingPopupPanel.show();
 			}
 		});
 		okButton.setWidth("100px");
@@ -167,14 +176,21 @@ public class UploadDataWidget extends Composite {
 		dialogBox.setAutoHideEnabled(true);
 	}
 
-	protected void warnMessage(String message) {
+	private void infoMessage(String message) {
+		Label label = (Label) ((HorizontalPanel) mesgPanel.getWidget(0)).getWidget(0);
+		label.setText(message);
+		mesgPanel.setStyleName("infoMessage");
+		mesgPanel.setVisible(true);
+	}
+
+	private void warnMessage(String message) {
 		Label label = (Label) ((HorizontalPanel) mesgPanel.getWidget(0)).getWidget(0);
 		label.setText(message);
 		mesgPanel.setStyleName("warnMessage");
 		mesgPanel.setVisible(true);
 	}
 
-	protected void clearMessage() {
+	private void clearMessage() {
 		mesgPanel.setVisible(false);
 	}
 
