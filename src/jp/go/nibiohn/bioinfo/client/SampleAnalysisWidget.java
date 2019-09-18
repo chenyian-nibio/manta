@@ -18,7 +18,7 @@ import jp.go.nibiohn.bioinfo.shared.SearchResultData;
  * @author chenyian
  *
  */
-public class SampleAnalysisWidget extends BaseWidget {
+public class SampleAnalysisWidget extends FlowableWidget {
 
 	private Set<SampleEntry> selectedSamples;
 

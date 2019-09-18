@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
+import jp.go.nibiohn.bioinfo.client.FlowableWidget;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.PcoaResult;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
@@ -97,7 +97,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 					
 					@Override
 					public void onFailure(Throwable caught) {
-						warnMessage(BaseWidget.SERVER_ERROR);
+						warnMessage(FlowableWidget.SERVER_ERROR);
 					}
 				});
 			}
@@ -130,7 +130,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 								
 								@Override
 								public void onFailure(Throwable caught) {
-									warnMessage(BaseWidget.SERVER_ERROR);
+									warnMessage(FlowableWidget.SERVER_ERROR);
 									loadingPopupPanel.hide();
 								}
 							});
@@ -138,7 +138,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 						
 						@Override
 						public void onFailure(Throwable caught) {
-							warnMessage(BaseWidget.SERVER_ERROR);
+							warnMessage(FlowableWidget.SERVER_ERROR);
 							loadingPopupPanel.hide();
 						}
 					});
@@ -154,7 +154,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 						
 						@Override
 						public void onFailure(Throwable caught) {
-							warnMessage(BaseWidget.SERVER_ERROR);
+							warnMessage(FlowableWidget.SERVER_ERROR);
 							loadingPopupPanel.hide();
 						}
 					});
@@ -254,14 +254,14 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 					
 					@Override
 					public void onFailure(Throwable caught) {
-						warnMessage(BaseWidget.SERVER_ERROR);
+						warnMessage(FlowableWidget.SERVER_ERROR);
 					}
 				});
 			}
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
+				warnMessage(FlowableWidget.SERVER_ERROR);
 			}
 		});
 		
@@ -332,7 +332,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 					
 					@Override
 					public void onFailure(Throwable caught) {
-						warnMessage(BaseWidget.SERVER_ERROR);
+						warnMessage(FlowableWidget.SERVER_ERROR);
 						dialogBox.hide();
 					}
 				});
@@ -381,7 +381,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
+				warnMessage(FlowableWidget.SERVER_ERROR);
 			}
 		});
 	}

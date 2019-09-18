@@ -39,7 +39,6 @@ import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.ScatterChart;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.PairListData;
@@ -208,7 +207,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 							
 							@Override
 							public void onFailure(Throwable caught) {
-								warnMessage(BaseWidget.SERVER_ERROR);
+								warnMessage(SERVER_ERROR);
 							}
 						});
 					}
@@ -225,7 +224,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 							
 							@Override
 							public void onFailure(Throwable caught) {
-								warnMessage(BaseWidget.SERVER_ERROR);
+								warnMessage(SERVER_ERROR);
 							}
 						});
 					}
@@ -251,7 +250,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 							
 							@Override
 							public void onFailure(Throwable caught) {
-								warnMessage(BaseWidget.SERVER_ERROR);
+								warnMessage(SERVER_ERROR);
 							}
 						});
 					}
@@ -268,7 +267,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 							
 							@Override
 							public void onFailure(Throwable caught) {
-								warnMessage(BaseWidget.SERVER_ERROR);
+								warnMessage(SERVER_ERROR);
 							}
 						});
 					}
@@ -335,7 +334,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					warnMessage(BaseWidget.SERVER_ERROR);
+					warnMessage(SERVER_ERROR);
 				}
 			});
 			
@@ -356,7 +355,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					warnMessage(BaseWidget.SERVER_ERROR);
+					warnMessage(SERVER_ERROR);
 				}
 			});
 		}
@@ -382,7 +381,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					warnMessage(BaseWidget.SERVER_ERROR);
+					warnMessage(SERVER_ERROR);
 				}
 			});
 			
@@ -403,7 +402,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					warnMessage(BaseWidget.SERVER_ERROR);
+					warnMessage(SERVER_ERROR);
 				}
 			});
 		}
@@ -466,7 +465,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					warnMessage(BaseWidget.SERVER_ERROR);
+					warnMessage(SERVER_ERROR);
 				}
 			});
 		}

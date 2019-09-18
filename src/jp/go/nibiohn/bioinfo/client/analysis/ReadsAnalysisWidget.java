@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.client.GutFloraResources;
 import jp.go.nibiohn.bioinfo.client.ItemSelectionWidget;
 import jp.go.nibiohn.bioinfo.client.SampleInfoWidget;
@@ -148,7 +147,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 						
 						@Override
 						public void onFailure(Throwable caught) {
-							warnMessage(BaseWidget.SERVER_ERROR);
+							warnMessage(SERVER_ERROR);
 							loadingPopupPanel.hide();
 						}
 					});
@@ -168,7 +167,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 						
 						@Override
 						public void onFailure(Throwable caught) {
-							warnMessage(BaseWidget.SERVER_ERROR);
+							warnMessage(SERVER_ERROR);
 							loadingPopupPanel.hide();
 						}
 					});
@@ -351,7 +350,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
+				warnMessage(SERVER_ERROR);
 				loadingPopupPanel.hide();
 			}
 		});
@@ -385,7 +384,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
+				warnMessage(SERVER_ERROR);
 				loadingPopupPanel.hide();
 			}
 		});
@@ -669,7 +668,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
+				warnMessage(SERVER_ERROR);
 				loadingPopupPanel.hide();
 			}
 		});
@@ -745,7 +744,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
+				warnMessage(SERVER_ERROR);
 			}
 			
 			private void updatePieChart(final String sampleId, final String rank, String taxonId) {

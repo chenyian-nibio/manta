@@ -44,7 +44,7 @@ import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 
-public class SampleListWidget extends BaseWidget {
+public class SampleListWidget extends FlowableWidget {
 
 	private static final String WELCOME_MSG = "Select samples and click the 'Start' button to start analysis.";
 

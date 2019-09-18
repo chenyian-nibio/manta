@@ -41,7 +41,7 @@ public class Manta extends BasePage {
 
 	private final GutFloraServiceAsync service = GWT.create(GutFloraService.class);
 
-	private List<BaseWidget> widgetTrails = new ArrayList<BaseWidget>(); 
+	private List<FlowableWidget> widgetTrails = new ArrayList<FlowableWidget>(); 
 
 	private SampleListWidget sampleListWidget;
 
@@ -171,10 +171,10 @@ public class Manta extends BasePage {
 										result, selectedRank, currentLang);
 							}
 
-							Iterator<BaseWidget> iterator = widgetTrails.iterator();
-							List<BaseWidget> wList = new ArrayList<BaseWidget>();
+							Iterator<FlowableWidget> iterator = widgetTrails.iterator();
+							List<FlowableWidget> wList = new ArrayList<FlowableWidget>();
 							while (iterator.hasNext()) {
-								BaseWidget widget = iterator.next();
+								FlowableWidget widget = iterator.next();
 								if (widget.name.equals(subsetAnalysisWidget.name)){
 									break;
 								}
@@ -217,7 +217,7 @@ public class Manta extends BasePage {
 					}
 					// TODO unchecked!
 					Set<SampleEntry> selectedSamples = subsetAnalysisWidget.getSelectedSamples();
-					BaseWidget resultWidget;
+					FlowableWidget resultWidget;
 					if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {
 						List<String> currentColumns = analysisWidget.getReadsAnalysisWidget().getCurrentColumns();
 						resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value, currentLang);
@@ -297,10 +297,10 @@ public class Manta extends BasePage {
 					
 				}
 			}
-			Iterator<BaseWidget> iterator = widgetTrails.iterator();
-			List<BaseWidget> wList = new ArrayList<BaseWidget>();
+			Iterator<FlowableWidget> iterator = widgetTrails.iterator();
+			List<FlowableWidget> wList = new ArrayList<FlowableWidget>();
 			while (iterator.hasNext()) {
-				BaseWidget widget = iterator.next();
+				FlowableWidget widget = iterator.next();
 				if (widget.name.equals(analysisWidget.name)){
 					break;
 				}
@@ -336,7 +336,7 @@ public class Manta extends BasePage {
 				}
 				// TODO unchecked!
 				Set<SampleEntry> selectedSamples = analysisWidget.getSelectedSamples();
-				BaseWidget resultWidget;
+				FlowableWidget resultWidget;
 				if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {
 					List<String> currentColumns = analysisWidget.getReadsAnalysisWidget().getCurrentColumns();
 					resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value, currentLang);
@@ -364,10 +364,10 @@ public class Manta extends BasePage {
 							readWidget.getSelectedRank(), false, currentLang);
 				}
 				
-				Iterator<BaseWidget> iterator = widgetTrails.iterator();
-				List<BaseWidget> wList = new ArrayList<BaseWidget>();
+				Iterator<FlowableWidget> iterator = widgetTrails.iterator();
+				List<FlowableWidget> wList = new ArrayList<FlowableWidget>();
 				while (iterator.hasNext()) {
-					BaseWidget widget = iterator.next();
+					FlowableWidget widget = iterator.next();
 					if (widget.name.equals(readVisualizeWidget.name)){
 						break;
 					}
@@ -394,10 +394,10 @@ public class Manta extends BasePage {
 							readWidget.getSelectedRank(), false, currentLang);
 				}
 				
-				Iterator<BaseWidget> iterator = widgetTrails.iterator();
-				List<BaseWidget> wList = new ArrayList<BaseWidget>();
+				Iterator<FlowableWidget> iterator = widgetTrails.iterator();
+				List<FlowableWidget> wList = new ArrayList<FlowableWidget>();
 				while (iterator.hasNext()) {
-					BaseWidget widget = iterator.next();
+					FlowableWidget widget = iterator.next();
 					if (widget.name.equals(readVisualizeWidget.name)){
 						break;
 					}
@@ -423,10 +423,10 @@ public class Manta extends BasePage {
 					readVisualizeWidget = new PcoaAnalysisWidget(readWidget.getSelectedSamples(), false, currentLang);
 				}
 				
-				Iterator<BaseWidget> iterator = widgetTrails.iterator();
-				List<BaseWidget> wList = new ArrayList<BaseWidget>();
+				Iterator<FlowableWidget> iterator = widgetTrails.iterator();
+				List<FlowableWidget> wList = new ArrayList<FlowableWidget>();
 				while (iterator.hasNext()) {
-					BaseWidget widget = iterator.next();
+					FlowableWidget widget = iterator.next();
 					if (widget.name.equals(readVisualizeWidget.name)){
 						break;
 					}
@@ -462,9 +462,9 @@ public class Manta extends BasePage {
 	private void setNaviBar() {
 		HorizontalPanel naviBar = new HorizontalPanel();
 		
-		Iterator<BaseWidget> iterator = widgetTrails.iterator();
+		Iterator<FlowableWidget> iterator = widgetTrails.iterator();
 		while (iterator.hasNext()) {
-			BaseWidget widget = iterator.next();
+			FlowableWidget widget = iterator.next();
 			Hyperlink link = new Hyperlink(widget.name, widget.link);
 			link.setStyleName("naviLink");
 			naviBar.add(link);

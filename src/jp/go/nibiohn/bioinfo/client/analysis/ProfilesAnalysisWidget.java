@@ -42,7 +42,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.client.GutFloraResources;
 import jp.go.nibiohn.bioinfo.client.ItemSelectionWidget;
 import jp.go.nibiohn.bioinfo.client.SampleInfoWidget;
@@ -155,7 +154,7 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 						
 						@Override
 						public void onFailure(Throwable caught) {
-							warnMessage(BaseWidget.SERVER_ERROR);
+							warnMessage(SERVER_ERROR);
 							loadingPopupPanel.hide();
 						}
 					});
@@ -173,7 +172,7 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 						
 						@Override
 						public void onFailure(Throwable caught) {
-							warnMessage(BaseWidget.SERVER_ERROR);
+							warnMessage(SERVER_ERROR);
 							loadingPopupPanel.hide();
 						}
 					});
@@ -273,7 +272,7 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
+				warnMessage(SERVER_ERROR);
 				loadingPopupPanel.hide();
 			}
 		});
@@ -538,7 +537,7 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
+				warnMessage(SERVER_ERROR);
 				loadingPopupPanel.hide();
 			}
 		});

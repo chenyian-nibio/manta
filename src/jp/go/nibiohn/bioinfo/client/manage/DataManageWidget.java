@@ -2,10 +2,10 @@ package jp.go.nibiohn.bioinfo.client.manage;
 
 import com.google.gwt.user.client.ui.TabPanel;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
+import jp.go.nibiohn.bioinfo.client.FlowableWidget;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 
-public class DataManageWidget extends BaseWidget {
+public class DataManageWidget extends FlowableWidget {
 
 	private TabPanel tabPanel;
 

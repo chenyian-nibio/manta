@@ -140,7 +140,7 @@ public class SampleInfoWidget extends Composite {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				sampleInfoPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));			}
+				sampleInfoPanel.setWidget(new Label(FlowableWidget.SERVER_ERROR));			}
 		});
 		
 		service.getSampleDiversity(sampleId, new AsyncCallback<List<String>>() {
@@ -168,7 +168,7 @@ public class SampleInfoWidget extends Composite {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				diversityPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
+				diversityPanel.setWidget(new Label(FlowableWidget.SERVER_ERROR));
 				
 			}
 		});
@@ -182,7 +182,7 @@ public class SampleInfoWidget extends Composite {
 			@Override
 			public void onSuccess(List<List<String>> result) {
 				if (result == null) {
-					readPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
+					readPanel.setWidget(new Label(FlowableWidget.SERVER_ERROR));
 				}
 				if (result.size() == 0) {
 					noReadInfoLabel.addStyleName("noINfoLabel");
@@ -206,7 +206,7 @@ public class SampleInfoWidget extends Composite {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				dietPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
+				dietPanel.setWidget(new Label(FlowableWidget.SERVER_ERROR));
 			}
 		});
 	}
@@ -217,7 +217,7 @@ public class SampleInfoWidget extends Composite {
 			@Override
 			public void onSuccess(List<List<String>> result) {
 				if (result == null) {
-					dietPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
+					dietPanel.setWidget(new Label(FlowableWidget.SERVER_ERROR));
 				}
 				if (result.size() == 0) {
 					noParaInfoLabel.addStyleName("noINfoLabel");
@@ -248,7 +248,7 @@ public class SampleInfoWidget extends Composite {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				dietPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
+				dietPanel.setWidget(new Label(FlowableWidget.SERVER_ERROR));
 			}
 		});
 	}

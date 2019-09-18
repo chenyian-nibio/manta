@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
 
-public class SearchResultWidget extends BaseWidget {
+public class SearchResultWidget extends FlowableWidget {
 
 	protected static final int PAGE_SIZE = 10;
 

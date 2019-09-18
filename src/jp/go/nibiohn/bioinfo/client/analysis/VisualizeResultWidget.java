@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.PairListData;
@@ -102,7 +101,7 @@ public class VisualizeResultWidget extends AnalysisWidget {
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					warnMessage(BaseWidget.SERVER_ERROR);
+					warnMessage(SERVER_ERROR);
 				}
 			});
 		} else if (referenceType.equals(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE)) {
@@ -118,7 +117,7 @@ public class VisualizeResultWidget extends AnalysisWidget {
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					warnMessage(BaseWidget.SERVER_ERROR);
+					warnMessage(SERVER_ERROR);
 				}
 			});
 		} else {
@@ -411,7 +410,7 @@ public class VisualizeResultWidget extends AnalysisWidget {
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					warnMessage(BaseWidget.SERVER_ERROR);
+					warnMessage(SERVER_ERROR);
 				}
 			});
 		} else if (referenceType.equals(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE)) {
@@ -428,7 +427,7 @@ public class VisualizeResultWidget extends AnalysisWidget {
 					
 					@Override
 					public void onFailure(Throwable caught) {
-						warnMessage(BaseWidget.SERVER_ERROR);
+						warnMessage(SERVER_ERROR);
 					}
 				});
 			} else {
@@ -442,7 +441,7 @@ public class VisualizeResultWidget extends AnalysisWidget {
 					
 					@Override
 					public void onFailure(Throwable caught) {
-						warnMessage(BaseWidget.SERVER_ERROR);
+						warnMessage(SERVER_ERROR);
 					}
 				});
 			}

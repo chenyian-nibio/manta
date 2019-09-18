@@ -47,7 +47,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.ScatterChart
  * @author chenyian
  *
  */
-public class MlrSearchResultWidget extends BaseWidget {
+public class MlrSearchResultWidget extends FlowableWidget {
 
 	protected static final int PAGE_SIZE = 10;
 
@@ -91,7 +91,7 @@ public class MlrSearchResultWidget extends BaseWidget {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(BaseWidget.SERVER_ERROR);
+				warnMessage(FlowableWidget.SERVER_ERROR);
 			}
 		});
 		
@@ -313,7 +313,7 @@ public class MlrSearchResultWidget extends BaseWidget {
 						
 						@Override
 						public void onFailure(Throwable caught) {
-							warnMessage(BaseWidget.SERVER_ERROR);
+							warnMessage(FlowableWidget.SERVER_ERROR);
 						}
 					});
 

@@ -1,13 +1,10 @@
 package jp.go.nibiohn.bioinfo.client.manage;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -23,22 +20,14 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-import jp.go.nibiohn.bioinfo.client.GutFloraService;
-import jp.go.nibiohn.bioinfo.client.GutFloraServiceAsync;
+import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 
-public class UploadDataWidget extends Composite {
-	
-	private static Logger rootLogger = Logger.getLogger("");
-	
-	private GutFloraServiceAsync service = GWT.create(GutFloraService.class);
+public class UploadDataWidget extends BaseWidget {
 
-	private RootPanel mesgPanel = RootPanel.get("mesgPanel");
-	
 	private ListBox typeListBox = new ListBox();
 
 	private SimplePanel filePreviewPanel = new SimplePanel();
@@ -174,24 +163,6 @@ public class UploadDataWidget extends Composite {
 		dialogBox.setGlassEnabled(true);
 		dialogBox.setAnimationEnabled(false);
 		dialogBox.setAutoHideEnabled(true);
-	}
-
-	private void infoMessage(String message) {
-		Label label = (Label) ((HorizontalPanel) mesgPanel.getWidget(0)).getWidget(0);
-		label.setText(message);
-		mesgPanel.setStyleName("infoMessage");
-		mesgPanel.setVisible(true);
-	}
-
-	private void warnMessage(String message) {
-		Label label = (Label) ((HorizontalPanel) mesgPanel.getWidget(0)).getWidget(0);
-		label.setText(message);
-		mesgPanel.setStyleName("warnMessage");
-		mesgPanel.setVisible(true);
-	}
-
-	private void clearMessage() {
-		mesgPanel.setVisible(false);
 	}
 
 	// Use html5 file reader to read the file contents on client side 

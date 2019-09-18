@@ -5,33 +5,23 @@ import java.util.List;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SelectionCell;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-import jp.go.nibiohn.bioinfo.client.GutFloraService;
-import jp.go.nibiohn.bioinfo.client.GutFloraServiceAsync;
+import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.ParameterEntry;
 
-public class DisplayColumnManageWidget extends Composite {
-
-	private final GutFloraServiceAsync service = GWT.create(GutFloraService.class);
-
-	private RootPanel mesgPanel = RootPanel.get("mesgPanel");
+public class DisplayColumnManageWidget extends BaseWidget {
 
 	private SimplePanel mainPanel = new SimplePanel();
 
@@ -114,6 +104,7 @@ public class DisplayColumnManageWidget extends Composite {
 		categoryColumn.setFieldUpdater(new FieldUpdater<TableItem, String>() {
 			@Override
 			public void update(int index, TableItem object, String value) {
+				clearMessage();
 				service.setSampleDisplayColumn(index + 1, value, new AsyncCallback<Boolean>() {
 					
 					@Override
@@ -155,13 +146,6 @@ public class DisplayColumnManageWidget extends Composite {
 		public String getParaId() {
 			return paraId;
 		}
-	}
-
-	private void warnMessage(String message) {
-		Label label = (Label) ((HorizontalPanel) mesgPanel.getWidget(0)).getWidget(0);
-		label.setText(message);
-		mesgPanel.setStyleName("warnMessage");
-		mesgPanel.setVisible(true);
 	}
 
 }
