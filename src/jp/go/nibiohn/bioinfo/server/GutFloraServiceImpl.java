@@ -78,27 +78,56 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			connection = ds.getConnection();
 
 			Statement statement1 = connection.createStatement();
-			String sqlQuery1 = " select distinct mb.sample_id " + " from microbiota as mb ";
+			String sqlQuery1 = " SELECT distinct mb.sample_id " + " FROM microbiota as mb ";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
 			Set<String> sampleSet = new HashSet<String>();
 			while (results1.next()) {
-				String string = results1.getString("sample_id");
-				sampleSet.add(string);
+				String sampleId = results1.getString("sample_id");
+				sampleSet.add(sampleId);
 			}
 
-			Statement statement = connection.createStatement();
-			String sqlQuery = " select s.id, s.create_date from sample as s " + " order by s.id ";
+			Statement statement2 = connection.createStatement();
+			String sqlQuery2 = " SELECT position, parameter_id FROM sample_display_columns ORDER BY position ";
 			
-			ResultSet results = statement.executeQuery(sqlQuery);
+			ResultSet results2 = statement2.executeQuery(sqlQuery2);
+			List<String> columnList = new ArrayList<String>();
+			while (results2.next()) {
+//				int index = results2.getInt("position");
+				String value = results2.getString("parameter_id");
+				columnList.add(value);
+			}
+			String[] displayColumns = columnList.toArray(new String[] {});
+			
+			Statement statement3 = connection.createStatement();
+			String sqlQuery3 = "SELECT sample_id, parameter_id, parameter_value FROM parameter_value "
+					+ "WHERE parameter_id IN ('" + StringUtils.join(columnList, "','") + "')";
+			ResultSet results3 = statement3.executeQuery(sqlQuery3);
+			Map<String, Map<String, String>> sampleDisplayMap = new HashMap<String, Map<String, String>>(); 
+			while (results3.next()) {
+				String sampleId = results3.getString("sample_id");
+				if (sampleDisplayMap.get(sampleId) == null) {
+					sampleDisplayMap.put(sampleId, new HashMap<String, String>());
+				}
+				sampleDisplayMap.get(sampleId).put(results3.getString("parameter_id"),
+						results3.getString("parameter_value"));
+			}
+
+			Statement statement4 = connection.createStatement();
+			String sqlQuery4 = " SELECT id, create_date FROM sample " + " ORDER BY id ";
+			
+			ResultSet results4 = statement4.executeQuery(sqlQuery4);
 			List<SampleEntry> ret = new ArrayList<SampleEntry>();
-			while (results.next()) {
-				String sampleId = results.getString("id");
-				// TODO ... should consider the display column options
-//				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
-//						results.getString("pj_name"), results.getDate("exp_date"), sampleSet.contains(sampleId)));
-				ret.add(new SampleEntry(sampleId, null, null,
-						null, results.getDate("create_date"), sampleSet.contains(sampleId)));
+			while (results4.next()) {
+				String sampleId = results4.getString("id");
+				String[] displayValues = new String[displayColumns.length];
+				for (int i = 0; i < displayColumns.length; i++) {
+					if (displayColumns[i] != null) {
+						displayValues[i] = sampleDisplayMap.get(sampleId).get(displayColumns[i]);
+					}
+				}
+				ret.add(new SampleEntry(sampleId, results4.getDate("create_date"), displayColumns, displayValues,
+						sampleSet.contains(sampleId)));
 
 			}
 			
@@ -196,7 +225,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			ResultSet results = statement.executeQuery(sqlQuery);
 			List<List<String>> ret = new ArrayList<List<String>>();
 			while (results.next()) {
-				List<String> asList = Arrays.asList(results.getString("taxon_name"), results.getString("sum_reads"), results.getString("taxon_id"));
+				List<String> asList = Arrays.asList(results.getString("taxon_name"), results.getString("sum_reads"),
+						results.getString("taxon_id"));
 				ret.add(asList);
 			}
 			connection.close();
@@ -239,7 +269,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			ResultSet results = statement.executeQuery(sqlQuery);
 			List<List<String>> ret = new ArrayList<List<String>>();
 			while (results.next()) {
-				List<String> asList = Arrays.asList(results.getString("taxon_name"), results.getString("sum_reads"), results.getString("taxon_id"));
+				List<String> asList = Arrays.asList(results.getString("taxon_name"), results.getString("sum_reads"),
+						results.getString("taxon_id"));
 				ret.add(asList);
 			}
 			connection.close();
@@ -282,8 +313,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Set<SampleEntry> ret = new HashSet<SampleEntry>();
 			while (results.next()) {
 				String sampleId = results.getString("id");
-				ret.add(new SampleEntry(sampleId, null, null,
-						results.getDate("create_date"), true));
+				// TODO
+				ret.add(new SampleEntry(sampleId, results.getDate("create_date"), null, null, true));
 			}
 			
 			connection.close();
@@ -313,22 +344,14 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		try {
 			connection = ds.getConnection();
 			
-			
-			String query_pjname = " pj.name as pj_name ";
-
 			Statement statement = connection.createStatement();
-			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, " + query_pjname
-					+ " from sample as s "
-					+ " join project_sample as ps on ps.sample_id = s.id "
-					+ " join project as pj on pj.id = ps.project_id "
-					+ " where s.id ='" + sampleId + "' ";
-			
+			String sqlQuery = " select s.id, create_date from sample as s where s.id ='" + sampleId + "' ";
+
 			ResultSet results = statement.executeQuery(sqlQuery);
 			SampleEntry ret = null;
 			while (results.next()) {
-				ret = new SampleEntry(results.getString("id"), results.getInt("age"),
-						results.getString("gender"), results.getString("pj_name"),
-						results.getDate("exp_date"), null);
+				// TODO
+				ret = new SampleEntry(results.getString("id"), results.getDate("create_date"), null, null, null);
 			}
 			
 			connection.close();
@@ -1686,27 +1709,63 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		try {
 			connection = ds.getConnection();
 			
-			Statement statement0 = connection.createStatement();
-			String queryFields = " select pi.id as id, pi.title as title, pi.unit as unit ";
-			String sqlQuery0 = queryFields + " from parameter_info as pi "
-					+ " join parameter_type as pt on pt.id = pi.type_id "
-					+ " join parameter_group as pg on pg.id = pi.group_id " 
-					+ " where pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' " 
-					+ " order by pg.id ";
+			Statement statement = connection.createStatement();
+			String sqlQuery = " select pi.id as id, pi.title as title " + " from parameter_info as pi "
+					+ " join parameter_type as pt on pt.id = pi.type_id " + " where pt.type_name = '"
+					+ GutFloraConstant.PARA_TYPE_CONTINUOUS + "' " + " order by pi.id ";
 			
-			ResultSet results0 = statement0.executeQuery(sqlQuery0);
-			List<ParameterEntry> profileNameList = new ArrayList<ParameterEntry>();
-			while (results0.next()) {
-				String name = results0.getString("title");
-				int paraId = results0.getInt("id");
-				String unit = results0.getString("unit");
-				profileNameList.add(new ParameterEntry(String.valueOf(paraId), name, unit));
+			ResultSet results = statement.executeQuery(sqlQuery);
+			List<ParameterEntry> parameterList = new ArrayList<ParameterEntry>();
+			while (results.next()) {
+				String name = results.getString("title");
+				int paraId = results.getInt("id");
+				parameterList.add(new ParameterEntry(String.valueOf(paraId), name, null));
 			}
 			
 			connection.close();
 			ds.close();
 			
-			return profileNameList;
+			return parameterList;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return null;
+	}
+
+	@Override
+	public List<ParameterEntry> getAllParameterEntry() {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			String sqlQuery = " SELECT pi.id AS id, pi.title AS title "
+					+ " FROM parameter_info AS pi ";
+			
+			ResultSet results = statement.executeQuery(sqlQuery);
+			List<ParameterEntry> parameterList = new ArrayList<ParameterEntry>();
+			while (results.next()) {
+				String name = results.getString("title");
+				String paraId = results.getString("id");
+				parameterList.add(new ParameterEntry(paraId, name, null));
+			}
+			
+			connection.close();
+			ds.close();
+			
+			return parameterList;
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -3515,4 +3574,90 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		}
 		return maxItemLength;
 	}
+
+	@Override
+	public List<String> getSampleDisplayColumn() {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			
+			String sqlQuery = " SELECT position, parameter_id FROM sample_display_columns ORDER BY position ";
+			
+			ResultSet results = statement.executeQuery(sqlQuery);
+			List<String> ret = new ArrayList<String>();
+			while (results.next()) {
+//				int position = results.getInt("position");
+				String pid = results.getString("parameter_id");
+				if (pid == null) {
+					pid = GutFloraConstant.CHOICE_NOT_SELECTED;
+				}
+				ret.add(pid);
+			}
+			connection.close();
+			ds.close();
+			return ret;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			ds.close();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return null;
+	}
+
+	@Override
+	public Boolean setSampleDisplayColumn(int position, String parameterId) {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			
+			String value;
+			if (parameterId.equals(GutFloraConstant.CHOICE_NOT_SELECTED)) {
+				value = null;
+			} else {
+				value = "'" + parameterId + "'";
+			}
+			
+			String sqlQuery = String.format(
+					" UPDATE sample_display_columns SET parameter_id = %s " + " WHERE position = %d ", value,
+					position);
+			
+			statement.executeUpdate(sqlQuery);
+			connection.close();
+			ds.close();
+			
+			return Boolean.TRUE;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			ds.close();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return Boolean.FALSE;
+	}
+	
 }

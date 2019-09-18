@@ -98,5 +98,7 @@ public class GutFloraConstant {
 	
 	public static final String UPLOAD_DATA_TYPE_MICROBIOTA = "Micorbiota";
 	public static final String UPLOAD_DATA_TYPE_PARAMETERS = "Phenotype parameters";
+
+	public static final String CHOICE_NOT_SELECTED = "--NOT SELECTED--";
 	
 }

@@ -55,6 +55,8 @@ public interface GutFloraService extends RemoteService {
 
 	List<ParameterEntry> getAllNumericParameterEntry(String lang);
 	
+	List<ParameterEntry> getAllParameterEntry();
+	
 	PairListData getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId);
 	
 	PairListData getReadsAndPctList(Set<SampleEntry> selectedSamples, String rank, String taxonName);
@@ -98,4 +100,8 @@ public interface GutFloraService extends RemoteService {
 	String getPCoAScatterPlot(PcoaResult pcoaResult, String profileName, String lang);
 	
 	String getPCoAScatterPlot(PcoaResult pcoaResult, String customTagString);
+	
+	List<String> getSampleDisplayColumn();
+	
+	Boolean setSampleDisplayColumn(int position, String parameterId); 
 }

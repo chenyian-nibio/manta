@@ -62,6 +62,8 @@ public interface GutFloraServiceAsync {
 
 	void getAllNumericParameterEntry(String lang, AsyncCallback<List<ParameterEntry>> callback);
 
+	void getAllParameterEntry(AsyncCallback<List<ParameterEntry>> callback);
+
 	void getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId,
 			AsyncCallback<PairListData> callback);
 	
@@ -112,4 +114,7 @@ public interface GutFloraServiceAsync {
 
 	void getPCoAScatterPlot(PcoaResult pcoaResult, String customTagString, AsyncCallback<String> callback);
 
+	void getSampleDisplayColumn(AsyncCallback<List<String>> callback);
+
+	void setSampleDisplayColumn(int position, String parameterId, AsyncCallback<Boolean> callback);
 }

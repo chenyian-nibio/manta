@@ -35,7 +35,7 @@ public class UploadDataWidget extends Composite {
 	
 	private static Logger rootLogger = Logger.getLogger("");
 	
-	private final GutFloraServiceAsync service = GWT.create(GutFloraService.class);
+	private GutFloraServiceAsync service = GWT.create(GutFloraService.class);
 
 	private RootPanel mesgPanel = RootPanel.get("mesgPanel");
 	

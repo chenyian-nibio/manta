@@ -181,6 +181,11 @@ public class SampleListWidget extends BaseWidget {
 	}
 
 	private Widget createTableContent(final List<SampleEntry> result) {
+		String[] displayColumn = null;
+		if (result.size() > 0) {
+			displayColumn = result.get(0).getDisplayColumns();
+		}
+		
 		VerticalPanel vp = new VerticalPanel();
 		cellTable = new CellTable<SampleEntry>();
 		cellTable.addStyleName("clickableTable");
@@ -268,74 +273,48 @@ public class SampleListWidget extends BaseWidget {
 				return o1.getSampleId().compareTo(o2.getSampleId());
 			}
 		});
-
-		TextColumn<SampleEntry> colAge = new TextColumn<SampleEntry>() {
-
-			@Override
-			public String getValue(SampleEntry object) {
-				return object.getAge().toString();
-			}
-		};
-		cellTable.addColumn(colAge, "Age");
-		colAge.setSortable(true);
-		sortHandler.setComparator(colAge, new Comparator<SampleEntry>() {
-
-			@Override
-			public int compare(SampleEntry o1, SampleEntry o2) {
-				return o1.getAge().compareTo(o2.getAge());
-			}
-		});
-
-		TextColumn<SampleEntry> colGender = new TextColumn<SampleEntry>() {
-
-			@Override
-			public String getValue(SampleEntry object) {
-				return object.getGender();
-			}
-		};
-		cellTable.addColumn(colGender, "Sex");
-		colGender.setSortable(true);
-		sortHandler.setComparator(colGender, new Comparator<SampleEntry>() {
-
-			@Override
-			public int compare(SampleEntry o1, SampleEntry o2) {
-				return o1.getGender().compareTo(o2.getGender());
-			}
-		});
 		
-		TextColumn<SampleEntry> colExpDate = new TextColumn<SampleEntry>() {
+		for (int i = 0; i < displayColumn.length; i++) {
+			if (displayColumn[i] != null) {
+				final Integer[] index = new Integer[1];
+				index[0] = i;
+				TextColumn<SampleEntry> colAge = new TextColumn<SampleEntry>() {
+					
+					@Override
+					public String getValue(SampleEntry object) {
+						return object.getColumnValue()[index[0]];
+					}
+				};
+				cellTable.addColumn(colAge, displayColumn[i]);
+				colAge.setSortable(true);
+				sortHandler.setComparator(colAge, new Comparator<SampleEntry>() {
+					
+					@Override
+					public int compare(SampleEntry o1, SampleEntry o2) {
+						return o1.getColumnValue()[index[0]].compareTo(o2.getColumnValue()[index[0]]);
+					}
+				});
+			}
+		}
 
-			@Override
-			public String getValue(SampleEntry object) {
-				return object.getExpDate().toString();
-			}
-		};
-		cellTable.addColumn(colExpDate, "Measurement date");
-		colExpDate.setSortable(true);
-		sortHandler.setComparator(colExpDate, new Comparator<SampleEntry>() {
-
-			@Override
-			public int compare(SampleEntry o1, SampleEntry o2) {
-				return o1.getExpDate().compareTo(o2.getExpDate());
-			}
-		});
-
-		TextColumn<SampleEntry> colProject = new TextColumn<SampleEntry>() {
-			
-			@Override
-			public String getValue(SampleEntry object) {
-				return object.getProject();
-			}
-		};
-		cellTable.addColumn(colProject, "Cohort name");
-		colProject.setSortable(true);
-		sortHandler.setComparator(colProject, new Comparator<SampleEntry>() {
-			
-			@Override
-			public int compare(SampleEntry o1, SampleEntry o2) {
-				return o1.getProject().compareTo(o2.getProject());
-			}
-		});
+		if (displayColumn == null || displayColumn.length == 0) {
+			TextColumn<SampleEntry> colCreateDate = new TextColumn<SampleEntry>() {
+				
+				@Override
+				public String getValue(SampleEntry object) {
+					return object.getCreateDate().toString();
+				}
+			};
+			cellTable.addColumn(colCreateDate, "Data create date");
+			colCreateDate.setSortable(true);
+			sortHandler.setComparator(colCreateDate, new Comparator<SampleEntry>() {
+				
+				@Override
+				public int compare(SampleEntry o1, SampleEntry o2) {
+					return o1.getCreateDate().compareTo(o2.getCreateDate());
+				}
+			});
+		}
 
 		cellTable.getColumnSortList().push(colSampleId);
 

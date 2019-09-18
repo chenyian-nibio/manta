@@ -7,31 +7,21 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class SampleEntry implements IsSerializable {
 
 	private String sampleId;
-	private Integer age;
-	private String gender;
-	private String project;
-	private Date expDate;
+	private Date createDate;
+	private String[] displayColumns;
+	private String[] columnValue;
 	private Boolean hasReads;
 	
 	public SampleEntry() {
 	}
 
-	public SampleEntry(String sampleId, Integer age, String gender, Date expDate, Boolean hasReads) {
+	public SampleEntry(String sampleId, Date createDate, String[] displayColumns, String[] columnValue,
+			Boolean hasReads) {
 		super();
 		this.sampleId = sampleId;
-		this.age = age;
-		this.gender = gender;
-		this.expDate = expDate;
-		this.hasReads = hasReads;
-	}
-	
-	public SampleEntry(String sampleId, Integer age, String gender, String project, Date expDate, Boolean hasReads) {
-		super();
-		this.sampleId = sampleId;
-		this.age = age;
-		this.gender = gender;
-		this.project = project;
-		this.expDate = expDate;
+		this.createDate = createDate;
+		this.displayColumns = displayColumns;
+		this.columnValue = columnValue;
 		this.hasReads = hasReads;
 	}
 
@@ -39,28 +29,24 @@ public class SampleEntry implements IsSerializable {
 		return sampleId;
 	}
 
-	public Integer getAge() {
-		return age;
-	}
-
-	public String getGender() {
-		return gender;
-	}
-	
-	public String getProject() {
-		return project;
-	}
-
-	public Date getExpDate() {
-		return expDate;
+	public Date getCreateDate() {
+		return createDate;
 	}
 
 	public Boolean hasReads() {
 		return hasReads;
 	}
 
-	public void setProject(String project) {
-		this.project = project;
+	public String[] getDisplayColumns() {
+		return displayColumns;
 	}
-	
+
+	public String[] getColumnValue() {
+		return columnValue;
+	}
+
+	public Boolean getHasReads() {
+		return hasReads;
+	}
+
 }

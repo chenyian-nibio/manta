@@ -128,11 +128,12 @@ public class SampleInfoWidget extends Composite {
 			
 			@Override
 			public void onSuccess(SampleEntry entry) {
+				// TODO to be refined
 				StringBuffer sb = new StringBuffer();
 				sb.append("<table class=\"sampleInfo normalCol\" >\n");
-				sb.append("<tr><th>Project</th><td colspan=\"2\">" + entry.getProject() + "</td></tr>");
+				sb.append("<tr><th>Project</th><td colspan=\"2\">" + "N/A" + "</td></tr>");
 				sb.append("<tr><th>Sample ID</th><td>" + entry.getSampleId() + "</td>");
-				sb.append("<td colspan=\"2\">Age " + entry.getAge() + ", " + entry.getGender() + "</td></tr>\n");
+				sb.append("<td colspan=\"2\">Age " + "N/A" + ", " + "N/A" + "</td></tr>\n");
 				sb.append("</table>");
 				sampleInfoPanel.setWidget(new HTML(sb.toString()));
 			}
