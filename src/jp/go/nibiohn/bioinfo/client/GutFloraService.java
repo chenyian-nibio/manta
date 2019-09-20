@@ -104,4 +104,8 @@ public interface GutFloraService extends RemoteService {
 	List<String> getSampleDisplayColumn();
 	
 	Boolean setSampleDisplayColumn(int position, String parameterId); 
+
+	List<String> getAllParameterTypes();
+	
+	Boolean setParameterType(String parameterId, Integer typeId); 
 }

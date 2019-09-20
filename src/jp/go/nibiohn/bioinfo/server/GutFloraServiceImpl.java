@@ -1718,8 +1718,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			List<ParameterEntry> parameterList = new ArrayList<ParameterEntry>();
 			while (results.next()) {
 				String name = results.getString("title");
-				int paraId = results.getInt("id");
-				parameterList.add(new ParameterEntry(String.valueOf(paraId), name, null));
+				String paraId = results.getString("id");
+				parameterList.add(new ParameterEntry(paraId, name));
 			}
 			
 			connection.close();
@@ -1751,15 +1751,16 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			connection = ds.getConnection();
 			
 			Statement statement = connection.createStatement();
-			String sqlQuery = " SELECT pi.id AS id, pi.title AS title "
-					+ " FROM parameter_info AS pi ";
+			String sqlQuery = " SELECT pi.id AS id, pi.title AS title, pi.type_id AS type "
+					+ " FROM parameter_info AS pi ORDER BY sysid ";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
 			List<ParameterEntry> parameterList = new ArrayList<ParameterEntry>();
 			while (results.next()) {
 				String name = results.getString("title");
 				String paraId = results.getString("id");
-				parameterList.add(new ParameterEntry(paraId, name, null));
+				int type = results.getInt("type");
+				parameterList.add(new ParameterEntry(paraId, name, Integer.valueOf(type)));
 			}
 			
 			connection.close();
@@ -3636,6 +3637,80 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String sqlQuery = String.format(
 					" UPDATE sample_display_columns SET parameter_id = %s " + " WHERE position = %d ", value,
 					position);
+			
+			statement.executeUpdate(sqlQuery);
+			connection.close();
+			ds.close();
+			
+			return Boolean.TRUE;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			ds.close();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return Boolean.FALSE;
+	}
+
+	@Override
+	public List<String> getAllParameterTypes() {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			
+			String sqlQuery = " SELECT description FROM parameter_type ORDER BY id ";
+			
+			ResultSet results = statement.executeQuery(sqlQuery);
+			List<String> ret = new ArrayList<String>();
+			while (results.next()) {
+				String desc = results.getString("description");
+				ret.add(desc);
+			}
+			connection.close();
+			ds.close();
+			return ret;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			ds.close();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return null;
+	}
+
+	@Override
+	public Boolean setParameterType(String parameterId, Integer typeId) {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			
+			String sqlQuery = String.format(
+					" UPDATE parameter_info SET type_id = %d " + " WHERE id = '%s' ", typeId,
+					parameterId);
 			
 			statement.executeUpdate(sqlQuery);
 			connection.close();

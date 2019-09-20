@@ -21,15 +21,24 @@ import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.ParameterEntry;
 
-public class DisplayColumnManageWidget extends BaseWidget {
+public class DisplayColumnSettingWidget extends BaseWidget {
 
 	private SimplePanel mainPanel = new SimplePanel();
 
 	private CellTable<TableItem> cellTable;
 
-	public DisplayColumnManageWidget() {
+	public DisplayColumnSettingWidget() {
 		VerticalPanel thisWidget = new VerticalPanel();
 		
+		loadSettingTable();
+
+		thisWidget.add(new HTML("<h3>Sample list display column setting:</h3>"));
+		thisWidget.add(mainPanel);
+		initWidget(thisWidget);
+		
+	}
+
+	public void loadSettingTable() {
 		service.getAllParameterEntry(new AsyncCallback<List<ParameterEntry>>() {
 			
 			@Override
@@ -61,15 +70,8 @@ public class DisplayColumnManageWidget extends BaseWidget {
 				warnMessage("System error! Fail to Retrieve parameters.");
 			}
 		});
-
-
-		thisWidget.add(new HTML("<h3>Sample list display column setting:</h3>"));
-		thisWidget.add(mainPanel);
-		initWidget(thisWidget);
-		
 	}
 	
-
 	private Widget createTableContent(List<String> result, List<String> parameters) {
 		VerticalPanel vp = new VerticalPanel();
 		cellTable = new CellTable<TableItem>();

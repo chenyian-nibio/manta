@@ -117,4 +117,8 @@ public interface GutFloraServiceAsync {
 	void getSampleDisplayColumn(AsyncCallback<List<String>> callback);
 
 	void setSampleDisplayColumn(int position, String parameterId, AsyncCallback<Boolean> callback);
+
+	void getAllParameterTypes(AsyncCallback<List<String>> callback);
+
+	void setParameterType(String parameterId, Integer typeId, AsyncCallback<Boolean> callback);
 }

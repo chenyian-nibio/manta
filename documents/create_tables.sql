@@ -34,6 +34,7 @@ CREATE TABLE parameter_type (
 );
 
 CREATE TABLE parameter_info (
+	sysid SERIAL NOT NULL,
 	id text PRIMARY KEY,
 	title text,
 	unit text,
