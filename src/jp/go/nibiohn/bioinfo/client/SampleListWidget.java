@@ -181,7 +181,7 @@ public class SampleListWidget extends FlowableWidget {
 	}
 
 	private Widget createTableContent(final List<SampleEntry> result) {
-		String[] displayColumn = null;
+		String[] displayColumn = new String[] {};
 		if (result.size() > 0) {
 			displayColumn = result.get(0).getDisplayColumns();
 		}
