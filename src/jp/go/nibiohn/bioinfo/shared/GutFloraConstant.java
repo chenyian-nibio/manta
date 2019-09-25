@@ -100,5 +100,7 @@ public class GutFloraConstant {
 	public static final String UPLOAD_DATA_TYPE_PARAMETERS = "Phenotype parameters";
 
 	public static final String CHOICE_NOT_SELECTED = "--NOT SELECTED--";
-	
+
+	public static final int SAMPLE_DISTANCE_BRAY_CURTIS = 1;
+	public static final int SAMPLE_DISTANCE_JACCARD = 2;
 }

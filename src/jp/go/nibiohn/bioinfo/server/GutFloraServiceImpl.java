@@ -447,6 +447,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 * (unused)
 	 */
 	public GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, int numOfColumns) {
+		// TODO
 		if (rank.equals("kingdom")) {
 			return getKingdomReadsAnalysisData(selectedSamples);
 		} else {
@@ -472,6 +473,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				while (results0.next()) {
 					String rid = results0.getString("taxon_id");
 					String name = results0.getString("taxon_name");
+					// TODO check if this is really ok
+//					if (name.toLowerCase().equals("other")) {
+//						continue;
+//					}
 					rankNameList.add(name);
 					if (topNRankIdList.size() < numOfColumns) {
 						topNRankIdList.add(rid);
@@ -494,6 +499,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					String sid = results1.getString("sample_id");
 					String tid = results1.getString("taxon_id");
 					String name = results1.getString("taxon_name");
+					// TODO check if this is really ok
+//					if (name.toLowerCase().equals("other")) {
+//						continue;
+//					}
 					taxonomyMap.put(tid, name);
 					double allReads = results1.getDouble("all_reads");
 					if (rows.get(sid) == null) {

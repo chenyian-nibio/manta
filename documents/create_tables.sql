@@ -16,6 +16,7 @@ CREATE TABLE taxonomy (
 
 CREATE TABLE microbiota (
 	sample_id text REFERENCES sample NOT NULL,
+	taxonkey text,
 	kingdom_id text REFERENCES taxonomy,
 	phylum_id text REFERENCES taxonomy,
 	class_id text REFERENCES taxonomy,
@@ -45,9 +46,8 @@ CREATE TABLE parameter_info (
 
 CREATE TABLE parameter_value (
 	sample_id text REFERENCES sample NOT NULL,
-	parameter_id integer REFERENCES parameter_info NOT NULL,
-	parameter_value text,
-	parameter_flag text
+	parameter_id text REFERENCES parameter_info NOT NULL,
+	parameter_value text
 );
 
 CREATE TABLE dominant_taxon (
@@ -77,7 +77,27 @@ CREATE TABLE sample_diversity (
 );
 
 CREATE TABLE sample_display_columns (
-	sysid SERIAL NOT NULL,
 	position integer PRIMARY KEY,
-	parameter_id integer REFERENCES parameter_info NOT NULL
+	parameter_id text REFERENCES parameter_info
 );
+
+INSERT INTO parameter_type (id, type_name, description) VALUES (1, 'continuous', 'continuous variable');
+INSERT INTO parameter_type (id, type_name, description) VALUES (2, 'category_u', 'unranked category');
+INSERT INTO parameter_type (id, type_name, description) VALUES (3, 'category_r', 'ranked category');
+INSERT INTO parameter_type (id, type_name, description) VALUES (4, 'text', 'free text');
+INSERT INTO parameter_type (id, type_name, description) VALUES (5, 'others', 'others');
+
+INSERT INTO taxon_rank (id, name) VALUES (1, 'kingdom');
+INSERT INTO taxon_rank (id, name) VALUES (2, 'phylum');
+INSERT INTO taxon_rank (id, name) VALUES (3, 'class');
+INSERT INTO taxon_rank (id, name) VALUES (4, 'order');
+INSERT INTO taxon_rank (id, name) VALUES (5, 'family');
+INSERT INTO taxon_rank (id, name) VALUES (6, 'genus');
+INSERT INTO taxon_rank (id, name) VALUES (7, 'species');
+
+INSERT INTO sample_display_columns (position) VALUES (1);
+INSERT INTO sample_display_columns (position) VALUES (2);
+INSERT INTO sample_display_columns (position) VALUES (3);
+
+INSERT INTO distance_type (id, type_code, type_name) VALUES (1, 'bray_genus', 'Bray-Curtis dissimilarity');
+INSERT INTO distance_type (id, type_code, type_name) VALUES (2, 'jaccard', 'Jaccard distance');
