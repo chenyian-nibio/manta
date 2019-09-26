@@ -15,6 +15,8 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -242,7 +244,10 @@ public class UploadProcessService {
 				String tid = resTaxonomy.getString("id");
 				savedTaxonomy.add(tid);
 			}
-			
+
+			// for dominant taxonomy
+			Map<String,List<MbDataHolder>> mdMap = new HashMap<String, List<MbDataHolder>>();
+
 			for (int i = 1; i < headers.length; i++) {
 				String sampleId = headers[i];
 				if (!sampleIdSet.contains(sampleId)) {
@@ -256,6 +261,7 @@ public class UploadProcessService {
 				}
 
 				for (String taxonString : summaryMap.get(sampleId).keySet()) {
+					MbDataHolder mdh = new MbDataHolder();
 					List<String> taxonList = Arrays.asList(taxonString.split(";"));
 					String[] taxonomy = new String[7];
 					for (int j = 0; j < taxonList.size(); j++) {
@@ -278,6 +284,7 @@ public class UploadProcessService {
 					psMicrobiota.setString(1, sampleId);
 					for (int t = 0; t < 7; t++) {
 						psMicrobiota.setString(t + 2, taxonomy[t]);
+						mdh.taxonomy[t] = taxonomy[t];
 					}
 					double pct = summaryMap.get(sampleId).get(taxonString) * 100d;
 					int count = (int) (summaryMap.get(sampleId).get(taxonString) * 10000 + 0.5);
@@ -287,6 +294,13 @@ public class UploadProcessService {
 					psMicrobiota.setString(11, md5Text(taxonString));
 					
 					psMicrobiota.executeUpdate();
+					
+					mdh.pct = pct;
+					
+					if (mdMap.get(sampleId) == null) {
+						mdMap.put(sampleId, new ArrayList<MbDataHolder>());
+					}
+					mdMap.get(sampleId).add(mdh);
 				}
 			}
 			
@@ -298,7 +312,7 @@ public class UploadProcessService {
 			
 			Map<String, Map<String, Integer>> matrix = new HashMap<String, Map<String,Integer>>();
 			Statement statMicrobiota = connection.createStatement();
-			String getMicrobiotaSql = " select sample_id, taxonkey, read_num from microbiota "; 
+			String getMicrobiotaSql = " SELECT sample_id, taxonkey, read_num FROM microbiota "; 
 			
 			ResultSet mbResults = statMicrobiota.executeQuery(getMicrobiotaSql);
 			while (mbResults.next()) {
@@ -333,6 +347,46 @@ public class UploadProcessService {
 					psSampleDistance.setInt(4, GutFloraConstant.SAMPLE_DISTANCE_JACCARD);
 					psSampleDistance.executeUpdate();
 				}
+			}
+			
+			// calculate dominant taxonomy
+			PreparedStatement psDominantTaxon = connection.prepareStatement(
+					" INSERT INTO dominant_taxon (sample_id, rank_id, taxon_id) VALUES (?, ?, ?) ");
+			for (String sid: mdMap.keySet()) {
+				List<MbDataHolder> list = mdMap.get(sid);
+				Collections.sort(list, new Comparator<MbDataHolder>() {
+
+					@Override
+					public int compare(MbDataHolder o1, MbDataHolder o2) {
+						return Double.valueOf(o2.pct).compareTo(Double.valueOf(o1.pct));
+					}
+				});
+				double sum = 0d;
+				Map<Integer,Set<String>> rankMap = new HashMap<Integer, Set<String>>();
+				for (MbDataHolder mdh : list) {
+					for (int i = 1; i < 8; i++) {
+						if (rankMap.get(Integer.valueOf(i)) == null) {
+							rankMap.put(Integer.valueOf(i), new HashSet<String>());
+						}
+						rankMap.get(Integer.valueOf(i)).add(mdh.taxonomy[i - 1]);
+					}
+					sum += Double.valueOf(mdh.pct).doubleValue();
+					if (sum > 90d) {
+						break;
+					}
+				}
+				
+				for (int i = 1; i < 8; i++) {
+					for (String taxonId: rankMap.get(Integer.valueOf(i))) {
+						if (taxonId != null) {
+							psDominantTaxon.setString(1, sid);
+							psDominantTaxon.setInt(2, i);
+							psDominantTaxon.setString(3, taxonId);
+							psDominantTaxon.executeUpdate();
+						}
+					}
+				}
+				
 			}
 
 			connection.close();
@@ -370,4 +424,10 @@ public class UploadProcessService {
 		}
 		return sb.toString();
 	}
+	
+	private class MbDataHolder {
+		String[] taxonomy = new String[7];
+		double pct;
+	}
+
 }
