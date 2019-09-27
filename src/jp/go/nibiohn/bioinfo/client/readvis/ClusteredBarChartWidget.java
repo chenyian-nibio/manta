@@ -1,6 +1,7 @@
 package jp.go.nibiohn.bioinfo.client.readvis;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -157,11 +158,6 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 		linkageOptHp.add(new HTML("<b>Linkage:</b>"));
 		linkageOptHp.add(linkageListBox);
 		
-		distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
-		distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE.toString());
-		distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
-		distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE.toString());
-		
 		linkageListBox.addItem(GutFloraConstant.CLUSTERING_LINKAGE_AVERAGE, GutFloraConstant.CLUSTERING_LINKAGE_AVERAGE_VALUE.toString());
 		linkageListBox.addItem(GutFloraConstant.CLUSTERING_LINKAGE_COMPLETE, GutFloraConstant.CLUSTERING_LINKAGE_COMPLETE_VALUE.toString());
 		linkageListBox.addItem(GutFloraConstant.CLUSTERING_LINKAGE_SINGLE, GutFloraConstant.CLUSTERING_LINKAGE_SINGLE_VALUE.toString());
@@ -237,7 +233,8 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 		loadingPopupPanel.add(loadingVp);
 
 		initWidget(thisWidget);
-		
+	
+		loadDistance();
 		drawChart();
 	}
 	
@@ -246,6 +243,25 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 		distanceListBox.setEnabled(false);
 		linkageListBox.setEnabled(false);
 		drawNormalBarChart();
+	}
+	
+	private void loadDistance() {
+		service.getAllDistanceTypes(new AsyncCallback<Map<Integer,String>>() {
+			
+			@Override
+			public void onSuccess(Map<Integer, String> result) {
+				List<Integer> list = new ArrayList<Integer>(result.keySet());
+				Collections.sort(list);
+				for (Integer value : list) {
+					distanceListBox.addItem(result.get(value), value.toString());
+				}
+			}
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				warnMessage("Failed to load the distance type.");
+			}
+		});
 	}
 	
 	private void drawNormalBarChart() {

@@ -27,7 +27,7 @@ public class GutFloraConstant {
 	public static final String[] DIVERSITY_INDEX = new String[]{"Shannon index", "Simpson index", "Chao1 index"};
 
 	public static final String[] ANALYSIS_TAB_TITLES = new String[] { "Microbiota composition",
-			"Diet and fitness parameters", "Compare two parameters" };
+			"Phenotype parameters", "Compare two parameters" };
 
 	public static final String NAVI_LINK_SAMPLE = "sample";
 	public static final String NAVI_LINK_ANALYSIS = "analysis";
@@ -65,15 +65,6 @@ public class GutFloraConstant {
 	public static final Integer MULTIPLE_LINEAR_REGRESSION_VALUE= Integer.valueOf(9);
 	// for multiple linear regression
 	public static final String ALL_ABOVE_MICROBIOTA = "ALL ABOVE";
-
-	public static final String SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC = "Unweighted UniFrac";
-	public static final Integer SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE = Integer.valueOf(1);
-	public static final String SAMPLE_DISTANCE_WEIGHTED_UNIFRAC = "Weighted UniFrac";
-	public static final Integer SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE = Integer.valueOf(2);
-	public static final String SAMPLE_DISTANCE_BRAY_CURTIS_OTU = "Bray-Curtis (by OTU)";
-	public static final Integer SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE = Integer.valueOf(3);
-	public static final String SAMPLE_DISTANCE_BRAY_CURTIS_GENUS = "Bray-Curtis (by genus)";
-	public static final Integer SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE = Integer.valueOf(4);
 
 	public static final String CLUSTERING_LINKAGE_AVERAGE = "Average";
 	public static final Integer CLUSTERING_LINKAGE_AVERAGE_VALUE = Integer.valueOf(0);

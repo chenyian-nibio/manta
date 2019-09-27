@@ -330,8 +330,7 @@ public class SampleListWidget extends FlowableWidget {
 		pager.setPageSize(PAGE_SIZE);
 		vp.add(pager);
 		
-		// TODO to be improved
-		cellTable.setEmptyTableWidget(new Label("No data"));
+		cellTable.setEmptyTableWidget(createEmptyTableWidget());
 
 		cellTable.addCellPreviewHandler(new CellPreviewEvent.Handler<SampleEntry>() {
 
@@ -490,4 +489,21 @@ public class SampleListWidget extends FlowableWidget {
 		return ids;
 	}
 
+	private Widget createEmptyTableWidget() {
+		VerticalPanel ret = new VerticalPanel();
+		ret.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+		ret.add(new HTML("<h3>no data</h3>"));
+		Label label = new Label("Click to upload the data.");
+		label.setStyleName("buttonLabel");
+		label.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_UPLOAD);
+				History.fireCurrentHistoryState();
+			}
+		});
+		ret.add(label);
+		return ret;
+	}
 }

@@ -164,7 +164,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " from parameter_value as pv "
 					+ " join parameter_info as pi on pi.id = pv.parameter_id "  
 					+ " where sample_id = '" + sampleId + "'  "
-					+ " order by pi.id ";
+					+ " order by pi.sysid ";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
 			List<List<String>> ret = new ArrayList<List<String>>();
@@ -448,7 +448,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 */
 	public GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, int numOfColumns) {
 		// TODO
-		if (rank.equals("kingdom")) {
+		if (rank.equals("")) {
 			return getKingdomReadsAnalysisData(selectedSamples);
 		} else {
 			List<String> sampleIdList = getSortedSampleList(selectedSamples);
@@ -473,10 +473,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				while (results0.next()) {
 					String rid = results0.getString("taxon_id");
 					String name = results0.getString("taxon_name");
-					// TODO check if this is really ok
-//					if (name.toLowerCase().equals("other")) {
-//						continue;
-//					}
 					rankNameList.add(name);
 					if (topNRankIdList.size() < numOfColumns) {
 						topNRankIdList.add(rid);
@@ -499,10 +495,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					String sid = results1.getString("sample_id");
 					String tid = results1.getString("taxon_id");
 					String name = results1.getString("taxon_name");
-					// TODO check if this is really ok
-//					if (name.toLowerCase().equals("other")) {
-//						continue;
-//					}
 					taxonomyMap.put(tid, name);
 					double allReads = results1.getDouble("all_reads");
 					if (rows.get(sid) == null) {
@@ -512,7 +504,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					rows.get(sid).put(name, displayValue);
 				}
 
-				// add others column 
+				// add others column
+				// TODO theoretically, total count should be 10,000. thus, no need to make a query? 
 				Statement statement2 = connection.createStatement();
 				String sqlQuery2 = " select sample_id, " + "sum(read_num)" + " as all_reads from microbiota "
 						+ " where sample_id in (" + sampleIdString + ") "
@@ -1238,16 +1231,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return null;
 	}
 
-	private Dendrogram sampleDistanceClustering(List<String> sampleIdList, int distanceType, LinkageType type) {
-		Map<String, Map<String, Double>> matrix = getSampleDistanceMatrix(sampleIdList, distanceType);
-		
-		HierarchicalClustering hc = new HierarchicalClustering(matrix);
-		
-		Dendrogram dendrogram = hc.getDendrogram(type);
-		
-		return dendrogram;
-	}
-
 	private Double calculateCorrelation(Integer correlationMethod, double[] list1, double[] list2) {
 		double value;
 		if (correlationMethod.equals(GutFloraConstant.CORRELATION_PEARSON_VALUE)) {
@@ -1470,6 +1453,16 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 		
+	private Dendrogram sampleDistanceClustering(List<String> sampleIdList, int distanceType, LinkageType type) {
+		Map<String, Map<String, Double>> matrix = getSampleDistanceMatrix(sampleIdList, distanceType);
+		
+		HierarchicalClustering hc = new HierarchicalClustering(matrix);
+		
+		Dendrogram dendrogram = hc.getDendrogram(type);
+		
+		return dendrogram;
+	}
+
 	@Override
 	public GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String lang) {
 		return getProfilesAnalysisData(selectedSamples, GutFloraConstant.DEFAULT_NUM_OF_COLUMNS, lang);
@@ -1491,7 +1484,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			String sqlQuery0 = "select pi.id as id, pi.title as title, pi.unit as unit, pt.type_name as type "
 					+ " from parameter_info as pi " + " join parameter_type as pt on pt.id = pi.type_id "
-					+ " order by pi.id";
+					+ " order by pi.sysid";
 
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
 			List<String> profileNameList = new ArrayList<String>();
@@ -1515,7 +1508,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 			}
 			
-			String topIdString = StringUtils.join(topNIdList, ",");
+			String topIdString = "'" + StringUtils.join(topNIdList, "','") + "'";
 			
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select sample_id, pi.title as title, pv.parameter_value "
@@ -1604,11 +1597,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement2 = connection.createStatement();
 			
-			String queryFields2 = " select sample_id, pi.title as title, pv.parameter_value, choice_value, pt.type_name as type ";
+			String queryFields2 = " select sample_id, pi.title as title, pv.parameter_value, pt.type_name as type ";
 			String sqlQuery2 = queryFields2 + " from parameter_value as pv "
 					+ " join parameter_info as pi on pi.id = parameter_id " 
 					+ " join parameter_type as pt on pt.id = pi.type_id "
-					+ " left outer join choice as ch on ch.parameter_id = pi.id and pv.parameter_value = ch.choice_option "
 					+ " where sample_id in (" + sampleIdString + ") "
 					+ " and pv.parameter_id in (" + idString + ") ";
 			
@@ -1618,14 +1610,11 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String sid = results2.getString("sample_id");
 				String name = results2.getString("title");
 				String valueString = results2.getString("parameter_value");
-				String choiceValue = results2.getString("choice_value");
 				if (rows.get(sid) == null) {
 					rows.put(sid, new HashMap<String, String>());
 				}
 				String para = "-";
-				if (choiceValue != null) {
-					para = choiceValue;
-				} else if (valueString != null) {
+				if (valueString != null) {
 					if (valueString.contains(".") && valueString.indexOf('.') + 3 < valueString.length()) {
 						para = valueString.substring(0, valueString.indexOf('.') + 3);
 					} else {
@@ -2037,7 +2026,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, parameter_value " + " from parameter_value "
 					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and parameter_id = " + paraId;
+					+ " and parameter_id = '" + paraId + "'";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
 			Map<String, Double> readMap = new HashMap<String, Double>();
@@ -3276,60 +3265,46 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		
 		// query profiles
 		boolean isContinous = false;
-		boolean isRanked = false;
-		Map<String, Double> paraValueMap = new HashMap<String, Double>();
-		Map<Integer, String> choiceMap = new HashMap<Integer, String>();
-		Set<Integer> usedOptions = new HashSet<Integer>();
-		String unit = "";
+		Map<String, String> paraValueMap = new HashMap<String, String>();
+		List<String> categoryList = new ArrayList<String>();
+		Map<String, Integer> colorMap = new HashMap<String, Integer>();
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
 			
 			Statement statement = connection.createStatement();
-			String selectFields = "select pi.id as id, pi.unit as unit ";
-			String constraintFields = " pi.title = '";
-			String sqlQuery0 = selectFields + ", pt.type_name as type "
-					+ " from parameter_info as pi "
-					+ " join parameter_type as pt on pt.id = pi.type_id "
-					+ " where " + constraintFields + profileName + "' ";
+			String sqlQuery0 = "select pi.id as id, pi.unit as unit " + ", pt.type_name as type "
+					+ " from parameter_info as pi " + " join parameter_type as pt on pt.id = pi.type_id " + " where "
+					+ " pi.title = '" + profileName + "' ";
 			ResultSet results = statement.executeQuery(sqlQuery0);
-			int piId = -1;
+			System.out.println(sqlQuery0);
 			if (results.next()) {
-				piId = results.getInt("id");
-				unit = results.getString("unit");
 				isContinous = GutFloraConstant.PARA_TYPE_CONTINUOUS.equals(results.getString("type"));
-				isRanked = GutFloraConstant.PARA_TYPE_RANKED_CATEGORY.equals(results.getString("type"));
 			} 
 
 			Statement statement2 = connection.createStatement();
-			String queryFields2 = " and pi.title = '";
 			String sqlQuery2 = " select sample_id, parameter_value " + " from parameter_value "
 					+ " join parameter_info as pi on pi.id = parameter_id " 
 					+ " where sample_id in (" + ("'" + StringUtils.join(sampleIds, "','") + "'") + ") "
-					+ queryFields2 + profileName + "' ";
+					+ " and pi.title = '" + profileName + "' ";
 			
+			Set<String> usedOptions = new HashSet<String>();
 			ResultSet results2 = statement2.executeQuery(sqlQuery2);
 			while (results2.next()) {
 				String sid = results2.getString("sample_id");
-				double value = results2.getDouble("parameter_value");
-				paraValueMap.put(sid, Double.valueOf(value));
+				String value = results2.getString("parameter_value");
+				paraValueMap.put(sid, value);
 				if (!isContinous) {
-					usedOptions.add(Integer.valueOf((int)value));
+					usedOptions.add(value);
 				}
 			}
 			
 			if (!isContinous) {
-				Statement statement3 = connection.createStatement();
-				String queryFields3 = " choice_value as value";
-				String sqlQuery3 = "select choice_option, " + queryFields3 + " from choice where parameter_id = " + piId;				
-				ResultSet results3 = statement3.executeQuery(sqlQuery3);
-				while (results3.next()) {
-					String value = results3.getString("value");
-					int option = results3.getInt("choice_option");
-					if (isRanked || usedOptions.contains(option)) {
-						choiceMap.put(Integer.valueOf(option), value);
-					}
+				categoryList.addAll(usedOptions);
+				Collections.sort(categoryList);
+				for (int i = 0; i < categoryList.size(); i++) {
+					colorMap.put(categoryList.get(i), i);
 				}
 			}
 			
@@ -3353,7 +3328,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		double max = 0;
 		double min = 0;
 		if (isContinous) {
-			List<Double> valueList = new ArrayList<Double>(paraValueMap.values());
+			List<Double> valueList = new ArrayList<Double>();
+			for (String v : paraValueMap.values()) {
+				valueList.add(Double.valueOf(v));
+			}
 			Collections.sort(valueList);
 			// TODO find the median
 			Statistics stat = new Statistics(valueList);
@@ -3366,7 +3344,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		
 		int legendHeight = 50; 
 		if (!isContinous) {
-			legendHeight = 18 * choiceMap.size() + 20;
+			legendHeight = 18 * colorMap.size() + 20;
 		}
 		
 		// draw scatter plot
@@ -3386,13 +3364,13 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 			String color;
 			String stroke = "none";
-			Double paraValue = paraValueMap.get(sampleId);
+			String paraValue = paraValueMap.get(sampleId);
 			if (paraValue == null) {
 				// skip the sample, which contains no data..
 				continue;
 			}
 			if (isContinous) {
-				double doubleValue = paraValue.doubleValue();
+				double doubleValue = Double.valueOf(paraValue).doubleValue();
 				if (doubleValue < min) {
 					doubleValue = min;
 					stroke = "#666";
@@ -3403,16 +3381,12 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				int cValue = (int) ((doubleValue - min) / interval * 255);
 				color = String.format("rgb(%d,%d,%d)", cValue, 255 - cValue, 0);
 			} else {
-				color = GutFloraConstant.BARCHART_COLOR.get(paraValue.intValue());
+				color = GutFloraConstant.BARCHART_COLOR.get(colorMap.get(paraValue).intValue());
 			}
 			
 			ret.append(String.format("\t<circle cx=\"%d\" cy=\"%d\" r=\"3\" style=\"fill: %s; stroke: %s;\" class=\"point\">\n", 
 					nX, nY, color, stroke));
-			String titleString = paraValue.toString();
-			if (!isContinous && choiceMap != null) {
-				titleString = choiceMap.get(Integer.valueOf(titleString.substring(0, titleString.indexOf("."))));
-			}
-			ret.append(String.format("<title>%s (%.2f, %.2f), %s</title>", sampleId, coord.get(0), coord.get(1), titleString));
+			ret.append(String.format("<title>%s (%.2f, %.2f), %s</title>", sampleId, coord.get(0), coord.get(1), paraValue));
 			ret.append("\t</circle>\n");
 		}
 		ret.append("</g>\n");
@@ -3436,56 +3410,22 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 							shiftX + 100 - 6, shiftY + 16, String.format("%.0f", min)));
 			ret.append(String
 					.format("\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\" text-anchor=\"start\">%s</text>\n",
-							shiftX + 100 + cellWidth * 5 + 6, shiftY + 16, String.format("%.0f", max) + " (" + unit + ")"));
+							shiftX + 100 + cellWidth * 5 + 6, shiftY + 16, String.format("%.0f", max)));
 		} else {
 			int shiftX = 100;
 			int shiftY = 600;
-			List<Integer> choiceValues = new ArrayList<Integer>(choiceMap.keySet());
-			Collections.sort(choiceValues);
-			for (int i = 0; i < choiceValues.size(); i++) {
-				Integer colName = choiceValues.get(i);
-				int colorIndex = colName.intValue();
+			for (int i = 0; i < categoryList.size(); i++) {
 				ret.append(String.format("\t<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" />\n",
-						shiftX + 0, shiftY + i * 18, 12, 12, GutFloraConstant.BARCHART_COLOR.get(colorIndex)));
+						shiftX + 0, shiftY + i * 18, 12, 12, GutFloraConstant.BARCHART_COLOR.get(i)));
 
 				ret.append(String.format(
 						"\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\">%s</text>\n",
-						shiftX + 20, shiftY + i * 18 + 10, choiceMap.get(colName)));
+						shiftX + 20, shiftY + i * 18 + 10, categoryList.get(i)));
 			}
 		}
 		ret.append("</g>\n");
 		
 		ret.append("</svg>\n");
-		
-		return ret.toString();
-	}
-
-	@SuppressWarnings("unused")
-	private String drawPCoAPlotGrid(String xAxis, String yAxis) {
-		StringBuffer ret = new StringBuffer();
-		
-		String gridStyle = "style=\"stroke:rgb(0,0,0);stroke-width:0.5;stroke-opacity:0.6;\"";
-		int[][] gridLines = new int[][] { { 100, 100, 100, 500 }, { 200, 100, 200, 500 }, { 300, 100, 300, 500 },
-				{ 400, 100, 400, 500 }, { 500, 100, 500, 500 }, { 100, 100, 500, 100 }, { 100, 200, 500, 200 },
-				{ 100, 300, 500, 300 }, { 100, 400, 500, 400 }, { 100, 500, 500, 500 } };
-		ret.append("<g stroke-width=\"1\" stroke=\"none\" class=\"grid\" id=\"grid\">\n");
-		for (int[] line : gridLines) {
-			ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", line[0], line[1],
-					line[2], line[3], gridStyle));
-		}
-		ret.append(String
-				.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
-						80, 305, 16, "0"));
-		ret.append(String
-				.format("\t<text x=\"%d\" y=\"%d\" transform=\"rotate(270, %d, %d)\" style=\"text-anchor: middle; font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
-						40, 300, 40, 305, 16, yAxis));
-		ret.append(String
-				.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
-						300, 520, 16, "0"));
-		ret.append(String
-				.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
-						300, 560, 16, xAxis));
-		ret.append("</g>\n");
 		
 		return ret.toString();
 	}
@@ -3599,7 +3539,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			ResultSet results = statement.executeQuery(sqlQuery);
 			List<String> ret = new ArrayList<String>();
 			while (results.next()) {
-//				int position = results.getInt("position");
 				String pid = results.getString("parameter_id");
 				if (pid == null) {
 					pid = GutFloraConstant.CHOICE_NOT_SELECTED;
@@ -3742,6 +3681,45 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		ds.close();
 		
 		return Boolean.FALSE;
+	}
+
+	@Override
+	public Map<Integer, String> getAllDistanceTypes() {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			
+			String sqlQuery = " select id, type_name from distance_type order by id ";
+			
+			ResultSet results = statement.executeQuery(sqlQuery);
+			Map<Integer, String> ret = new HashMap<Integer, String>();
+			while (results.next()) {
+				int id = results.getInt("id");
+				String name = results.getString("type_name");
+				ret.put(Integer.valueOf(id), name);
+			}
+			connection.close();
+			ds.close();
+			return ret;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			ds.close();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return null;
 	}
 	
 }

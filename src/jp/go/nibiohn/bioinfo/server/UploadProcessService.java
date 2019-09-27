@@ -329,10 +329,13 @@ public class UploadProcessService {
 					" INSERT INTO sample_distance (sample_id_1, sample_id_2, distance, distance_type_id) VALUES (?, ?, ?, ?) ");
 			
 			List<String> sampleList = new ArrayList<String>(matrix.keySet());
-			for (int i = 0; i < sampleList.size() - 1; i++) {
+			for (int i = 0; i < sampleList.size(); i++) {
 				String sid1 = sampleList.get(i);
-				for (int j = i + 1; j < sampleList.size(); j++) {
+				for (int j = 0; j < sampleList.size(); j++) {
 					String sid2 = sampleList.get(j);
+					if (sid2.equals(sid1)) {
+						continue;
+					}
 					double bcDist = BrayCurtis.distance(matrix.get(sid1), matrix.get(sid2));
 					psSampleDistance.setString(1, sid1);
 					psSampleDistance.setString(2, sid2);

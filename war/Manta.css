@@ -179,6 +179,10 @@ h1.header {
 	cursor:pointer;
 }
 
+.sampleInfoHeader {
+	width: 600px;
+}
+
 table.sampleInfo {
 	width: 600px;
 	border: 1px solid lightgrey;

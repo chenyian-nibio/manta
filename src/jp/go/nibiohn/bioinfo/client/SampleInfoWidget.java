@@ -88,7 +88,6 @@ public class SampleInfoWidget extends Composite {
 		thisWidget.add(diversityPanel);
 		thisWidget.add(readPanel);
 		readPanel.add(loadingLabel);
-		rankListBox.setVisible(readInfoDisplay);
 		readPanel.setVisible(readInfoDisplay);
 		getMicrobiotaInfo(sampleId);
 
@@ -128,14 +127,7 @@ public class SampleInfoWidget extends Composite {
 			
 			@Override
 			public void onSuccess(SampleEntry entry) {
-				// TODO to be refined
-				StringBuffer sb = new StringBuffer();
-				sb.append("<table class=\"sampleInfo normalCol\" >\n");
-				sb.append("<tr><th>Project</th><td colspan=\"2\">" + "N/A" + "</td></tr>");
-				sb.append("<tr><th>Sample ID</th><td>" + entry.getSampleId() + "</td>");
-				sb.append("<td colspan=\"2\">Age " + "N/A" + ", " + "N/A" + "</td></tr>\n");
-				sb.append("</table>");
-				sampleInfoPanel.setWidget(new HTML(sb.toString()));
+				sampleInfoPanel.setWidget(new HTML("<h3 class=\"sampleInfoHeader\">Sample ID: " + entry.getSampleId() + "</h3>"));
 			}
 			
 			@Override
@@ -158,11 +150,10 @@ public class SampleInfoWidget extends Composite {
 					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[2] + "</th><td>" + result.get(2) + "</td>");
 					sb.append("</tr></table>");
 					vp.add(new HTML(sb.toString()));
-					vp.add(new HTML("&nbsp;"));
-					vp.add(rankListBox);
 					diversityPanel.setWidget(vp);
 				} else {
 					// just let it blank...
+					diversityPanel.setWidget(new Label("No diversity data"));
 				}
 			}
 			
@@ -199,7 +190,11 @@ public class SampleInfoWidget extends Composite {
 					}
 					sb.append("</table>\n");
 					sb.append("</div>\n");
-					readPanel.setWidget(new HTML(sb.toString()));
+					VerticalPanel vp = new VerticalPanel();
+					vp.add(new HTML("&nbsp;"));
+					vp.add(rankListBox);
+					vp.add(new HTML(sb.toString()));
+					readPanel.setWidget(vp);
 					
 				}
 			}

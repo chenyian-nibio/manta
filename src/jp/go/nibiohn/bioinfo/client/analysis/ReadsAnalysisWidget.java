@@ -502,7 +502,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		}
 		
 		// 'Others' column
-		if (showOthersCb.getValue() && !getSelectedRank().equals("kingdom")) {
+		if (showOthersCb.getValue()) {
 			TextColumn<String> column = new TextColumn<String>() {
 
 				@Override

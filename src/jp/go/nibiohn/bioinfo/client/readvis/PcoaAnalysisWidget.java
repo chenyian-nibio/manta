@@ -1,6 +1,7 @@
 package jp.go.nibiohn.bioinfo.client.readvis;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -103,11 +104,6 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 			}
 		});
 		
-		// TODO need to read the available distance type from the database
-//		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
-//		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE.toString());
-//		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
-		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE.toString());
 		sampleDistanceListBox.addChangeHandler(new ChangeHandler() {
 			
 			@Override
@@ -239,17 +235,33 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 			sampleIdList.add(sampleEntry.getSampleId());
 		}
 		loadingPopupPanel.show();
-		service.getPCoAResult(sampleIdList, Integer.valueOf(sampleDistanceListBox.getSelectedValue()), new AsyncCallback<PcoaResult>() {
+		service.getAllDistanceTypes(new AsyncCallback<Map<Integer,String>>() {
 			
 			@Override
-			public void onSuccess(PcoaResult result) {
-				pcoaResultMap.put(Integer.valueOf(sampleDistanceListBox.getSelectedValue()), result);
-				service.getPCoAScatterPlot(result, new AsyncCallback<String>() {
+			public void onSuccess(Map<Integer, String> result) {
+				List<Integer> list = new ArrayList<Integer>(result.keySet());
+				Collections.sort(list);
+				for (Integer value : list) {
+					sampleDistanceListBox.addItem(result.get(value), value.toString());
+				}
+				service.getPCoAResult(sampleIdList, Integer.valueOf(sampleDistanceListBox.getSelectedValue()), new AsyncCallback<PcoaResult>() {
 					
 					@Override
-					public void onSuccess(String result) {
-						chartPanel.setWidget(new HTML(result));
-						loadingPopupPanel.hide();
+					public void onSuccess(PcoaResult result) {
+						pcoaResultMap.put(Integer.valueOf(sampleDistanceListBox.getSelectedValue()), result);
+						service.getPCoAScatterPlot(result, new AsyncCallback<String>() {
+							
+							@Override
+							public void onSuccess(String result) {
+								chartPanel.setWidget(new HTML(result));
+								loadingPopupPanel.hide();
+							}
+							
+							@Override
+							public void onFailure(Throwable caught) {
+								warnMessage(FlowableWidget.SERVER_ERROR);
+							}
+						});
 					}
 					
 					@Override
@@ -261,10 +273,9 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				warnMessage(FlowableWidget.SERVER_ERROR);
+				warnMessage("Failed to load the distance type.");
 			}
 		});
-		
 	}
 	
 	private DialogBox customTagDialogBox;
