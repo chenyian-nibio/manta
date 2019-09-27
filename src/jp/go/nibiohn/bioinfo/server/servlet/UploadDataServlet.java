@@ -3,6 +3,7 @@ package jp.go.nibiohn.bioinfo.server.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +17,6 @@ import org.apache.commons.fileupload.FileUploadBase.FileSizeLimitExceededExcepti
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
-import com.google.gwt.dev.util.collect.HashMap;
 
 import jp.go.nibiohn.bioinfo.server.UploadProcessService;
 
@@ -53,32 +52,13 @@ public class UploadDataServlet extends HttpServlet {
 					} else {
 						writer.write("Upload failed.");
 					}
-					
-//					BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-//					String line = reader.readLine();
-//					while (line != null) {
-						// TODO process the upload data and store in the database
-						
-//						System.out.println(line);
-//						writer.write(line + "\n");
-//						line = reader.readLine();
-//					}
 				}
 			}
 		} catch (FileSizeLimitExceededException e) {
 			response.getWriter().write("Upload file exceeds the size limitation. Try a smaller file.");
 		} catch (FileUploadException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		// TODO for test; to be removed
-//		try {
-//			System.out.println("Wait 5 seconds.");
-//			Thread.sleep(5000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 }
