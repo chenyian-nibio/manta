@@ -247,7 +247,8 @@ public class UploadProcessService {
 
 			// for dominant taxonomy
 			Map<String,List<MbDataHolder>> mdMap = new HashMap<String, List<MbDataHolder>>();
-
+			// for alpha diversity
+			Map<String, Map<String, Integer>> sampleReadsMap = new HashMap<String, Map<String,Integer>>();
 			for (int i = 1; i < headers.length; i++) {
 				String sampleId = headers[i];
 				if (!sampleIdSet.contains(sampleId)) {
@@ -260,6 +261,7 @@ public class UploadProcessService {
 					continue;
 				}
 
+				sampleReadsMap.put(sampleId, new HashMap<String, Integer>());
 				for (String taxonString : summaryMap.get(sampleId).keySet()) {
 					MbDataHolder mdh = new MbDataHolder();
 					List<String> taxonList = Arrays.asList(taxonString.split(";"));
@@ -291,7 +293,8 @@ public class UploadProcessService {
 					psMicrobiota.setInt(9, count);
 					psMicrobiota.setDouble(10, pct);
 					
-					psMicrobiota.setString(11, md5Text(taxonString));
+					String taxonKey = md5Text(taxonString);
+					psMicrobiota.setString(11, taxonKey);
 					
 					psMicrobiota.executeUpdate();
 					
@@ -301,6 +304,7 @@ public class UploadProcessService {
 						mdMap.put(sampleId, new ArrayList<MbDataHolder>());
 					}
 					mdMap.get(sampleId).add(mdh);
+					sampleReadsMap.get(sampleId).put(taxonKey, count);
 				}
 			}
 			
@@ -390,6 +394,26 @@ public class UploadProcessService {
 					}
 				}
 				
+			}
+			
+			// calculate alpha diversity
+			PreparedStatement psSampleDiversity = connection.prepareStatement(
+					" INSERT INTO sample_diversity (sample_id, shannon, simpson) VALUES (?, ?, ?) ");
+			for (String sid : sampleReadsMap.keySet()) {
+				Map<String, Integer> map = sampleReadsMap.get(sid);
+				double simpson = 0d;
+				double shannon = 0d;
+				for (Integer value : map.values()) {
+					double p = value / 10000d;
+					if (p == 0)
+						continue;
+					simpson += p * p;
+					shannon += p * Math.log(p);
+				}
+				psSampleDiversity.setString(1, sid);
+				psSampleDiversity.setDouble(2, -shannon);
+				psSampleDiversity.setDouble(3, 1 - simpson);
+				psSampleDiversity.executeUpdate();
 			}
 
 			connection.close();

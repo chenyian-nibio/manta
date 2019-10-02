@@ -72,8 +72,7 @@ CREATE TABLE sample_distance (
 CREATE TABLE sample_diversity (
 	sample_id text REFERENCES sample PRIMARY KEY,
 	shannon numeric,
-	simpson numeric,
-	chao1 integer
+	simpson numeric
 );
 
 CREATE TABLE sample_display_columns (

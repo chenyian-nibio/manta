@@ -2532,7 +2532,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
 			
 			Statement statement3 = connection.createStatement();
-			String sqlQuery3 = " select sample_id, shannon, simpson, chao1 "
+			String sqlQuery3 = " select sample_id, shannon, simpson "
 					+ " from sample_diversity "
 					+ " where sample_id in (" + sampleIdString + ") ";
 			
@@ -2543,8 +2543,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				// TODO to be refined!
 				String shannon = results3.getString("shannon").substring(0, 4);
 				String simpson = results3.getString("simpson").substring(0, 4);
-				String chao1 = results3.getString("chao1");
-				diverMap.put(sid, String.format("%s|%s|%s", shannon, simpson, chao1));
+				diverMap.put(sid, String.format("%s|%s", shannon, simpson));
 			}
 			
 		} catch (SQLException e) {
@@ -2573,7 +2572,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			connection = ds.getConnection();
 			
 			Statement statement3 = connection.createStatement();
-			String sqlQuery3 = " select shannon, simpson, chao1 "
+			String sqlQuery3 = " select shannon, simpson "
 					+ " from sample_diversity "
 					+ " where sample_id = '" + sampleId +"' ";
 			
@@ -2582,8 +2581,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				// TODO to be refined!
 				String shannon = results3.getString("shannon").substring(0, 4);
 				String simpson = results3.getString("simpson").substring(0, 4);
-				String chao1 = results3.getString("chao1");
-				ret = Arrays.asList(shannon, simpson, chao1);
+				ret = Arrays.asList(shannon, simpson);
 			}
 			
 		} catch (SQLException e) {

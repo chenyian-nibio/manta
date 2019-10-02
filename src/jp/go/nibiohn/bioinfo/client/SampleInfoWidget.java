@@ -147,7 +147,6 @@ public class SampleInfoWidget extends Composite {
 					sb.append("<tr>");
 					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[0] + "</th><td>" + result.get(0) + "</td>");
 					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[1] + "</th><td>" + result.get(1) + "</td>");
-					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[2] + "</th><td>" + result.get(2) + "</td>");
 					sb.append("</tr></table>");
 					vp.add(new HTML(sb.toString()));
 					diversityPanel.setWidget(vp);

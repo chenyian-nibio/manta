@@ -24,7 +24,7 @@ public class GutFloraConstant {
 	
 	public static final List<String> RANK_LIST = Arrays.asList("kingdom", "phylum", "class", "order", "family", "genus");
 
-	public static final String[] DIVERSITY_INDEX = new String[]{"Shannon index", "Simpson index", "Chao1 index"};
+	public static final String[] DIVERSITY_INDEX = new String[]{"Shannon index", "Simpson index"};
 
 	public static final String[] ANALYSIS_TAB_TITLES = new String[] { "Microbiota composition",
 			"Phenotype parameters", "Compare two parameters" };

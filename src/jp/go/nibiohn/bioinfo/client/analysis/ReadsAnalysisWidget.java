@@ -441,7 +441,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		});
 
 		// add diversity columns
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 2; i++) {
 			final Integer index = Integer.valueOf(i);
 			TextColumn<String> diverColumn = new TextColumn<String>() {
 				
