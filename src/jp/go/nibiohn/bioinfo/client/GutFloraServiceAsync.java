@@ -123,4 +123,6 @@ public interface GutFloraServiceAsync {
 	void setParameterType(String parameterId, Integer typeId, AsyncCallback<Boolean> callback);
 
 	void getAllDistanceTypes(AsyncCallback<Map<Integer, String>> callback);
+
+	void deleteAllContents(AsyncCallback<Boolean> callback);
 }

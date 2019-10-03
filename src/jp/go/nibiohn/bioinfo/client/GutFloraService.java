@@ -110,4 +110,6 @@ public interface GutFloraService extends RemoteService {
 	Boolean setParameterType(String parameterId, Integer typeId); 
 
 	Map<Integer, String> getAllDistanceTypes();
+	
+	Boolean deleteAllContents();
 }

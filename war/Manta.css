@@ -405,3 +405,12 @@ table.paraPreview td {
 table.paraPreview th.firstColumn {
 	background: #DFDF33;
 }
+
+.warningMessage {
+	background: url('image/ic_error_black_24dp.png') left center no-repeat;
+	color: #CC3333;
+	font: bold 16px Sans-serif;
+	padding-left: 32px;
+	padding-top: 16px;
+	padding-bottom: 16px;
+}

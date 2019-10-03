@@ -47,14 +47,14 @@ public class UploadDataWidget extends BaseWidget {
 		formPanel.setMethod(FormPanel.METHOD_POST);
 		formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
 		
-		DecoratorPanel itemSelectionDec = new DecoratorPanel();
-		itemSelectionDec.setTitle("File upload");
-		itemSelectionDec.addStyleName("optionDec");
+		DecoratorPanel fileUploadDec = new DecoratorPanel();
+		fileUploadDec.setTitle("File upload");
+		fileUploadDec.addStyleName("optionDec");
 		
 		HorizontalPanel fileUploadHp = new HorizontalPanel();
 		fileUploadHp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		fileUploadHp.setSpacing(12);
-		itemSelectionDec.add(formPanel);
+		fileUploadDec.add(formPanel);
 		
 		fileUploadHp.add(new Label("File type: "));
 		
@@ -109,7 +109,7 @@ public class UploadDataWidget extends BaseWidget {
 		fileUploadHp.add(uploadBtn);
 		formPanel.setWidget(fileUploadHp);
 		
-		thisWidget.add(itemSelectionDec);
+		thisWidget.add(fileUploadDec);
 		
 		// ajax loading ...
 		loadingPopupPanel.setGlassEnabled(true);

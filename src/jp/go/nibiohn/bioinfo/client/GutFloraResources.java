@@ -33,6 +33,12 @@ public interface GutFloraResources extends ClientBundle {
 	  
 	  @Source("ic_timeline_black_18dp.png")
 	  ImageResource getTimelineIconImageResource();
+
+	  @Source("ic_warning_black_24dp.png")
+	  ImageResource getWarningIconImageResource();
+	  
+	  @Source("ic_warning_black_48dp.png")
+	  ImageResource getWarningIconLargeImageResource();
 	  
 	  @Source("clustering.png")
 	  ImageResource getClusteringImageResource();

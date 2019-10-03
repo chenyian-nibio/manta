@@ -27,6 +27,7 @@ public class DataManageWidget extends FlowableWidget {
 		tabPanel.add(displaySetWidget, "Display Column Setting", false);
 		typeSetWidget = new ParameterTypeSettingWidget();
 		tabPanel.add(typeSetWidget, "Parameter Setting", false);
+		tabPanel.add(new DeleteAllContentsWidget(), "Danger zone", false);
 		tabPanel.selectTab(0);
 		
 		tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {

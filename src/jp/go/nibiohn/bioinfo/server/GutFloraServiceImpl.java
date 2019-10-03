@@ -2,6 +2,7 @@ package jp.go.nibiohn.bioinfo.server;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -3718,6 +3719,51 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		ds.close();
 		
 		return null;
+	}
+
+	@Override
+	public Boolean deleteAllContents() {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			
+			String sqlTruncateSample = " TRUNCATE TABLE sample CASCADE ";
+			statement.executeUpdate(sqlTruncateSample);
+			String sqlTruncateTaxonomy = " TRUNCATE TABLE taxonomy CASCADE ";
+			statement.executeUpdate(sqlTruncateTaxonomy);
+			String sqlTruncateParaInfo = " TRUNCATE TABLE parameter_info CASCADE ";
+			statement.executeUpdate(sqlTruncateParaInfo);
+			
+			PreparedStatement psSampleDisplayColumn = connection.prepareStatement(
+					" INSERT INTO sample_display_columns (position) VALUES (?) ");
+			for (int i = 1; i < 4; i++) {
+				psSampleDisplayColumn.setInt(1, i);
+				psSampleDisplayColumn.executeUpdate();
+			}
+			
+			connection.close();
+			ds.close();
+			
+			return Boolean.TRUE;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			ds.close();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return Boolean.FALSE;
 	}
 	
 }
