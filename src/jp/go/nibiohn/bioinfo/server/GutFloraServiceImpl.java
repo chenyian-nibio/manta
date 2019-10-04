@@ -3765,5 +3765,77 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		
 		return Boolean.FALSE;
 	}
+
+	@Override
+	public String getDatabaseSummary() {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			int sampleCount = 0;
+			int mbSampleCount = 0;
+			int pvSampleCount = 0;
+			
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			
+			String sampleCountQuery = " SELECT count(distinct(id)) AS count FROM sample ";
+			ResultSet scResults = statement.executeQuery(sampleCountQuery);
+			while (scResults.next()) {
+				sampleCount = scResults.getInt("count");
+			}
+			
+			String mbCountQuery = " SELECT count(distinct(sample_id)) AS count FROM microbiota ";
+			ResultSet mcResults = statement.executeQuery(mbCountQuery);
+			while (mcResults.next()) {
+				mbSampleCount = mcResults.getInt("count");
+			}
+			
+			String pvCountQuery = " select count(distinct(sample_id)) from parameter_value ";
+			ResultSet pvResults = statement.executeQuery(pvCountQuery);
+			while (pvResults.next()) {
+				pvSampleCount = pvResults.getInt("count");
+			}
+			
+			String ret;
+			if (sampleCount == 0) {
+				ret = "There is no sample in the database.";
+			} else {
+				StringBuffer sb = new StringBuffer();
+				sb.append(String.format("There are %d samples in the database. ", sampleCount));
+				if (mbSampleCount == 0) {
+					sb.append("None of them has microbiome data. ");
+				} else {
+					sb.append(String.format("%d of them have microbiome data. ", mbSampleCount));
+				}
+				if (pvSampleCount == 0) {
+					sb.append("None of them has phenotype parameters. ");
+				} else {
+					sb.append(String.format("%d of them have phenotype parameters.", pvSampleCount));
+				}
+				ret = sb.toString();
+			}
+			
+			connection.close();
+			ds.close();
+			
+			return ret;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			ds.close();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return null;
+	}
 	
 }

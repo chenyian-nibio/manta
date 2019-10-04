@@ -17,11 +17,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.ParameterEntry;
 
-public class DisplayColumnSettingWidget extends BaseWidget {
+public class DisplayColumnSettingWidget extends ManageWidget {
 
 	private SimplePanel mainPanel = new SimplePanel();
 
@@ -38,7 +37,7 @@ public class DisplayColumnSettingWidget extends BaseWidget {
 		
 	}
 
-	public void loadSettingTable() {
+	private void loadSettingTable() {
 		service.getAllParameterEntry(new AsyncCallback<List<ParameterEntry>>() {
 			
 			@Override
@@ -150,4 +149,8 @@ public class DisplayColumnSettingWidget extends BaseWidget {
 		}
 	}
 
+	@Override
+	public void updateContents() {
+		loadSettingTable();
+	}
 }

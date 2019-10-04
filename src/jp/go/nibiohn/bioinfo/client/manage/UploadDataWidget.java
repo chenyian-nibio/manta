@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
@@ -23,12 +24,13 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 
-public class UploadDataWidget extends BaseWidget {
+public class UploadDataWidget extends ManageWidget {
 
 	private ListBox typeListBox = new ListBox();
+
+	private SimplePanel summaryPanel = new SimplePanel();
 
 	private SimplePanel filePreviewPanel = new SimplePanel();
 	
@@ -41,7 +43,11 @@ public class UploadDataWidget extends BaseWidget {
 	public UploadDataWidget() {
 		VerticalPanel thisWidget = new VerticalPanel();
 		
-		// TODO add some statistics here
+		thisWidget.add(new HTML("<h3>Summary:</h3>"));
+		thisWidget.add(summaryPanel);
+		summaryPanel.add(new Label("Loading......"));
+		
+		thisWidget.add(new HTML("<h3>Upload files:</h3>"));
 		
 		formPanel.setAction(GWT.getModuleBaseURL() + "upload");
 		formPanel.setMethod(FormPanel.METHOD_POST);
@@ -97,6 +103,7 @@ public class UploadDataWidget extends BaseWidget {
 			@Override
 			public void onSubmitComplete(SubmitCompleteEvent event) {
 				loadingPopupPanel.hide();
+				updateDatabaseSummary();
 				String results = event.getResults();
 				if (results.startsWith("OK")) {
 					infoMessage("Data successfully uploaded.");
@@ -110,6 +117,8 @@ public class UploadDataWidget extends BaseWidget {
 		formPanel.setWidget(fileUploadHp);
 		
 		thisWidget.add(fileUploadDec);
+		
+		updateDatabaseSummary();
 		
 		// ajax loading ...
 		loadingPopupPanel.setGlassEnabled(true);
@@ -248,5 +257,26 @@ public class UploadDataWidget extends BaseWidget {
 		
 		filePreviewPanel.setWidget(new HTML(sb.toString()));
 		dialogBox.center();
+	}
+	
+	private void updateDatabaseSummary() {
+		service.getDatabaseSummary(new AsyncCallback<String>() {
+			
+			@Override
+			public void onSuccess(String result) {
+				summaryPanel.setWidget(new HTML(result));
+			}
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	}
+	
+	@Override
+	public void updateContents() {
+		updateDatabaseSummary();
 	}
 }

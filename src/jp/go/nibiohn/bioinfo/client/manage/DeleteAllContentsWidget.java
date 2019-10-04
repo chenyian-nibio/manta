@@ -17,10 +17,9 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.client.GutFloraResources;
 
-public class DeleteAllContentsWidget extends BaseWidget {
+public class DeleteAllContentsWidget extends ManageWidget {
 
 	private GutFloraResources resources = GWT.create(GutFloraResources.class);
 	

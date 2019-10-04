@@ -15,7 +15,7 @@ import jp.go.nibiohn.bioinfo.shared.SearchResultData;
  * @author chenyian
  *
  */
-public class AnalysisWidget extends BaseWidget {
+public abstract class AnalysisWidget extends BaseWidget {
 	
 	protected static final int PAGE_SIZE = 20;
 

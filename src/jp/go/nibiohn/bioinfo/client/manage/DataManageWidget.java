@@ -1,5 +1,9 @@
 package jp.go.nibiohn.bioinfo.client.manage;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -10,8 +14,8 @@ import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 public class DataManageWidget extends FlowableWidget {
 
 	private TabPanel tabPanel;
-	private DisplayColumnSettingWidget displaySetWidget;
-	private ParameterTypeSettingWidget typeSetWidget;
+	
+	private ManageWidget[] widgetList = new ManageWidget[4];
 
 	public DataManageWidget(String lang) {
 		super("Data Management", lang + GutFloraConstant.NAVI_LINK_UPLOAD);
@@ -22,23 +26,31 @@ public class DataManageWidget extends FlowableWidget {
 	private TabPanel loadTabPanel() {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
-		tabPanel.add(new UploadDataWidget(), "Data Upload", false);
-		displaySetWidget = new DisplayColumnSettingWidget();
+		// tab 1
+		UploadDataWidget uploadDataWidget = new UploadDataWidget();
+		widgetList[0] = uploadDataWidget;
+		tabPanel.add(uploadDataWidget, "Data Upload", false);
+		// tab 2
+		DisplayColumnSettingWidget displaySetWidget = new DisplayColumnSettingWidget();
+		widgetList[1] = displaySetWidget;
 		tabPanel.add(displaySetWidget, "Display Column Setting", false);
-		typeSetWidget = new ParameterTypeSettingWidget();
+		// tab 3
+		ParameterTypeSettingWidget typeSetWidget = new ParameterTypeSettingWidget();
+		widgetList[2] = typeSetWidget;
 		tabPanel.add(typeSetWidget, "Parameter Setting", false);
-		tabPanel.add(new DeleteAllContentsWidget(), "Danger zone", false);
+		// tab 4
+		DeleteAllContentsWidget deleteAllWidget = new DeleteAllContentsWidget();
+		tabPanel.add(deleteAllWidget, "Danger zone", false);
+		widgetList[3] = deleteAllWidget;
+		
 		tabPanel.selectTab(0);
 		
 		tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 			
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
-				if (event.getSelectedItem().equals(1)) {
-					displaySetWidget.loadSettingTable();
-				} else if (event.getSelectedItem().equals(2)) {
-					typeSetWidget.loadParameterTable();
-				}
+				Integer index = event.getSelectedItem();
+				widgetList[index].updateContents();
 			}
 		});
 		

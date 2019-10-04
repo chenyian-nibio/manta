@@ -20,11 +20,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
-import jp.go.nibiohn.bioinfo.client.BaseWidget;
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
 import jp.go.nibiohn.bioinfo.shared.ParameterEntry;
 
-public class ParameterTypeSettingWidget extends BaseWidget {
+public class ParameterTypeSettingWidget extends ManageWidget {
 
 	private static final int PAGE_SIZE = 16;
 
@@ -129,7 +128,7 @@ public class ParameterTypeSettingWidget extends BaseWidget {
 		return vp;
 	}
 
-	public void loadParameterTable() {
+	private void loadParameterTable() {
 		service.getAllParameterEntry(new AsyncCallback<List<ParameterEntry>>() {
 			
 			@Override
@@ -145,5 +144,10 @@ public class ParameterTypeSettingWidget extends BaseWidget {
 				warnMessage("System error! Fail to load the parameters.");
 			}
 		});
-	}	
+	}
+	
+	@Override
+	public void updateContents() {
+		loadParameterTable();
+	}
 }
