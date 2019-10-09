@@ -70,6 +70,8 @@ import com.google.gwt.visualization.client.visualizations.corechart.PieChart;
  */
 public class ReadsAnalysisWidget extends AnalysisWidget {
 
+	private static int PIE_CHART_COLUMN = 3;
+	
 	private GutFloraResources resources = GWT.create(GutFloraResources.class);
 	
 	private ListBox readListBox = new ListBox();
@@ -564,7 +566,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 						}
 						dialogBox.setPopupPosition(left, 70);
 						dialogBox.show();
-					} else if (column == 4) {
+					} else if (column == PIE_CHART_COLUMN) {
 						DialogBox dialogBox = createReadsPieChart(event.getValue());
 						dialogBox.setGlassEnabled(true);
 						dialogBox.setAnimationEnabled(false);
@@ -573,8 +575,8 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 						dialogBox.center();
 						dialogBox.show();
 
-					} else if (column > 4) {
-						int index = column - 5;
+					} else if (column > PIE_CHART_COLUMN) {
+						int index = column - PIE_CHART_COLUMN - 1;
 						if (index < currentColumns.size()) {
 							String columnName = currentColumns.get(index);
 							for (int i = 1; i < readListBox.getItemCount(); i++) {
