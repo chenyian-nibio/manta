@@ -1,9 +1,5 @@
 package jp.go.nibiohn.bioinfo.client.manage;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.TabPanel;

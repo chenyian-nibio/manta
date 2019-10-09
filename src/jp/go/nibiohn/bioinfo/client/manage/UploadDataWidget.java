@@ -107,6 +107,7 @@ public class UploadDataWidget extends ManageWidget {
 				String results = event.getResults();
 				if (results.startsWith("OK")) {
 					infoMessage("Data successfully uploaded.");
+					formPanel.reset();
 				} else {
 					warnMessage(results);
 				}
