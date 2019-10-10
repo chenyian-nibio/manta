@@ -62,9 +62,8 @@ public class SampleListWidget extends FlowableWidget {
 	
 	private List<SampleEntry> allSamples;
 
-	public SampleListWidget(final List<SampleEntry> result, String lang) {
-		super("Data Analysis", lang + GutFloraConstant.NAVI_LINK_SAMPLE);
-		this.currentLang = lang;
+	public SampleListWidget(final List<SampleEntry> result) {
+		super("Data Analysis", GutFloraConstant.NAVI_LINK_SAMPLE);
 		this.allSamples = result;
 		
 		int i = 0;
@@ -370,7 +369,7 @@ public class SampleListWidget extends FlowableWidget {
 					warnMessage("Please select some samples for analysis.");
 					return;
 				}
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+				History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS);
 				
 			}
 		});
@@ -393,7 +392,7 @@ public class SampleListWidget extends FlowableWidget {
 		dialogContents.setSpacing(4);
 		dialogBox.setWidget(dialogContents);
 
-		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(entry.getSampleId(), currentLang);
+		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(entry.getSampleId());
 		dialogContents.add(sampleInfoWidget);
 
 		// Add a close button at the bottom of the dialog
@@ -499,7 +498,7 @@ public class SampleListWidget extends FlowableWidget {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_UPLOAD);
+				History.newItem(GutFloraConstant.NAVI_LINK_UPLOAD);
 				History.fireCurrentHistoryState();
 			}
 		});

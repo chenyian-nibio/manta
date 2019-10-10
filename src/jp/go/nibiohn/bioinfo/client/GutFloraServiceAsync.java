@@ -21,13 +21,13 @@ import jp.go.nibiohn.bioinfo.shared.VisualizationtResult;
  */
 public interface GutFloraServiceAsync {
 
-	void getSampleEntryList(String lang, AsyncCallback<List<SampleEntry>> callback);
+	void getSampleEntryList(AsyncCallback<List<SampleEntry>> callback);
 
-	void getSelectedSampleEntrySet(String sampleIdString, String lang, AsyncCallback<Set<SampleEntry>> callback);
+	void getSelectedSampleEntrySet(String sampleIdString, AsyncCallback<Set<SampleEntry>> callback);
 
-	void getSampleEntry(String sampleId, String lang, AsyncCallback<SampleEntry> callback);
+	void getSampleEntry(String sampleId, AsyncCallback<SampleEntry> callback);
 	
-	void getSampleProfile(String sampleId, String lang, AsyncCallback<List<List<String>>> callback);
+	void getSampleProfile(String sampleId, AsyncCallback<List<List<String>>> callback);
 	
 	void getMicrobiota(String sampleId, String rank, AsyncCallback<List<List<String>>> callback);
 
@@ -49,18 +49,17 @@ public interface GutFloraServiceAsync {
 			String parentTaxonId, int distanceType, int linkageType, int numOfColumns, Map<Integer, DendrogramCache> cacheMap,
 			AsyncCallback<VisualizationtResult> callback);
 	
-	void getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String lang,
-			AsyncCallback<GutFloraAnalysisData> callback);
+	void getProfilesAnalysisData(Set<SampleEntry> selectedSamples, AsyncCallback<GutFloraAnalysisData> callback);
 	
 	void getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, List<String> selectedcolumns,
 			AsyncCallback<GutFloraAnalysisData> callback);
 
-	void getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns, String lang, 
+	void getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns,
 			AsyncCallback<GutFloraAnalysisData> callback);
 
 	void getAllTaxonEntries(Set<SampleEntry> selectedSamples, String rank, AsyncCallback<List<TaxonEntry>> callback);
 
-	void getAllNumericParameterEntry(String lang, AsyncCallback<List<ParameterEntry>> callback);
+	void getAllNumericParameterEntry(AsyncCallback<List<ParameterEntry>> callback);
 
 	void getAllParameterEntry(AsyncCallback<List<ParameterEntry>> callback);
 
@@ -70,7 +69,7 @@ public interface GutFloraServiceAsync {
 	void getReadsAndPctList(Set<SampleEntry> selectedSamples, String rank, String taxonName,
 			AsyncCallback<PairListData> callback);
 	
-	void getProfilesList(Set<SampleEntry> selectedSamples, String name, String lang, AsyncCallback<PairListData> callback);
+	void getProfilesList(Set<SampleEntry> selectedSamples, String name, AsyncCallback<PairListData> callback);
 
 	void getProfilesListById(Set<SampleEntry> selectedSamples, String paraId, AsyncCallback<PairListData> callback);
 
@@ -78,17 +77,17 @@ public interface GutFloraServiceAsync {
 			AsyncCallback<String> callback);
 	
 	void searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
-			Integer correlationMethod, String lang, AsyncCallback<SearchResultData> callback);
+			Integer correlationMethod, AsyncCallback<SearchResultData> callback);
 
 	// for multiple linear regression
 	void searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames,
-			String lang, AsyncCallback<SearchResultData> callback);
+			AsyncCallback<SearchResultData> callback);
 	
 	void searchForSimilerProfilesbyProfile(Set<SampleEntry> selectedSamples, String profileName, String paraType,
-			Integer correlationMethod, String lang, AsyncCallback<SearchResultData> callback);
+			Integer correlationMethod, AsyncCallback<SearchResultData> callback);
 
 	void searchForSimilarReads(Set<SampleEntry> selectedSamples, String rank, String name, Integer correlationMethod,
-			String lang, AsyncCallback<SearchResultData> callback);
+			AsyncCallback<SearchResultData> callback);
 
 	void getAllReadsPctList(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames,
 			AsyncCallback<Map<String, Double[]>> callback);
@@ -106,13 +105,13 @@ public interface GutFloraServiceAsync {
 
 	void getPCoAResult(List<String> sampleIdList, Integer distanceType, AsyncCallback<PcoaResult> callback);
 
-	void getProfileNames(String lang, AsyncCallback<List<String>> callback);
+	void getProfileNames(AsyncCallback<List<String>> callback);
 
 	void getPCoAScatterPlot(PcoaResult pcoaResult, AsyncCallback<String> callback);
 
-	void getPCoAScatterPlot(PcoaResult pcoaResult, String profileName, String lang, AsyncCallback<String> callback);
+	void getPCoAScatterPlot(PcoaResult pcoaResult, String profileName, AsyncCallback<String> callback);
 
-	void getPCoAScatterPlot(PcoaResult pcoaResult, String customTagString, AsyncCallback<String> callback);
+	void getPCoAScatterPlotWithCustomTags(PcoaResult pcoaResult, String customTagString, AsyncCallback<String> callback);
 
 	void getSampleDisplayColumn(AsyncCallback<List<String>> callback);
 

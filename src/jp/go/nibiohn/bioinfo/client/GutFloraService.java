@@ -23,13 +23,13 @@ import jp.go.nibiohn.bioinfo.shared.VisualizationtResult;
 @RemoteServiceRelativePath("analysis")
 public interface GutFloraService extends RemoteService {
 
-	List<SampleEntry> getSampleEntryList(String lang);
+	List<SampleEntry> getSampleEntryList();
 
-	Set<SampleEntry> getSelectedSampleEntrySet(String sampleIdString, String lang);
+	Set<SampleEntry> getSelectedSampleEntrySet(String sampleIdString);
 	
-	SampleEntry getSampleEntry(String sampleId, String lang);
+	SampleEntry getSampleEntry(String sampleId);
 
-	List<List<String>> getSampleProfile(String sampleId, String lang);
+	List<List<String>> getSampleProfile(String sampleId);
 
 	List<List<String>> getMicrobiota(String sampleId, String rank);
 
@@ -47,13 +47,13 @@ public interface GutFloraService extends RemoteService {
 	
 	GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, List<String> selectedcolumns);
 
-	GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String lang);
+	GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples);
 
-	GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns, String lang);
+	GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns);
 
 	List<TaxonEntry> getAllTaxonEntries(Set<SampleEntry> selectedSamples, String rank);
 
-	List<ParameterEntry> getAllNumericParameterEntry(String lang);
+	List<ParameterEntry> getAllNumericParameterEntry();
 	
 	List<ParameterEntry> getAllParameterEntry();
 	
@@ -61,23 +61,22 @@ public interface GutFloraService extends RemoteService {
 	
 	PairListData getReadsAndPctList(Set<SampleEntry> selectedSamples, String rank, String taxonName);
 
-	PairListData getProfilesList(Set<SampleEntry> selectedSamples, String name, String lang);
+	PairListData getProfilesList(Set<SampleEntry> selectedSamples, String name);
 
 	PairListData getProfilesListById(Set<SampleEntry> selectedSamples, String paraId);
 	
 	String getCorrelationString(Integer correlationMethod, List<String> list1, List<String> list2);
 	
 	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
-			Integer correlationMethod, String lang);
+			Integer correlationMethod);
 
-	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames,
-			String lang);
+	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames);
 
 	SearchResultData searchForSimilerProfilesbyProfile(Set<SampleEntry> selectedSamples, String profileName,
-			String paraType, Integer correlationMethod, String lang);
+			String paraType, Integer correlationMethod);
 
 	SearchResultData searchForSimilarReads(Set<SampleEntry> selectedSamples, String rank, String name,
-			Integer correlationMethod, String lang);
+			Integer correlationMethod);
 
 	Map<String, Double[]> getAllReadsPctList(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames);
 	
@@ -87,19 +86,20 @@ public interface GutFloraService extends RemoteService {
 	
 	VisualizationtResult getReadsHeatmap(Set<SampleEntry> selectedSamples, String rank);
 
-	VisualizationtResult getClusteredReadsHeatmap(Set<SampleEntry> selectedSamples, String rank, int distanceType, int linkageType, Map<Integer, DendrogramCache> cacheMap);
+	VisualizationtResult getClusteredReadsHeatmap(Set<SampleEntry> selectedSamples, String rank, int distanceType,
+			int linkageType, Map<Integer, DendrogramCache> cacheMap);
 	
 	String getHeatmapLegend();
 	
 	PcoaResult getPCoAResult(List<String> sampleIdList, Integer distanceType);
 	
-	List<String> getProfileNames(String lang);
+	List<String> getProfileNames();
 
 	String getPCoAScatterPlot(PcoaResult pcoaResult);
 	
-	String getPCoAScatterPlot(PcoaResult pcoaResult, String profileName, String lang);
+	String getPCoAScatterPlot(PcoaResult pcoaResult, String profileName);
 	
-	String getPCoAScatterPlot(PcoaResult pcoaResult, String customTagString);
+	String getPCoAScatterPlotWithCustomTags(PcoaResult pcoaResult, String customTagString);
 	
 	List<String> getSampleDisplayColumn();
 	

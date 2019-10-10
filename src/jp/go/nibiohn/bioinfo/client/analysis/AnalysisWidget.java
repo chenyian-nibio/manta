@@ -25,9 +25,6 @@ public abstract class AnalysisWidget extends BaseWidget {
 
 	protected SimplePanel analysisTabelPanel = new SimplePanel();
 
-	// default is English
-	protected String currentLang = "en_";
-	
 	protected SearchResultData searchResultData;
 
 	public SearchResultData getSearchResultData() {

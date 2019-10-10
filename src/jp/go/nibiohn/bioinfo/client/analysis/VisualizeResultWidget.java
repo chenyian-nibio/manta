@@ -70,11 +70,10 @@ public class VisualizeResultWidget extends AnalysisWidget {
 	private String rank;
 
 	public VisualizeResultWidget(Set<SampleEntry> selectedSamples, 
-			String rank, String referenceType, String referenceName, String correlationMethod, String lang) {
+			String rank, String referenceType, String referenceName, String correlationMethod) {
 		this.selectedSamples = selectedSamples;
 		this.referenceType = referenceType;
 		this.rank = rank;
-		this.currentLang = lang;
 		
 		sortedSampleIds = getSortedSampleList(selectedSamples); 
 				
@@ -106,20 +105,20 @@ public class VisualizeResultWidget extends AnalysisWidget {
 			});
 		} else if (referenceType.equals(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE)) {
 			profileNameLabel.setText(referenceName);
-			service.getProfilesList(VisualizeResultWidget.this.selectedSamples, referenceName, currentLang,
+			service.getProfilesList(VisualizeResultWidget.this.selectedSamples, referenceName,
 					new AsyncCallback<PairListData>() {
-				
-				@Override
-				public void onSuccess(PairListData result) {
-					profilesOriList = result.getOriginalList();
-					updateResults();
-				}
-				
-				@Override
-				public void onFailure(Throwable caught) {
-					warnMessage(SERVER_ERROR);
-				}
-			});
+
+						@Override
+						public void onSuccess(PairListData result) {
+							profilesOriList = result.getOriginalList();
+							updateResults();
+						}
+
+						@Override
+						public void onFailure(Throwable caught) {
+							warnMessage(SERVER_ERROR);
+						}
+					});
 		} else {
 			// TODO unchecked! should never happen
 		}
@@ -399,51 +398,52 @@ public class VisualizeResultWidget extends AnalysisWidget {
 	public void setSelectNameAndUpdate(String name) {
 		if (referenceType.equals(GutFloraConstant.NAVI_LINK_SUFFIX_READ)) {
 			profileNameLabel.setText(name);
-			service.getProfilesList(VisualizeResultWidget.this.selectedSamples, name, currentLang, 
+			service.getProfilesList(VisualizeResultWidget.this.selectedSamples, name,
 					new AsyncCallback<PairListData>() {
-				
-				@Override
-				public void onSuccess(PairListData result) {
-					profilesOriList = result.getOriginalList();
-					updateResults();
-				}
-				
-				@Override
-				public void onFailure(Throwable caught) {
-					warnMessage(SERVER_ERROR);
-				}
-			});
+
+						@Override
+						public void onSuccess(PairListData result) {
+							profilesOriList = result.getOriginalList();
+							updateResults();
+						}
+
+						@Override
+						public void onFailure(Throwable caught) {
+							warnMessage(SERVER_ERROR);
+						}
+					});
 		} else if (referenceType.equals(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE)) {
 			readNameLabel.setText(name);
 			if (rank.equals("profile")) {
-				service.getProfilesList(VisualizeResultWidget.this.selectedSamples, name, currentLang, 
+				service.getProfilesList(VisualizeResultWidget.this.selectedSamples, name,
 						new AsyncCallback<PairListData>() {
-					
-					@Override
-					public void onSuccess(PairListData result) {
-						readsOriList = result.getOriginalList();
-						updateResults();
-					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						warnMessage(SERVER_ERROR);
-					}
-				});
+
+							@Override
+							public void onSuccess(PairListData result) {
+								readsOriList = result.getOriginalList();
+								updateResults();
+							}
+
+							@Override
+							public void onFailure(Throwable caught) {
+								warnMessage(SERVER_ERROR);
+							}
+						});
 			} else {
-				service.getReadsAndPctList(VisualizeResultWidget.this.selectedSamples, VisualizeResultWidget.this.rank, name, new AsyncCallback<PairListData>() {
-					
-					@Override
-					public void onSuccess(PairListData result) {
-						readsOriList = result.getOriginalList();
-						updateResults();
-					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						warnMessage(SERVER_ERROR);
-					}
-				});
+				service.getReadsAndPctList(VisualizeResultWidget.this.selectedSamples, VisualizeResultWidget.this.rank,
+						name, new AsyncCallback<PairListData>() {
+
+							@Override
+							public void onSuccess(PairListData result) {
+								readsOriList = result.getOriginalList();
+								updateResults();
+							}
+
+							@Override
+							public void onFailure(Throwable caught) {
+								warnMessage(SERVER_ERROR);
+							}
+						});
 			}
 		} else {
 			// TODO unchecked! should never happen

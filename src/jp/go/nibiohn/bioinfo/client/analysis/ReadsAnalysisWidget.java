@@ -90,15 +90,14 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 	
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
-	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
-		this(selectedSamples, "phylum", "", lang);
+	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples) {
+		this(selectedSamples, "phylum", "");
 	}
 	
-	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, String initRank, final String suffix, String lang) {
+	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, String initRank, final String suffix) {
 		showOthersCb.setValue(true);
 		
 		this.selectedSamples = selectedSamples;
-		this.currentLang = lang;
 
 		HorizontalPanel topHp = new HorizontalPanel();
 
@@ -136,13 +135,12 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 				if (taxonName.equals(GutFloraConstant.ALL_ABOVE_MICROBIOTA)) {
 					// Do multiple linear regression
 					service.searchForSimilerProfiles(ReadsAnalysisWidget.this.selectedSamples, rank, currentColumns,
-							currentLang,
 							new AsyncCallback<SearchResultData>() {
 						
 						@Override
 						public void onSuccess(SearchResultData result) {
 							searchResultData = result;
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH + GutFloraConstant.NAVI_LINK_MLR
+							History.newItem(GutFloraConstant.NAVI_LINK_SEARCH + GutFloraConstant.NAVI_LINK_MLR
 									+ GutFloraConstant.NAVI_LINK_SUFFIX_READ + suffix);
 							loadingPopupPanel.hide();
 						}
@@ -156,23 +154,23 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 					
 				} else {
 					service.searchForSimilerProfiles(ReadsAnalysisWidget.this.selectedSamples, rank, taxonName,
-							Integer.valueOf(correlationListBox.getSelectedValue()), currentLang,
+							Integer.valueOf(correlationListBox.getSelectedValue()),
 							new AsyncCallback<SearchResultData>() {
-						
-						@Override
-						public void onSuccess(SearchResultData result) {
-							searchResultData = result;
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH
-									+ GutFloraConstant.NAVI_LINK_SUFFIX_READ + suffix);
-							loadingPopupPanel.hide();
-						}
-						
-						@Override
-						public void onFailure(Throwable caught) {
-							warnMessage(SERVER_ERROR);
-							loadingPopupPanel.hide();
-						}
-					});
+
+								@Override
+								public void onSuccess(SearchResultData result) {
+									searchResultData = result;
+									History.newItem(GutFloraConstant.NAVI_LINK_SEARCH
+											+ GutFloraConstant.NAVI_LINK_SUFFIX_READ + suffix);
+									loadingPopupPanel.hide();
+								}
+
+								@Override
+								public void onFailure(Throwable caught) {
+									warnMessage(SERVER_ERROR);
+									loadingPopupPanel.hide();
+								}
+							});
 				}
 			}
 		}));
@@ -282,11 +280,11 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_VIEW_BARCHART + suffix);
+				History.newItem(GutFloraConstant.NAVI_LINK_VIEW_BARCHART + suffix);
 			}
 		});
 		barChartIcon.addStyleName("clickable");
-		Hyperlink barChartLink = new Hyperlink("Bar Chart", currentLang + GutFloraConstant.NAVI_LINK_VIEW_BARCHART + suffix);
+		Hyperlink barChartLink = new Hyperlink("Bar Chart", GutFloraConstant.NAVI_LINK_VIEW_BARCHART + suffix);
 		rankHp.add(barChartLink);
 		barChartLink.addStyleName("fixlink");
 
@@ -298,11 +296,11 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_VIEW_HEATMAP + suffix);
+				History.newItem(GutFloraConstant.NAVI_LINK_VIEW_HEATMAP + suffix);
 			}
 		});
 		heatMapIcon.addStyleName("clickable");
-		Hyperlink heatMapLink = new Hyperlink("Heat Map", currentLang + GutFloraConstant.NAVI_LINK_VIEW_HEATMAP + suffix);
+		Hyperlink heatMapLink = new Hyperlink("Heat Map", GutFloraConstant.NAVI_LINK_VIEW_HEATMAP + suffix);
 		rankHp.add(heatMapLink);
 		heatMapLink.addStyleName("fixlink");
 
@@ -314,11 +312,11 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_VIEW_PCOA + suffix);
+				History.newItem(GutFloraConstant.NAVI_LINK_VIEW_PCOA + suffix);
 			}
 		});
 		pcoaAnalysisIcon.addStyleName("clickable");
-		Hyperlink pcoaAnalysisLink = new Hyperlink("PCoA Chart", currentLang + GutFloraConstant.NAVI_LINK_VIEW_PCOA + suffix);
+		Hyperlink pcoaAnalysisLink = new Hyperlink("PCoA Chart", GutFloraConstant.NAVI_LINK_VIEW_PCOA + suffix);
 		rankHp.add(pcoaAnalysisLink);
 		pcoaAnalysisLink.addStyleName("fixlink");
 
@@ -686,7 +684,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		dialogContents.setSpacing(4);
 		dialogBox.setWidget(dialogContents);
 
-		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(sampleId, currentLang);
+		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(sampleId);
 		dialogContents.add(sampleInfoWidget);
 
 		// Add a close button at the bottom of the dialog

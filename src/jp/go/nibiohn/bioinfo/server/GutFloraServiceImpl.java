@@ -72,7 +72,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public List<SampleEntry> getSampleEntryList(String lang) {
+	public List<SampleEntry> getSampleEntryList() {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -153,7 +153,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public List<List<String>> getSampleProfile(String sampleId, String lang) {
+	public List<List<String>> getSampleProfile(String sampleId) {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -296,7 +296,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public Set<SampleEntry> getSelectedSampleEntrySet(String sampleIdString, String lang) {
+	public Set<SampleEntry> getSelectedSampleEntrySet(String sampleIdString) {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -339,7 +339,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public SampleEntry getSampleEntry(String sampleId, String lang) {
+	public SampleEntry getSampleEntry(String sampleId) {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -1465,12 +1465,11 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String lang) {
-		return getProfilesAnalysisData(selectedSamples, GutFloraConstant.DEFAULT_NUM_OF_COLUMNS, lang);
+	public GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples) {
+		return getProfilesAnalysisData(selectedSamples, GutFloraConstant.DEFAULT_NUM_OF_COLUMNS);
 	}
 	// TODO consider to create a class for the parameter, which holds title, id and a boolean (isNumeric)
-	private GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, int numOfColumns,
-			String lang) {
+	private GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, int numOfColumns) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -1567,8 +1566,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns,
-			String lang) {
+	public GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -1702,7 +1700,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public List<ParameterEntry> getAllNumericParameterEntry(String lang) {
+	public List<ParameterEntry> getAllNumericParameterEntry() {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -1964,7 +1962,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public PairListData getProfilesList(Set<SampleEntry> selectedSamples, String name, String lang) {
+	public PairListData getProfilesList(Set<SampleEntry> selectedSamples, String name) {
 		// TODO [to be improved] should be better to use parameter id ...
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 
@@ -2077,7 +2075,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 */
 	@Override
 	public SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank,
-			List<String> taxonNames, String lang) {
+			List<String> taxonNames) {
 		// do multiple linear regression (MLR)
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
@@ -2182,7 +2180,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
-			Integer correlationMethod, String lang) {
+			Integer correlationMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -2277,7 +2275,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public SearchResultData searchForSimilarReads(Set<SampleEntry> selectedSamples, String rank, String name,
-			Integer correlationMethod, String lang) {
+			Integer correlationMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 
 		HikariDataSource ds = getHikariDataSource();
@@ -2372,7 +2370,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public SearchResultData searchForSimilerProfilesbyProfile(Set<SampleEntry> selectedSamples, String name,
-			String paraType, Integer correlationMethod, String lang) {
+			String paraType, Integer correlationMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -3185,7 +3183,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 * only 3 types: PARA_TYPE_CONTINUOUS, PARA_TYPE_UNRANKED_CATEGORY and PARA_TYPE_RANKED_CATEGORY
 	 */
 	@Override
-	public List<String> getProfileNames(String lang) {
+	public List<String> getProfileNames() {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -3258,7 +3256,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public String getPCoAScatterPlot(PcoaResult pcoaResult, String profileName, String lang) {
+	public String getPCoAScatterPlot(PcoaResult pcoaResult, String profileName) {
 		Map<String, List<Double>> coordinates = pcoaResult.getCoordinates();
 		Set<String> sampleIds = coordinates.keySet();
 		
@@ -3430,7 +3428,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public String getPCoAScatterPlot(PcoaResult pcoaResult, String customTagString) {
+	public String getPCoAScatterPlotWithCustomTags(PcoaResult pcoaResult, String customTagString) {
 		Map<String, List<Double>> coordinates = pcoaResult.getCoordinates();
 		String[] lines = customTagString.split("\n");
 		

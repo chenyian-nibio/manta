@@ -25,9 +25,6 @@ public abstract class BasePage implements EntryPoint, ValueChangeHandler<String>
 	protected boolean hasMessage = false;
 	protected Label info = new Label("Message will be shown here.");
 	
-	// AT the moment, only English
-	protected String currentLang = "en_";
-
 	protected void init() {
 		mesgPanel.setStyleName("infoMessage");
 		mesgPanel.setVisible(false);
