@@ -145,7 +145,6 @@ public class Manta extends BasePage {
 				}
 			});
 			
-		// TODO to be improved
 		} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
 			if (value.startsWith(GutFloraConstant.NAVI_LINK_ANALYSIS)) {
 				if (readVisualizeWidget == null) {
@@ -197,7 +196,6 @@ public class Manta extends BasePage {
 				
 			} else if (value.startsWith(GutFloraConstant.NAVI_LINK_SEARCH)) {
 				if (subsetAnalysisWidget == null) {
-					// TODO to be defined!
 					History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 					return;
 				} else {
@@ -208,7 +206,6 @@ public class Manta extends BasePage {
 					SearchResultData searchResultData = subsetAnalysisWidget.getCorrectionResults(tabIndex);
 					
 					if (searchResultData == null) {
-						// TODO to be defined!
 						History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 						return;
 					}
@@ -256,7 +253,7 @@ public class Manta extends BasePage {
 				} else {
 					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget();
 					MicrobiotaHeatmapWidget subsetMicrobiotaHeatmapWidget = new MicrobiotaHeatmapWidget(
-							"Subset Clustering", GutFloraConstant.NAVI_LINK_VIEW_BARCHART
+							"Subset Clustering", GutFloraConstant.NAVI_LINK_VIEW_HEATMAP
 							+ GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
 							readWidget.getSelectedSamples(), readWidget.getSelectedRank(), true);
 					
@@ -265,6 +262,23 @@ public class Manta extends BasePage {
 					
 					mainPanel.clear();
 					mainPanel.add(subsetMicrobiotaHeatmapWidget);
+					
+					setNaviBar();
+				}
+			} else if (value.startsWith(GutFloraConstant.NAVI_LINK_VIEW_PCOA)) {
+				if (subsetAnalysisWidget == null) {
+					History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+					return;
+				} else {
+					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget();
+					PcoaAnalysisWidget subsetReadVisualizeWidget = new PcoaAnalysisWidget("Subset PCoA Chart",
+							GutFloraConstant.NAVI_LINK_VIEW_PCOA + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
+							readWidget.getSelectedSamples(), true);
+					
+					widgetTrails.add(subsetReadVisualizeWidget);
+					
+					mainPanel.clear();
+					mainPanel.add(subsetReadVisualizeWidget);
 					
 					setNaviBar();
 				}
@@ -448,7 +462,6 @@ public class Manta extends BasePage {
 			setNaviBar();
 		} else {
 			warnMessage("Illegal URL.");
-			// choose English as default
 			History.newItem(GutFloraConstant.NAVI_LINK_SAMPLE);
 		}
 		
