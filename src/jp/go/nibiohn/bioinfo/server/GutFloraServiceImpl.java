@@ -57,16 +57,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	private HikariDataSource getHikariDataSource() {
 		if (config == null) {
-			Properties props = new Properties();
-			try {
-				Class.forName("org.postgresql.Driver");
-				props.load(GutFloraServiceImpl.class.getClassLoader().getResourceAsStream(GutFloraConfig.PGSQL_PROP_FILE));
-			} catch (IOException e) {
-				throw new RuntimeException("Problem loading properties '" + GutFloraConfig.PGSQL_PROP_FILE + "'", e);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			config = new HikariConfig(props);
+			// For desktop version
+			config = new HikariConfig();
+			String dbPath = getServletContext().getRealPath("../gutflora.db");
+			config.setJdbcUrl("jdbc:sqlite:" + dbPath);
 		}
 		return new HikariDataSource(config);
 	}
