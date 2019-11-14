@@ -26,9 +26,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import jp.go.nibiohn.bioinfo.server.DataSourceLoader;
 import jp.go.nibiohn.bioinfo.server.distance.BrayCurtis;
 import jp.go.nibiohn.bioinfo.server.distance.Jaccard;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConfig;
@@ -38,8 +38,6 @@ public class UploadProcessService {
 	
 	private static Set<String> IGNORED_TAXON_NAMES = new HashSet<String>();
 
-	private HikariConfig config;
-	
 	{
 		// silva
 		IGNORED_TAXON_NAMES.add("Unassigned");
@@ -54,22 +52,6 @@ public class UploadProcessService {
 		IGNORED_TAXON_NAMES.add("g__");
 		IGNORED_TAXON_NAMES.add("s__");
 		IGNORED_TAXON_NAMES.add("__");
-	}
-	
-	private HikariDataSource getHikariDataSource() {
-		if (config == null) {
-			Properties props = new Properties();
-			try {
-				Class.forName("org.postgresql.Driver");
-				props.load(GutFloraServiceImpl.class.getClassLoader().getResourceAsStream(GutFloraConfig.PGSQL_PROP_FILE));
-			} catch (IOException e) {
-				throw new RuntimeException("Problem loading properties '" + GutFloraConfig.PGSQL_PROP_FILE + "'", e);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			config = new HikariConfig(props);
-		}
-		return new HikariDataSource(config);
 	}
 	
 	public boolean processAndSaveUploadData(String type, InputStream inputStream) throws IOException {
@@ -90,7 +72,7 @@ public class UploadProcessService {
 		String headerLine = reader.readLine();
 		String[] headers = headerLine.split("\t");
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -176,7 +158,7 @@ public class UploadProcessService {
 		String headerLine = reader.readLine();
 		String[] headers = headerLine.split("\t");
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
