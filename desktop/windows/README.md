@@ -5,3 +5,4 @@
     powershell -ExecutionPolicy Bypass -command .\download.ps1
     ```
 2. Run `build.bat` to generate application zip file for download.
+3. A zip file should have been generated in the `releases` folder.
