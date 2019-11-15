@@ -1,6 +1,5 @@
-echo %cd%
 cd /d %~dp0
-echo %cd%
+
 set version=0.1.0
 set app_name=manta
 set release_name=%app_name%-%version%-windows-x64
@@ -43,6 +42,6 @@ jlink --compress=2 --module-path %resource_dir%\jdk\jmods --add-modules %MODULE_
 
 cd %release_dir%
 powershell compress-archive %release_name% %release_name%.zip -Force
-rmdir /s/q %release_path%
+rmdir /s/q %release_name%
 
 exit 1
