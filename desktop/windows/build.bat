@@ -20,6 +20,7 @@ cd war
 jar -cf manta.war *
 
 cd ..
+if not exist %release_dir% mkdir %release_dir%
 if exist %release_path% rmdir /s/q %release_path%
 mkdir %release_path%
 
