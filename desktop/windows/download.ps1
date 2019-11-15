@@ -14,6 +14,12 @@ if(!(Test-Path -Path gwt )){
     Expand-Archive -Path gwt.zip -DestinationPath .
     Move-Item gwt-2.8.2 gwt
 }
+if(Test-Path .\gwt\samples){
+	Remove-Item .\gwt\samples -Recurse -Force -Confirm:$false
+}
+if(Test-Path .\gwt\doc){
+	Remove-Item .\gwt\doc -Recurse -Force -Confirm:$false
+}
 if(!(Test-Path -Path jdk )){
     Invoke-WebRequest -Uri https://d3pxv6yz143wms.cloudfront.net/11.0.3.7.1/amazon-corretto-11.0.3.7.1-windows-x64.zip -OutFile .\corretto.zip
     Expand-Archive -Path corretto.zip -DestinationPath .
