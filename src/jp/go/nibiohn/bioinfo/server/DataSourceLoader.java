@@ -12,11 +12,14 @@ import java.net.URISyntaxException;
 // import jp.go.nibiohn.bioinfo.shared.GutFloraConfig;
 
 public class DataSourceLoader{
+    public static String backend;
+
     private static HikariConfig config;
 
     public static HikariDataSource getHikariDataSource() {
 		if (config == null) {
             ///////////// Server version ///////////////
+            // backend = "postgresql";
             // Properties props = new Properties();
 			// try {
 			// 	Class.forName("org.postgresql.Driver");
@@ -30,6 +33,7 @@ public class DataSourceLoader{
             ////////////////////////////////////////////
 
             ///////////// Desktop version ///////////////
+            backend = "sqlite";
 			config = new HikariConfig();
 			try {
                 Path classPath = Paths.get(DataSourceLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());

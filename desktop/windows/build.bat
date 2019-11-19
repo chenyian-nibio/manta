@@ -27,7 +27,7 @@ mkdir %release_path%
 copy /y war\manta.war %release_path%\manta.war
 xcopy /s/e/i/y/q %resource_dir%\tomcat-embed %release_path%\tomcat-embed
 
-sqlite3 %release_path%\gutflora.db < documents\create_tables.sql
+sqlite3 %release_path%\gutflora.db < documents\create_tables_sqlite.sql
 
 cd %release_path%
 javac -classpath ".\tomcat-embed\*" -d . ..\..\MantaLauncher.java
