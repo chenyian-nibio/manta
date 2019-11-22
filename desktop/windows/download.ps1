@@ -10,9 +10,9 @@ if(!(Test-Path resources )){
 Set-Location resources
 
 if(!(Test-Path gwt )){
-    Invoke-WebRequest -Uri https://goo.gl/pZZPXS -OutFile .\gwt.zip 
+    Invoke-WebRequest -Uri http://goo.gl/t7FQSn -OutFile .\gwt.zip 
     Expand-Archive -Path gwt.zip -DestinationPath .
-    Move-Item gwt-2.8.2 gwt
+    Move-Item gwt-2.7.0 gwt
 }
 if(Test-Path .\gwt\samples){
 	Remove-Item .\gwt\samples -Recurse -Force -Confirm:$false
