@@ -3,11 +3,11 @@ cd /d %~dp0
 set version=0.1.0
 set app_name=manta
 set release_name=%app_name%-%version%-windows-x64
-set release_dir=desktop\windows\releases
+set release_dir=%cd%\releases
 set release_path=%release_dir%\%release_name%
 set resource_dir=%cd%\resources
-set PATH=%resource_dir%\jdk\bin;%PATH%
-set JAVA_HOME=%resource_dir%\jdk
+set PATH=%resource_dir%\jdk8\bin;%PATH%
+set JAVA_HOME=%resource_dir%\jdk8
 set PATH=%resource_dir%\ant\bin;%PATH%
 set PATH=%resource_dir%\sqlite-tools;%PATH%
 set PATH=%resource_dir%\exewrap\x64;%PATH%
@@ -31,15 +31,17 @@ sqlite3 %release_path%\gutflora.db < documents\create_tables_sqlite.sql
 
 cd %release_path%
 javac -classpath ".\tomcat-embed\*" -d . ..\..\MantaLauncher.java
-jar -c -v -f .\MantaLauncher.jar -e MantaLauncher .\MantaLauncher.class
-exewrap -t 1.11 -L .;.\tomcat-embed\* -e SHARE .\MantaLauncher.jar
+jar cfe .\MantaLauncher.jar MantaLauncher .\MantaLauncher.class
+exewrap -t 1.8 -L .;.\tomcat-embed\* -e SHARE .\MantaLauncher.jar
 del .\MantaLauncher.class
 
 cd ..\..\..\..
-for /f "tokens=* USEBACKQ" %%f in (`jdeps --print-module-deps %release_path%\MantaLauncher.jar war\WEB-INF\classes\* war\WEB-INF\lib\*`) do ( set MODULE_DEPS=%%f)
-set MODULE_DEPS=%MODULE_DEPS%,jdk.localedata,java.instrument
-echo Module dependancies: %MODULE_DEPS%
-jlink --compress=2 --module-path %resource_dir%\jdk\jmods --add-modules %MODULE_DEPS% --output %release_path%\jre
+REM for /f "tokens=* USEBACKQ" %%f in (`jdeps --print-module-deps %release_path%\MantaLauncher.jar war\WEB-INF\classes\* war\WEB-INF\lib\*`) do ( set MODULE_DEPS=%%f)
+REM set MODULE_DEPS=%MODULE_DEPS%,jdk.localedata,java.instrument
+REM echo Module dependancies: %MODULE_DEPS%
+REM jlink --compress=2 --module-path %resource_dir%\jdk11\jmods --add-modules %MODULE_DEPS% --output %release_path%\jre
+
+xcopy /s/e/i/y/q %resource_dir%\jre8 %release_path%\jre
 
 cd %release_dir%
 powershell compress-archive %release_name% %release_name%.zip -Force
