@@ -61,16 +61,14 @@ public class MicrobiotaHeatmapWidget extends ReadVisualizeWidget {
 	
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
-	public MicrobiotaHeatmapWidget(Set<SampleEntry> selectedSamples, String rank, 
-			boolean isSubset, String lang) {
-		this("Heat Map", GutFloraConstant.NAVI_LINK_VIEW_HEATMAP, selectedSamples, rank, isSubset, lang);
+	public MicrobiotaHeatmapWidget(Set<SampleEntry> selectedSamples, String rank, boolean isSubset) {
+		this("Heat Map", GutFloraConstant.NAVI_LINK_VIEW_HEATMAP, selectedSamples, rank, isSubset);
 	}
 	
 	public MicrobiotaHeatmapWidget(String name, String link, Set<SampleEntry> selectedSamples, String rank,
-			boolean isSubset, String lang) {
-		super(name, lang + link);
+			boolean isSubset) {
+		super(name, link);
 		this.selectedSamples = selectedSamples;
-		this.currentLang = lang;
 		if (isSubset) {
 			showViewSample = false;
 		}
@@ -113,7 +111,7 @@ public class MicrobiotaHeatmapWidget extends ReadVisualizeWidget {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+				History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 			}
 		});
 		viewSamplePanel.setVisible(false);

@@ -72,13 +72,12 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
-	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
-		this(selectedSamples, "", lang);
+	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples) {
+		this(selectedSamples, "");
 	}
 	
-	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, final String suffix, String lang) {
+	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, final String suffix) {
 		this.selectedSamples = selectedSamples;
-		this.currentLang = lang;
 		
 		HorizontalPanel topHp = new HorizontalPanel();
 		
@@ -142,13 +141,13 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 				if (refTypeListBox.getSelectedIndex() == 0) {
 					String rank = rankListBox.getValue(rankListBox.getSelectedIndex());
 					service.searchForSimilarReads(ProfilesAnalysisWidget.this.selectedSamples, rank, targetName,
-							Integer.valueOf(correlationListBox.getSelectedValue()), currentLang,
+							Integer.valueOf(correlationListBox.getSelectedValue()),
 							new AsyncCallback<SearchResultData>() {
 						
 						@Override
 						public void onSuccess(SearchResultData result) {
 							searchResultData = result;
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH + GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + suffix);
+							History.newItem(GutFloraConstant.NAVI_LINK_SEARCH + GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + suffix);
 							loadingPopupPanel.hide();
 						}
 						
@@ -161,12 +160,13 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 				} else {
 					String refType = refTypeListBox.getValue(refTypeListBox.getSelectedIndex());
 					service.searchForSimilerProfilesbyProfile(ProfilesAnalysisWidget.this.selectedSamples, targetName,
-							refType, Integer.valueOf(correlationListBox.getSelectedValue()), currentLang, new AsyncCallback<SearchResultData>() {
+							refType, Integer.valueOf(correlationListBox.getSelectedValue()), 
+							new AsyncCallback<SearchResultData>() {
 						
 						@Override
 						public void onSuccess(SearchResultData result) {
 							searchResultData = result;
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH + GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + suffix);
+							History.newItem(GutFloraConstant.NAVI_LINK_SEARCH + GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + suffix);
 							loadingPopupPanel.hide();
 						}
 						
@@ -246,7 +246,7 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		loadingPopupPanel.show();
 
 		// TODO have to show non-value type data
-		service.getProfilesAnalysisData(selectedSamples, currentLang, new AsyncCallback<GutFloraAnalysisData>() {
+		service.getProfilesAnalysisData(selectedSamples, new AsyncCallback<GutFloraAnalysisData>() {
 			
 			@Override
 			public void onSuccess(GutFloraAnalysisData result) {
@@ -512,29 +512,28 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 	private void updateTable(List<String> selectedColumns) {
 		loadingPopupPanel.show();
 
-		service.getProfilesAnalysisData(selectedSamples, selectedColumns, currentLang,
-				new AsyncCallback<GutFloraAnalysisData>() {
-			
+		service.getProfilesAnalysisData(selectedSamples, selectedColumns, new AsyncCallback<GutFloraAnalysisData>() {
+
 			@Override
 			public void onSuccess(GutFloraAnalysisData result) {
 				Widget table = createTableContent(result);
 
 				analysisTabelPanel.setWidget(table);
-				
+
 				profileListBox.clear();
 				profileListBox.addItem("");
 				Set<String> numericProfilesHeader = result.getNumericProfilesHeader();
-				for (String h: result.getProfilesHeader()) {
+				for (String h : result.getProfilesHeader()) {
 					if (numericProfilesHeader.contains(h)) {
 						profileListBox.addItem(h);
 					}
 				}
-				
+
 				currentColumns = result.getProfilesHeader();
-				
+
 				loadingPopupPanel.hide();
 			}
-			
+
 			@Override
 			public void onFailure(Throwable caught) {
 				warnMessage(SERVER_ERROR);
@@ -553,7 +552,7 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		dialogContents.setSpacing(4);
 		dialogBox.setWidget(dialogContents);
 
-		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(sampleId, currentLang);
+		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(sampleId);
 		dialogContents.add(sampleInfoWidget);
 
 		// Add a close button at the bottom of the dialog

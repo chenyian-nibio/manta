@@ -13,8 +13,8 @@ public class DataManageWidget extends FlowableWidget {
 	
 	private ManageWidget[] widgetList = new ManageWidget[4];
 
-	public DataManageWidget(String lang) {
-		super("Data Management", lang + GutFloraConstant.NAVI_LINK_UPLOAD);
+	public DataManageWidget() {
+		super("Data Management", GutFloraConstant.NAVI_LINK_UPLOAD);
 		tabPanel = loadTabPanel();
 	    initWidget(tabPanel);
 	}

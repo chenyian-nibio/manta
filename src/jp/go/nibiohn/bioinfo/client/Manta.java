@@ -62,7 +62,7 @@ public class Manta extends BasePage {
 		String initToken = History.getToken();
 		if (initToken.length() == 0) {
 			// use English by default
-			History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_SAMPLE);
+			History.newItem(GutFloraConstant.NAVI_LINK_SAMPLE);
 		}
 		
 		History.fireCurrentHistoryState();
@@ -85,7 +85,7 @@ public class Manta extends BasePage {
 
 					@Override
 					public void execute() {
-						History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_SAMPLE);
+						History.newItem(GutFloraConstant.NAVI_LINK_SAMPLE);
 						History.fireCurrentHistoryState();
 					}
 				});
@@ -98,7 +98,7 @@ public class Manta extends BasePage {
 
 					@Override
 					public void execute() {
-						History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_UPLOAD);
+						History.newItem(GutFloraConstant.NAVI_LINK_UPLOAD);
 						History.fireCurrentHistoryState();
 					}
 				});
@@ -117,18 +117,15 @@ public class Manta extends BasePage {
 			setMessageInvisible();
 		}
 
-		String option = event.getValue();
-		String value = option.substring(3);
-		String lang = option.substring(0, 3);
-		this.currentLang = lang;
+		String value = event.getValue();
 		if (value.equals(GutFloraConstant.NAVI_LINK_SAMPLE)) {
-			service.getSampleEntryList(currentLang, new AsyncCallback<List<SampleEntry>>() {
+			service.getSampleEntryList(new AsyncCallback<List<SampleEntry>>() {
 				
 				@Override
 				public void onSuccess(List<SampleEntry> result) {
 					widgetTrails.clear();
 					
-					sampleListWidget = new SampleListWidget(result, currentLang);
+					sampleListWidget = new SampleListWidget(result);
 					widgetTrails.add(sampleListWidget);
 					
 					// force to new a analysisWidget
@@ -148,19 +145,18 @@ public class Manta extends BasePage {
 				}
 			});
 			
-		// TODO to be improved
 		} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
 			if (value.startsWith(GutFloraConstant.NAVI_LINK_ANALYSIS)) {
 				if (readVisualizeWidget == null) {
-					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+					History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS);
 					return;
 				} else {
 					String sampleIdString = readVisualizeWidget.getSubsetSampleIdString();
 					if (sampleIdString == null || sampleIdString.equals("")) {
-						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+						History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS);
 						return;
 					}
-					service.getSelectedSampleEntrySet(sampleIdString, currentLang, new AsyncCallback<Set<SampleEntry>>() {
+					service.getSelectedSampleEntrySet(sampleIdString, new AsyncCallback<Set<SampleEntry>>() {
 						
 						@Override
 						public void onSuccess(Set<SampleEntry> result) {
@@ -168,7 +164,7 @@ public class Manta extends BasePage {
 								String selectedRank = readVisualizeWidget.getSelectedRank();
 								subsetAnalysisWidget = new SampleAnalysisWidget("Selected subset",
 										GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
-										result, selectedRank, currentLang);
+										result, selectedRank);
 							}
 
 							Iterator<FlowableWidget> iterator = widgetTrails.iterator();
@@ -200,8 +196,7 @@ public class Manta extends BasePage {
 				
 			} else if (value.startsWith(GutFloraConstant.NAVI_LINK_SEARCH)) {
 				if (subsetAnalysisWidget == null) {
-					// TODO to be defined!
-					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+					History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 					return;
 				} else {
 					int tabIndex = 0;
@@ -211,8 +206,7 @@ public class Manta extends BasePage {
 					SearchResultData searchResultData = subsetAnalysisWidget.getCorrectionResults(tabIndex);
 					
 					if (searchResultData == null) {
-						// TODO to be defined!
-						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+						History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 						return;
 					}
 					// TODO unchecked!
@@ -220,9 +214,9 @@ public class Manta extends BasePage {
 					FlowableWidget resultWidget;
 					if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {
 						List<String> currentColumns = analysisWidget.getReadsAnalysisWidget().getCurrentColumns();
-						resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value, currentLang);
+						resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value);
 					} else {
-						resultWidget = new SearchResultWidget(selectedSamples, searchResultData, value, currentLang);
+						resultWidget = new SearchResultWidget(selectedSamples, searchResultData, value);
 					}
 					widgetTrails.add(resultWidget);
 
@@ -235,15 +229,14 @@ public class Manta extends BasePage {
 				}
 			} else if (value.startsWith(GutFloraConstant.NAVI_LINK_VIEW_BARCHART)) {
 				if (subsetAnalysisWidget == null) {
-					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+					History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 					return;
 				} else {
 					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget();
 					ClusteredBarChartWidget subsetClusteredBarChartWidget = new ClusteredBarChartWidget(
 							"Subset Clustering", GutFloraConstant.NAVI_LINK_VIEW_BARCHART
 									+ GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
-									readWidget.getSelectedSamples(), readWidget.getSelectedRank(),
-									true, currentLang);
+									readWidget.getSelectedSamples(), readWidget.getSelectedRank(), true);
 					
 					// subsetClusteredBarChart so far is always the last widget
 					widgetTrails.add(subsetClusteredBarChartWidget);
@@ -255,15 +248,14 @@ public class Manta extends BasePage {
 				}
 			} else if (value.startsWith(GutFloraConstant.NAVI_LINK_VIEW_HEATMAP)) {
 				if (subsetAnalysisWidget == null) {
-					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+					History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 					return;
 				} else {
 					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget();
 					MicrobiotaHeatmapWidget subsetMicrobiotaHeatmapWidget = new MicrobiotaHeatmapWidget(
-							"Subset Clustering", GutFloraConstant.NAVI_LINK_VIEW_BARCHART
+							"Subset Clustering", GutFloraConstant.NAVI_LINK_VIEW_HEATMAP
 							+ GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
-							readWidget.getSelectedSamples(), readWidget.getSelectedRank(),
-							true, currentLang);
+							readWidget.getSelectedSamples(), readWidget.getSelectedRank(), true);
 					
 					// subsetClusteredBarChart so far is always the last widget
 					widgetTrails.add(subsetMicrobiotaHeatmapWidget);
@@ -273,15 +265,32 @@ public class Manta extends BasePage {
 					
 					setNaviBar();
 				}
+			} else if (value.startsWith(GutFloraConstant.NAVI_LINK_VIEW_PCOA)) {
+				if (subsetAnalysisWidget == null) {
+					History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+					return;
+				} else {
+					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget();
+					PcoaAnalysisWidget subsetReadVisualizeWidget = new PcoaAnalysisWidget("Subset PCoA Chart",
+							GutFloraConstant.NAVI_LINK_VIEW_PCOA + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
+							readWidget.getSelectedSamples(), true);
+					
+					widgetTrails.add(subsetReadVisualizeWidget);
+					
+					mainPanel.clear();
+					mainPanel.add(subsetReadVisualizeWidget);
+					
+					setNaviBar();
+				}
 			} else {
 				warnMessage("Illegal URL.");
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
+				History.newItem(GutFloraConstant.NAVI_LINK_SAMPLE);
 			}	
 
 		} else if (value.equals(GutFloraConstant.NAVI_LINK_ANALYSIS)) {
 			if (analysisWidget == null) {
 				if (sampleListWidget == null) {
-					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
+					History.newItem(GutFloraConstant.NAVI_LINK_SAMPLE);
 					return;
 				} else {
 					Set<SampleEntry> selectedSamples = sampleListWidget.getSelectedSamples();
@@ -289,11 +298,11 @@ public class Manta extends BasePage {
 					if (selectedSamples == null || selectedSamples.size() == 0) {
 						warnMessage("No sample was selected.");
 						hasMessage = true;
-						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
+						History.newItem(GutFloraConstant.NAVI_LINK_SAMPLE);
 						return;
 					}
 					
-					analysisWidget = new SampleAnalysisWidget(selectedSamples, currentLang);
+					analysisWidget = new SampleAnalysisWidget(selectedSamples);
 					
 				}
 			}
@@ -321,7 +330,7 @@ public class Manta extends BasePage {
 			infoPanel.setVisible(false);
 		} else if (value.startsWith(GutFloraConstant.NAVI_LINK_SEARCH)) {
 			if (analysisWidget == null) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+				History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS);
 				return;
 			} else {
 				int tabIndex = 0;
@@ -331,7 +340,7 @@ public class Manta extends BasePage {
 				SearchResultData searchResultData = analysisWidget.getCorrectionResults(tabIndex);
 				
 				if (searchResultData == null) {
-					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+					History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS);
 					return;
 				}
 				// TODO unchecked!
@@ -339,9 +348,9 @@ public class Manta extends BasePage {
 				FlowableWidget resultWidget;
 				if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {
 					List<String> currentColumns = analysisWidget.getReadsAnalysisWidget().getCurrentColumns();
-					resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value, currentLang);
+					resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value);
 				} else {
-					resultWidget = new SearchResultWidget(selectedSamples, searchResultData, value, currentLang);
+					resultWidget = new SearchResultWidget(selectedSamples, searchResultData, value);
 				}
 				
 				widgetTrails.add(resultWidget);
@@ -355,13 +364,13 @@ public class Manta extends BasePage {
 			}
 		} else if (value.equals(GutFloraConstant.NAVI_LINK_VIEW_BARCHART)) {
 			if (analysisWidget == null) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+				History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS);
 				return;
 			} else {
 				if (readVisualizeWidget == null) {
 					ReadsAnalysisWidget readWidget = analysisWidget.getReadsAnalysisWidget();
 					readVisualizeWidget = new ClusteredBarChartWidget(readWidget.getSelectedSamples(),
-							readWidget.getSelectedRank(), false, currentLang);
+							readWidget.getSelectedRank(), false);
 				}
 				
 				Iterator<FlowableWidget> iterator = widgetTrails.iterator();
@@ -385,13 +394,13 @@ public class Manta extends BasePage {
 			}
 		} else if (value.equals(GutFloraConstant.NAVI_LINK_VIEW_HEATMAP)) {
 			if (analysisWidget == null) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+				History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS);
 				return;
 			} else {
 				if (readVisualizeWidget == null) {
 					ReadsAnalysisWidget readWidget = analysisWidget.getReadsAnalysisWidget();
 					readVisualizeWidget = new MicrobiotaHeatmapWidget(readWidget.getSelectedSamples(),
-							readWidget.getSelectedRank(), false, currentLang);
+							readWidget.getSelectedRank(), false);
 				}
 				
 				Iterator<FlowableWidget> iterator = widgetTrails.iterator();
@@ -415,12 +424,12 @@ public class Manta extends BasePage {
 			}
 		} else if (value.equals(GutFloraConstant.NAVI_LINK_VIEW_PCOA)) {
 			if (analysisWidget == null) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+				History.newItem(GutFloraConstant.NAVI_LINK_ANALYSIS);
 				return;
 			} else {
 				if (readVisualizeWidget == null) {
 					ReadsAnalysisWidget readWidget = analysisWidget.getReadsAnalysisWidget();
-					readVisualizeWidget = new PcoaAnalysisWidget(readWidget.getSelectedSamples(), false, currentLang);
+					readVisualizeWidget = new PcoaAnalysisWidget(readWidget.getSelectedSamples(), false);
 				}
 				
 				Iterator<FlowableWidget> iterator = widgetTrails.iterator();
@@ -445,7 +454,7 @@ public class Manta extends BasePage {
 		} else if (value.equals(GutFloraConstant.NAVI_LINK_UPLOAD)) {
 			// load the page
 			widgetTrails.clear();
-			DataManageWidget dataManageWidget = new DataManageWidget(currentLang);
+			DataManageWidget dataManageWidget = new DataManageWidget();
 			widgetTrails.add(dataManageWidget);
 			mainPanel.clear();
 			mainPanel.add(dataManageWidget);
@@ -453,8 +462,7 @@ public class Manta extends BasePage {
 			setNaviBar();
 		} else {
 			warnMessage("Illegal URL.");
-			// choose English as default
-			History.newItem(GutFloraConstant.LANG_EN + GutFloraConstant.NAVI_LINK_SAMPLE);
+			History.newItem(GutFloraConstant.NAVI_LINK_SAMPLE);
 		}
 		
 	}

@@ -2,9 +2,6 @@ package jp.go.nibiohn.bioinfo.client;
 
 import java.util.List;
 
-import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
-import jp.go.nibiohn.bioinfo.shared.SampleEntry;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -20,6 +17,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
+import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
+import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 
 public class SampleInfoWidget extends Composite {
 
@@ -40,10 +40,7 @@ public class SampleInfoWidget extends Composite {
 	private boolean readInfoDisplay = true;
 	private boolean dietInfoDisplay = false;
 	
-	private String currentLang;
-
-	public SampleInfoWidget(final String sampleId, String lang) {
-		this.currentLang = lang;
+	public SampleInfoWidget(final String sampleId) {
 
 		VerticalPanel thisWidget = new VerticalPanel();
 		
@@ -123,7 +120,7 @@ public class SampleInfoWidget extends Composite {
 	}
 	
 	private void getSampleInfo(String sampleId) {
-		service.getSampleEntry(sampleId, currentLang, new AsyncCallback<SampleEntry>() {
+		service.getSampleEntry(sampleId, new AsyncCallback<SampleEntry>() {
 			
 			@Override
 			public void onSuccess(SampleEntry entry) {
@@ -206,7 +203,7 @@ public class SampleInfoWidget extends Composite {
 	}
 	
 	private void getProfileData(String sampleId) {
-		service.getSampleProfile(sampleId, currentLang, new AsyncCallback<List<List<String>>>() {
+		service.getSampleProfile(sampleId, new AsyncCallback<List<List<String>>>() {
 			
 			@Override
 			public void onSuccess(List<List<String>> result) {

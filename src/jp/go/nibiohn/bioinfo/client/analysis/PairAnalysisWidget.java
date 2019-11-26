@@ -76,9 +76,8 @@ public class PairAnalysisWidget extends AnalysisWidget {
 	
 	private List<List<String>> pairDataList = new ArrayList<List<String>>();
 	
-	public PairAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
+	public PairAnalysisWidget(Set<SampleEntry> selectedSamples) {
 		this.selectedSamples = selectedSamples;
-		this.currentLang = lang;
 		sortedSampleIds = getSortedSampleList(selectedSamples);
 		
 		HorizontalPanel topHp = new HorizontalPanel();
@@ -317,7 +316,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 	private void updateReadListBox() {
 		String rank = rankListBoxX.getSelectedItemText();
 		if (rank.equals(OPTION_PARAMETER)) {
-			service.getAllNumericParameterEntry(currentLang, new AsyncCallback<List<ParameterEntry>>() {
+			service.getAllNumericParameterEntry(new AsyncCallback<List<ParameterEntry>>() {
 				
 				@Override
 				public void onSuccess(List<ParameterEntry> result) {
@@ -364,7 +363,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 	private void updateProfileListBox() {
 		String rank = rankListBoxY.getSelectedItemText();
 		if (rank.equals(OPTION_PARAMETER)) {
-			service.getAllNumericParameterEntry(currentLang, new AsyncCallback<List<ParameterEntry>>() {
+			service.getAllNumericParameterEntry(new AsyncCallback<List<ParameterEntry>>() {
 				
 				@Override
 				public void onSuccess(List<ParameterEntry> result) {

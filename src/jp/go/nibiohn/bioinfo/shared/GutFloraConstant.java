@@ -44,8 +44,6 @@ public class GutFloraConstant {
 	public static final String NAVI_LINK_ADMIN = "administration";
 	public static final String[] TABLE_NAMES = new String[]{"sample", "microbiota", "parameter_info", "parameter_value"};
 
-	public static final String LANG_EN = "en_";
-
 	public static final String COLUMN_HEADER_OTHERS = "Others";
 
 	public static final String USER_NAME_GUEST = "Guest";

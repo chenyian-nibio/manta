@@ -24,19 +24,17 @@ public class SampleAnalysisWidget extends FlowableWidget {
 
 	private TabPanel tabPanel;
 
-	public SampleAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
-		super("Analysis", lang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+	public SampleAnalysisWidget(Set<SampleEntry> selectedSamples) {
+		super("Analysis", GutFloraConstant.NAVI_LINK_ANALYSIS);
 		this.selectedSamples = selectedSamples;
-		this.currentLang = lang;
 		tabPanel = loadTabPanel(selectedSamples);
 	    initWidget(tabPanel);
 	}
 
 	// for subset analysis
-	public SampleAnalysisWidget(String name, String link, Set<SampleEntry> selectedSamples, String initRank, String lang) {
-		super(name, lang + link);
+	public SampleAnalysisWidget(String name, String link, Set<SampleEntry> selectedSamples, String initRank) {
+		super(name, link);
 		this.selectedSamples = selectedSamples;
-		this.currentLang = lang;
 		tabPanel = loadSubsetTabPanel(selectedSamples, initRank, GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 		initWidget(tabPanel);
 	}
@@ -44,9 +42,9 @@ public class SampleAnalysisWidget extends FlowableWidget {
 	private TabPanel loadTabPanel(Set<SampleEntry> selectedSamples) {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
-		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
-		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
-		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
+		tabPanel.add(new ReadsAnalysisWidget(selectedSamples), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
+		tabPanel.add(new PairAnalysisWidget(selectedSamples), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.selectTab(0);
 		
 		// the border around the tab panel is not very good looking
@@ -57,9 +55,9 @@ public class SampleAnalysisWidget extends FlowableWidget {
 	private TabPanel loadSubsetTabPanel(Set<SampleEntry> selectedSamples, String initRank, String suffix) {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
-		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
-		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
-		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
+		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, initRank, suffix), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, suffix), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
+		tabPanel.add(new PairAnalysisWidget(selectedSamples), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.selectTab(0);
 		
 		// the border around the tab panel is not very good looking

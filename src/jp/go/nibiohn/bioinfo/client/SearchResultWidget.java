@@ -31,10 +31,8 @@ public class SearchResultWidget extends FlowableWidget {
 
 	private VisualizeResultWidget vrWidget;
 	
-	public SearchResultWidget(Set<SampleEntry> selectedSamples, SearchResultData searchResultData, String historyTag,
-			String lang) {
+	public SearchResultWidget(Set<SampleEntry> selectedSamples, SearchResultData searchResultData, String historyTag) {
 		super("Search results", historyTag);
-		this.currentLang = lang;
 		
 		HorizontalPanel thisWidget = new HorizontalPanel();
 		
@@ -42,7 +40,7 @@ public class SearchResultWidget extends FlowableWidget {
 		thisWidget.add(visualPanel);
 		
 		vrWidget = new VisualizeResultWidget(selectedSamples, searchResultData.getRank(), searchResultData.getReferenceType(),
-				searchResultData.getReferenceName(), searchResultData.getCorrelationMethod(), currentLang);
+				searchResultData.getReferenceName(), searchResultData.getCorrelationMethod());
 		visualPanel.add(vrWidget);
 		
 		initWidget(thisWidget);

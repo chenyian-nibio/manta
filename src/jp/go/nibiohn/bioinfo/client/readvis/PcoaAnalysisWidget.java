@@ -49,14 +49,13 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 
 	private List<String> sampleIdList = new ArrayList<String>();
 
-	public PcoaAnalysisWidget(Set<SampleEntry> selectedSamples, boolean isSubset, String lang) {
-		this("PCoA Chart", GutFloraConstant.NAVI_LINK_VIEW_PCOA, selectedSamples, isSubset, lang);
+	public PcoaAnalysisWidget(Set<SampleEntry> selectedSamples, boolean isSubset) {
+		this("PCoA Chart", GutFloraConstant.NAVI_LINK_VIEW_PCOA, selectedSamples, isSubset);
 	}
 
-	public PcoaAnalysisWidget(String name, String link, Set<SampleEntry> selectedSamples, boolean isSubset, String lang) {
-		super(name, lang + link);
+	public PcoaAnalysisWidget(String name, String link, Set<SampleEntry> selectedSamples, boolean isSubset) {
+		super(name, link);
 		this.selectedSamples = selectedSamples;
-		this.currentLang = lang;
 
 		HorizontalPanel thisWidget = new HorizontalPanel();
 		VerticalPanel chartVp = new VerticalPanel();
@@ -87,20 +86,20 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 				if (pcoaResultMap.get(distanceType) == null) {
 					// TODO ??
 				}
-				service.getPCoAScatterPlot(pcoaResultMap.get(distanceType), profileListBox.getSelectedValue(), currentLang,
+				service.getPCoAScatterPlot(pcoaResultMap.get(distanceType), profileListBox.getSelectedValue(),
 						new AsyncCallback<String>() {
-					
-					@Override
-					public void onSuccess(String result) {
-						chartPanel.setWidget(new HTML(result));
-						loadingPopupPanel.hide();
-					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						warnMessage(FlowableWidget.SERVER_ERROR);
-					}
-				});
+
+							@Override
+							public void onSuccess(String result) {
+								chartPanel.setWidget(new HTML(result));
+								loadingPopupPanel.hide();
+							}
+
+							@Override
+							public void onFailure(Throwable caught) {
+								warnMessage(FlowableWidget.SERVER_ERROR);
+							}
+						});
 			}
 		});
 		
@@ -188,6 +187,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 		});
 		profileVp.add(label5);
 
+		// TODO not finished yet!
 		final FormPanel formPanel = new FormPanel();
 		profileVp.add(formPanel);
 		Label label6 = new Label("Export current grouping");
@@ -202,8 +202,6 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 				formPanel.setWidget(flowPanel);
 				Hidden profileHidden = new Hidden("profile", profileListBox.getSelectedValue());
 				flowPanel.add(profileHidden);
-				Hidden currentLangHidden = new Hidden("currentLang", currentLang);
-				flowPanel.add(currentLangHidden);
 				Iterator<String> iterator = sampleIdList.iterator();
 				StringBuffer sb = new StringBuffer();
 				while (iterator.hasNext()) {
@@ -220,7 +218,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 				formPanel.submit();
 			}
 		});
-		profileVp.add(label5);
+//		profileVp.add(label6);
 		
 		profileListBox.setWidth("300px");
 		profileListBox.setVisibleItemCount(10);
@@ -332,21 +330,22 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 				if (pcoaResultMap.get(distanceType) == null) {
 					// TODO should not happen?
 				}
-				service.getPCoAScatterPlot(pcoaResultMap.get(distanceType), textArea.getText(), new AsyncCallback<String>() {
-					
-					@Override
-					public void onSuccess(String result) {
-						chartPanel.setWidget(new HTML(result));
-						dialogBoxMessageLable.setVisible(false);
-						dialogBox.hide();
-					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						warnMessage(FlowableWidget.SERVER_ERROR);
-						dialogBox.hide();
-					}
-				});
+				service.getPCoAScatterPlotWithCustomTags(pcoaResultMap.get(distanceType), textArea.getText(),
+						new AsyncCallback<String>() {
+
+							@Override
+							public void onSuccess(String result) {
+								chartPanel.setWidget(new HTML(result));
+								dialogBoxMessageLable.setVisible(false);
+								dialogBox.hide();
+							}
+
+							@Override
+							public void onFailure(Throwable caught) {
+								warnMessage(FlowableWidget.SERVER_ERROR);
+								dialogBox.hide();
+							}
+						});
 			}
 		});
 		okButton.setWidth("80px");
@@ -380,8 +379,8 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 	}
 
 	private void getProfileList() {
-		service.getProfileNames(currentLang, new AsyncCallback<List<String>>() {
-			
+		service.getProfileNames(new AsyncCallback<List<String>>() {
+
 			@Override
 			public void onSuccess(List<String> result) {
 				profileListBox.clear();
@@ -389,7 +388,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 					profileListBox.addItem(string);
 				}
 			}
-			
+
 			@Override
 			public void onFailure(Throwable caught) {
 				warnMessage(FlowableWidget.SERVER_ERROR);

@@ -67,12 +67,11 @@ public class MlrSearchResultWidget extends FlowableWidget {
 	private List<String> currentColumns;
 	
 	public MlrSearchResultWidget(Set<SampleEntry> selectedSamples, SearchResultData searchResultData,
-			List<String> currentColumns, String historyTag, String lang) {
-		super("Search results (MLR)", lang + historyTag);
+			List<String> currentColumns, String historyTag) {
+		super("Search results (MLR)", historyTag);
 		
 		this.selectedSamples = selectedSamples;
 		this.currentColumns = currentColumns;
-		this.currentLang = lang;
 		
 		HorizontalPanel thisWidget = new HorizontalPanel();
 		
@@ -302,15 +301,14 @@ public class MlrSearchResultWidget extends FlowableWidget {
 					final String profileName = value.get(0);
 					profileNameLabel.setText(profileName);
 					
-					service.getProfilesList(selectedSamples, value.get(0), currentLang, 
-							new AsyncCallback<PairListData>() {
-						
+					service.getProfilesList(selectedSamples, value.get(0), new AsyncCallback<PairListData>() {
+
 						@Override
 						public void onSuccess(PairListData result) {
 							profilesOriList = result.getOriginalList();
 							drawLineChart(profileName);
 						}
-						
+
 						@Override
 						public void onFailure(Throwable caught) {
 							warnMessage(FlowableWidget.SERVER_ERROR);
