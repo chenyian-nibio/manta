@@ -1,23 +1,19 @@
-DROP TABLE IF EXISTS sample;
 CREATE TABLE sample (
 	id text PRIMARY KEY,
 	create_date date
 );
 
-DROP TABLE IF EXISTS taxon_rank;
 CREATE TABLE taxon_rank (
 	id integer PRIMARY KEY,
 	name text
 );
 
-DROP TABLE IF EXISTS taxonomy;
 CREATE TABLE taxonomy (
 	id text PRIMARY KEY,
 	rank_id integer REFERENCES taxon_rank,
 	name text
 );
 
-DROP TABLE IF EXISTS microbiota;
 CREATE TABLE microbiota (
 	sample_id text REFERENCES sample NOT NULL,
 	taxonkey text,
@@ -32,14 +28,12 @@ CREATE TABLE microbiota (
 	read_pct numeric
 );
 
-DROP TABLE IF EXISTS parameter_type;
 CREATE TABLE parameter_type (
 	id integer PRIMARY KEY,
 	type_name text,
 	description text
 );
 
-DROP TABLE IF EXISTS parameter_info;
 CREATE TABLE parameter_info (
 	sysid integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	id text NOT NULL UNIQUE,
@@ -50,28 +44,24 @@ CREATE TABLE parameter_info (
 	visible boolean
 );
 
-DROP TABLE IF EXISTS parameter_value;
 CREATE TABLE parameter_value (
 	sample_id text REFERENCES sample NOT NULL,
 	parameter_id text REFERENCES parameter_info NOT NULL,
 	parameter_value text
 );
 
-DROP TABLE IF EXISTS dominant_taxon;
 CREATE TABLE dominant_taxon (
 	sample_id text REFERENCES sample NOT NULL,
 	rank_id integer REFERENCES taxon_rank NOT NULL,
 	taxon_id text REFERENCES taxonomy NOT NULL
 );
 
-DROP TABLE IF EXISTS distance_type;
 CREATE TABLE distance_type (
 	id integer PRIMARY KEY,
 	type_code text,
 	type_name text
 );
 
-DROP TABLE IF EXISTS sample_distance;
 CREATE TABLE sample_distance (
 	sample_id_1 text REFERENCES sample NOT NULL,
 	sample_id_2 text REFERENCES sample NOT NULL,
@@ -79,14 +69,12 @@ CREATE TABLE sample_distance (
 	distance_type_id integer REFERENCES distance_type NOT NULL
 );
 
-DROP TABLE IF EXISTS sample_diversity;
 CREATE TABLE sample_diversity (
 	sample_id text REFERENCES sample PRIMARY KEY,
 	shannon numeric,
 	simpson numeric
 );
 
-DROP TABLE IF EXISTS sample_display_columns;
 CREATE TABLE sample_display_columns (
 	position integer PRIMARY KEY,
 	parameter_id text REFERENCES parameter_info
