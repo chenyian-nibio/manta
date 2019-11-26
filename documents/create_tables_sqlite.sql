@@ -42,7 +42,7 @@ CREATE TABLE parameter_type (
 DROP TABLE IF EXISTS parameter_info;
 CREATE TABLE parameter_info (
 	sysid integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	id text,
+	id text NOT NULL UNIQUE,
 	title text,
 	unit text,
 	note text,
