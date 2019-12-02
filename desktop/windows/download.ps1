@@ -7,6 +7,10 @@ if(!(Test-Path resources )){
     mkdir resources
 }
 
+if(!(Test-Path ..\resources )){
+    mkdir ..\resources
+}
+
 Set-Location resources
 
 # if(!(Test-Path gwt )){
@@ -14,11 +18,11 @@ Set-Location resources
 #     Expand-Archive -Path gwt.zip -DestinationPath .
 #     Move-Item gwt-2.8.2 gwt
 # }
-if(!(Test-Path gwt )){
+if(!(Test-Path ..\..\resources\gwt )){
     Write-Output "Downloading gwt"
     Invoke-WebRequest -Uri http://goo.gl/t7FQSn -OutFile .\gwt.zip
     Expand-Archive -Path gwt.zip -DestinationPath .
-    Move-Item gwt-2.7.0 gwt
+    Move-Item gwt-2.7.0 ..\..\resources\gwt
 }
 if(Test-Path .\gwt\samples){
 	Remove-Item .\gwt\samples -Recurse -Force -Confirm:$false

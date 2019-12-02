@@ -30,7 +30,7 @@ xcopy /s/e/i/y/q %resource_dir%\tomcat-embed %release_path%\tomcat-embed
 sqlite3 %release_path%\gutflora.db < documents\create_tables_sqlite.sql
 
 cd %release_path%
-javac -classpath ".\tomcat-embed\*" -d . ..\..\MantaLauncher.java
+javac -classpath ".\tomcat-embed\*" -d . ..\..\..\MantaLauncher.java
 jar cfe .\MantaLauncher.jar MantaLauncher .\MantaLauncher.class
 exewrap -t 1.8 -L .;.\tomcat-embed\* -e SHARE .\MantaLauncher.jar
 del .\MantaLauncher.class
