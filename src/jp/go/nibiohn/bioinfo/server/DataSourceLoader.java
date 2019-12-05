@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.nio.file.InvalidPathException;
 import java.net.URISyntaxException;
 
+import org.apache.commons.lang.SystemUtils;
+
 // For server version
 // import jp.go.nibiohn.bioinfo.shared.GutFloraConfig;
 
@@ -37,8 +39,13 @@ public class DataSourceLoader{
         backend = "sqlite";
         config = new HikariConfig();
         try {
+            String dbPath;
             Path classPath = Paths.get(DataSourceLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-            String dbPath = classPath.getParent().getParent().getParent().resolve("gutflora.db").toString();
+            if (SystemUtils.IS_OS_MAC) {
+                dbPath = Paths.get(System.getProperty("user.home") + "/Library/Manta/gutflora.db").toString();
+            } else {
+                dbPath = classPath.getParent().getParent().getParent().resolve("gutflora.db").toString();
+            }
             if (dbPath == null) {
                 dbPath = "gutflora.db";
             }
