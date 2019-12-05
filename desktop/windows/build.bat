@@ -23,16 +23,18 @@ cd ..
 if not exist %release_dir% mkdir %release_dir%
 if exist %release_path% rmdir /s/q %release_path%
 mkdir %release_path%
+mkdir %release_path%\lib
 
 copy /y war\manta.war %release_path%\manta.war
 xcopy /s/e/i/y/q %resource_dir%\tomcat-embed %release_path%\tomcat-embed
+copy /y %resource_dir%\commons-lang3-3.9.jar %release_path%\commons-lang3-3.9.jar
 
 sqlite3 %release_path%\gutflora.db < documents\create_tables_sqlite.sql
 
 cd %release_path%
-javac -classpath ".\tomcat-embed\*" -d . ..\..\..\MantaLauncher.java
+javac -classpath ".:.\lib\*:.\tomcat-embed\*" -d . ..\..\..\MantaLauncher.java
 jar cfe .\MantaLauncher.jar MantaLauncher .\MantaLauncher.class
-exewrap -t 1.8 -L .;.\tomcat-embed\* -e SHARE .\MantaLauncher.jar
+exewrap -t 1.8 -L .;.\lib\*;.\tomcat-embed\* -e SHARE .\MantaLauncher.jar
 del .\MantaLauncher.class
 
 cd ..\..\..\..

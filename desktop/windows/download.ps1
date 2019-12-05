@@ -14,7 +14,7 @@ if(!(Test-Path ..\resources )){
 Set-Location resources
 
 # if(!(Test-Path gwt )){
-#     Invoke-WebRequest -Uri https://goo.gl/pZZPXS -OutFile .\gwt.zip 
+#     Invoke-WebRequest -Uri https://goo.gl/pZZPXS -OutFile .\gwt.zip
 #     Expand-Archive -Path gwt.zip -DestinationPath .
 #     Move-Item gwt-2.8.2 gwt
 # }
@@ -62,6 +62,10 @@ if(!(Test-Path sqlite-tools )){
     Invoke-WebRequest -Uri https://www.sqlite.org/2019/sqlite-tools-win32-x86-3300100.zip -OutFile .\sqlite-tools.zip
     Expand-Archive -Path sqlite-tools.zip -DestinationPath .
     Move-Item sqlite-tools-win32-x86-3300100 sqlite-tools
+}
+if(!(Test-Path commons-lang3-3.9.jar )){
+    Write-Output "Downloading commons-lang3"
+    Invoke-WebRequest -Uri https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.9/commons-lang3-3.9.jar
 }
 if(!(Test-Path exewrap )){
     Write-Output "Downloading exewrap"
