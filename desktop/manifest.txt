@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: MantaLauncher
+Class-Path: lib/commons-lang3-3.9.jar tomcat-embed/annotations-api.jar tomcat-embed/tomcat-embed-core.jar tomcat-embed/tomcat-embed-el.jar tomcat-embed/tomcat-embed-jasper.jar tomcat-embed/tomcat-embed-websocket.jar tomcat-embed/tomcat-dbcp.jar tomcat-embed/ecj-4.6.3.jar
+Created-By: 1.8.0_232 (Amazon.com Inc.)

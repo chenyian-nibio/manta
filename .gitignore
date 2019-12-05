@@ -4,7 +4,7 @@ war/WEB-INF/classes/
 war/WEB-INF/deploy/
 war/manta/
 manta.war
-desktop/windows/resources/
-desktop/windows/releases/
+desktop/**/resources/
+desktop/**/releases/
 .gwt/
 .settings/
