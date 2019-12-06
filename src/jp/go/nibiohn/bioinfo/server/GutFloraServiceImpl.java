@@ -23,10 +23,11 @@ import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.zaxxer.hikari.HikariConfig;
+
 import com.zaxxer.hikari.HikariDataSource;
 
 import jp.go.nibiohn.bioinfo.client.GutFloraService;
+import jp.go.nibiohn.bioinfo.server.DataSourceLoader;
 import jp.go.nibiohn.bioinfo.server.clustering.Dendrogram;
 import jp.go.nibiohn.bioinfo.server.clustering.HierarchicalClustering;
 import jp.go.nibiohn.bioinfo.server.clustering.HierarchicalClustering.LinkageType;
@@ -53,27 +54,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	private LinkageType[] linkageTypes = new LinkageType[] { LinkageType.AVERAGE, LinkageType.COMPLETE,
 			LinkageType.SINGLE };
 	
-	private HikariConfig config;
-	
-	private HikariDataSource getHikariDataSource() {
-		if (config == null) {
-			Properties props = new Properties();
-			try {
-				Class.forName("org.postgresql.Driver");
-				props.load(GutFloraServiceImpl.class.getClassLoader().getResourceAsStream(GutFloraConfig.PGSQL_PROP_FILE));
-			} catch (IOException e) {
-				throw new RuntimeException("Problem loading properties '" + GutFloraConfig.PGSQL_PROP_FILE + "'", e);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			config = new HikariConfig(props);
-		}
-		return new HikariDataSource(config);
-	}
-	
 	@Override
 	public List<SampleEntry> getSampleEntryList() {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -154,7 +137,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<List<String>> getSampleProfile(String sampleId) {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -212,7 +195,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 */
 	@Override
 	public List<List<String>> getMicrobiota(String sampleId, String rank) {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -252,7 +235,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<List<String>> getSampleReads(String sampleId, String rank, String taxonId) {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -297,7 +280,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public Set<SampleEntry> getSelectedSampleEntrySet(String sampleIdString) {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -340,7 +323,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public SampleEntry getSampleEntry(String sampleId) {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -378,7 +361,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	private GutFloraAnalysisData getKingdomReadsAnalysisData(Set<SampleEntry> selectedSamples) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -454,7 +437,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} else {
 			List<String> sampleIdList = getSortedSampleList(selectedSamples);
 			
-			HikariDataSource ds = getHikariDataSource();
+			HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 			Connection connection = null;
 			try {
 				connection = ds.getConnection();
@@ -568,7 +551,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		String q0Rank = rank;
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -742,7 +725,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -889,7 +872,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		String q0Rank = rank;
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1076,7 +1059,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Map<Integer, DendrogramCache> cacheMap) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1358,7 +1341,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			List<String> selectedcolumns) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		String q0Rank = rank;
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1472,7 +1455,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	private GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, int numOfColumns) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1569,7 +1552,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	public GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1656,7 +1639,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	public List<TaxonEntry> getAllTaxonEntries(Set<SampleEntry> selectedSamples, String rank) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1701,7 +1684,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<ParameterEntry> getAllNumericParameterEntry() {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1742,7 +1725,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<ParameterEntry> getAllParameterEntry() {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1785,7 +1768,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	public PairListData getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1843,7 +1826,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	public PairListData getReadsAndPctList(Set<SampleEntry> selectedSamples, String rank, String taxonName) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -1966,7 +1949,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		// TODO [to be improved] should be better to use parameter id ...
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -2015,7 +1998,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	public PairListData getProfilesListById(Set<SampleEntry> selectedSamples, String paraId) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -2079,7 +2062,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		// do multiple linear regression (MLR)
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -2183,7 +2166,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Integer correlationMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -2278,7 +2261,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Integer correlationMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -2373,7 +2356,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String paraType, Integer correlationMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -2469,7 +2452,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	public Map<String, Double[]> getAllReadsPctList(Set<SampleEntry> selectedSamples, String rank,
 			List<String> taxonNames) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -2522,7 +2505,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	public Map<String, String> getSampleDiversity(Set<SampleEntry> selectedSamples) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		Map<String,String> diverMap = null;
 		try {
@@ -2564,7 +2547,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<String> getSampleDiversity(String sampleId) {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		List<String> ret = null;
 		try {
@@ -2607,7 +2590,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		String q0Rank = rank;
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -2733,7 +2716,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		String q0Rank = rank;
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -3014,7 +2997,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	private Map<String, Map<String, Double>> getSampleDistanceMatrix(List<String> sampleIdList, Integer distanceType) {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		Map<String, Map<String, Double>> matrix = new HashMap<String, Map<String,Double>>();
 		try {
@@ -3184,7 +3167,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 */
 	@Override
 	public List<String> getProfileNames() {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -3265,7 +3248,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		Map<String, String> paraValueMap = new HashMap<String, String>();
 		List<String> categoryList = new ArrayList<String>();
 		Map<String, Integer> colorMap = new HashMap<String, Integer>();
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -3524,7 +3507,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<String> getSampleDisplayColumn() {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -3565,7 +3548,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public Boolean setSampleDisplayColumn(int position, String parameterId) {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -3608,7 +3591,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public List<String> getAllParameterTypes() {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -3646,7 +3629,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public Boolean setParameterType(String parameterId, Integer typeId) {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -3682,7 +3665,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public Map<Integer, String> getAllDistanceTypes() {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -3721,7 +3704,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public Boolean deleteAllContents() {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			connection = ds.getConnection();
@@ -3766,7 +3749,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public String getDatabaseSummary() {
-		HikariDataSource ds = getHikariDataSource();
+		HikariDataSource ds = DataSourceLoader.getHikariDataSource();
 		Connection connection = null;
 		try {
 			int sampleCount = 0;
@@ -3789,7 +3772,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				mbSampleCount = mcResults.getInt("count");
 			}
 			
-			String pvCountQuery = " select count(distinct(sample_id)) from parameter_value ";
+			String pvCountQuery = " select count(distinct(sample_id)) AS count from parameter_value ";
 			ResultSet pvResults = statement.executeQuery(pvCountQuery);
 			while (pvResults.next()) {
 				pvSampleCount = pvResults.getInt("count");
