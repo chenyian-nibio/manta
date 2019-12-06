@@ -69,7 +69,6 @@ javapackager -deploy \
   -BjvmOptions=-showversion \
   -v \
   -Bruntime="$RESOURCE_DIR/amazon-corretto-8.jdk"
-#   # -Bruntime=
 
 cd $BUILD_ROOT
 
