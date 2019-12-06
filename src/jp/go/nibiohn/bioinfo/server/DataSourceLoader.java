@@ -49,7 +49,6 @@ public class DataSourceLoader{
             if (dbPath == null) {
                 dbPath = "gutflora.db";
             }
-            System.out.println("Database path: " + dbPath);
             config.setJdbcUrl("jdbc:sqlite:" + dbPath);
         } catch (InvalidPathException e) {
             e.printStackTrace();

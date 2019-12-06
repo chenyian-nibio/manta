@@ -65,7 +65,7 @@ if(!(Test-Path sqlite-tools )){
 }
 if(!(Test-Path commons-lang3-3.9.jar )){
     Write-Output "Downloading commons-lang3"
-    Invoke-WebRequest -Uri https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.9/commons-lang3-3.9.jar
+    Invoke-WebRequest -Uri https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.9/commons-lang3-3.9.jar -OutFile commons-lang3-3.9.jar 
 }
 if(!(Test-Path exewrap )){
     Write-Output "Downloading exewrap"
