@@ -40,16 +40,20 @@ public class DataSourceLoader{
         config = new HikariConfig();
         try {
             String dbPath;
+            String options = "";
             Path classPath = Paths.get(DataSourceLoader.class.getProtectionDomain().getCodeSource().getLocation().toURI());
             if (SystemUtils.IS_OS_MAC) {
                 dbPath = Paths.get(System.getProperty("user.home") + "/Library/Manta/gutflora.db").toString();
             } else {
                 dbPath = classPath.getParent().getParent().getParent().resolve("gutflora.db").toString();
             }
+            if (SystemUtils.IS_OS_WINDOWS) {
+                options = "?journal_mode=WAL";
+            }
             if (dbPath == null) {
                 dbPath = "gutflora.db";
             }
-            config.setJdbcUrl("jdbc:sqlite:" + dbPath);
+            config.setJdbcUrl("jdbc:sqlite:" + dbPath + options);
         } catch (InvalidPathException e) {
             e.printStackTrace();
         } catch (URISyntaxException e) {
