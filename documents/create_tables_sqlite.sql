@@ -15,7 +15,7 @@ CREATE TABLE taxonomy (
 );
 
 CREATE TABLE microbiota (
-	sample_id text REFERENCES sample NOT NULL,
+	sample_id text REFERENCES sample ON DELETE CASCADE NOT NULL,
 	taxonkey text,
 	kingdom_id text REFERENCES taxonomy,
 	phylum_id text REFERENCES taxonomy,
@@ -45,13 +45,13 @@ CREATE TABLE parameter_info (
 );
 
 CREATE TABLE parameter_value (
-	sample_id text REFERENCES sample NOT NULL,
-	parameter_id text REFERENCES parameter_info NOT NULL,
+	sample_id text REFERENCES sample ON DELETE CASCADE NOT NULL,
+	parameter_id text REFERENCES parameter_info(id) ON DELETE CASCADE NOT NULL,
 	parameter_value text
 );
 
 CREATE TABLE dominant_taxon (
-	sample_id text REFERENCES sample NOT NULL,
+	sample_id text REFERENCES sample ON DELETE CASCADE NOT NULL,
 	rank_id integer REFERENCES taxon_rank NOT NULL,
 	taxon_id text REFERENCES taxonomy NOT NULL
 );
@@ -63,21 +63,21 @@ CREATE TABLE distance_type (
 );
 
 CREATE TABLE sample_distance (
-	sample_id_1 text REFERENCES sample NOT NULL,
-	sample_id_2 text REFERENCES sample NOT NULL,
+	sample_id_1 text REFERENCES sample ON DELETE CASCADE NOT NULL,
+	sample_id_2 text REFERENCES sample ON DELETE CASCADE NOT NULL,
 	distance numeric NOT NULL,
 	distance_type_id integer REFERENCES distance_type NOT NULL
 );
 
 CREATE TABLE sample_diversity (
-	sample_id text REFERENCES sample PRIMARY KEY,
+	sample_id text REFERENCES sample ON DELETE CASCADE PRIMARY KEY,
 	shannon numeric,
 	simpson numeric
 );
 
 CREATE TABLE sample_display_columns (
 	position integer PRIMARY KEY,
-	parameter_id text REFERENCES parameter_info
+	parameter_id text REFERENCES parameter_info(id) ON DELETE CASCADE
 );
 
 INSERT INTO parameter_type (id, type_name, description) VALUES (1, 'continuous', 'continuous variable');
