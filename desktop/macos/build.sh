@@ -1,8 +1,9 @@
 #!/bin/bash
+# Build script for Mac OS
 cd "$(dirname "$0")"
 
-BUILD_ROOT=$PWD
 APP_NAME="manta"
+BUILD_ROOT=`echo $(cd .. && pwd)`
 APP_ROOT=`echo $(cd ../.. && pwd)`
 VERSION=`echo $(cat $APP_ROOT/version.txt)`
 RELEASE_NAME="$APP_NAME-$VERSION"
@@ -45,6 +46,7 @@ cp war/manta.war $RELEASE_DIR/$RELEASE_NAME/
 cp -r $RESOURCE_DIR/tomcat-embed $RELEASE_DIR/$RELEASE_NAME/
 mkdir $RELEASE_DIR/$RELEASE_NAME/lib
 cp $RESOURCE_DIR/commons-lang3-3.9.jar $RELEASE_DIR/$RELEASE_NAME/lib/
+cp $BUILD_ROOT/icons/manta.icns $RELEASE_DIR/$RELEASE_NAME/
 sqlite3 $RELEASE_DIR/$RELEASE_NAME/gutflora.db < documents/create_tables_sqlite.sql
 
 cd $RELEASE_DIR/$RELEASE_NAME
@@ -64,11 +66,11 @@ javapackager -deploy \
   -srcfiles lib \
   -appclass MantaLauncher \
   -name "Manta" -title "Manta" \
+  -Bicon=manta.icns \
   -BmainJar=MantaLauncher.jar \
   -BappVersion=$VERSION \
   -BjvmOptions=-showversion \
   -v \
   -Bruntime="$RESOURCE_DIR/amazon-corretto-8.jdk"
 
-cd $BUILD_ROOT
-
+cd $BUILD_ROOT/macos
