@@ -46,8 +46,7 @@ sqlite3 %release_path%\gutflora.db < documents\create_tables_sqlite.sql
 cd %release_path%
 javac -classpath ".;.\lib\*;.\tomcat-embed\*" -d . %buidl_root%\MantaLauncher.java
 jar cfm .\MantaLauncher.jar %buidl_root%\manifest.txt .\MantaLauncher.class
-exewrap -t 1.8 -L .;.\lib\*;.\tomcat-embed\* -e SHARE -i .\manta.ico \
- .\MantaLauncher.jar
+exewrap -t 1.8 -L .;.\lib\*;.\tomcat-embed\* -e SHARE -i .\manta.ico .\MantaLauncher.jar
 del .\MantaLauncher.class
 xcopy /s/e/i/y/q %resource_dir%\jre8 %release_path%\jre
 

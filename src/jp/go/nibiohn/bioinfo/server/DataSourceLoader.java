@@ -48,7 +48,7 @@ public class DataSourceLoader{
                 dbPath = classPath.getParent().getParent().getParent().resolve("gutflora.db").toString();
             }
             if (SystemUtils.IS_OS_WINDOWS) {
-                options = "?journal_mode=WAL";
+                options = "?journal_mode=WAL&synchronous=OFF";
             }
             if (dbPath == null) {
                 dbPath = "gutflora.db";
