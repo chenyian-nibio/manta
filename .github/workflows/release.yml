@@ -2,8 +2,9 @@ name: Upload assets
 
 on:
   release:
-    types: [created, edited]
-
+    types:
+      - created
+      - edited
 jobs:
   windows:
     name: Build windows version
