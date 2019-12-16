@@ -1,0 +1,16 @@
+name: Upload assets
+
+on:
+  release:
+    types: [created, edited]
+
+jobs:
+  windows:
+    name: Build windows version
+    runs-on: windows
+    steps:
+      - name: Set output
+        id: release
+        run: |
+        echo $GITHUB_REF
+
