@@ -1,6 +1,6 @@
 cd /d %~dp0
 
-powershell -ExecutionPolicy Bypass -command .\download.ps1
+powershell -ExecutionPolicy Bypass -command .\download.ps1 || exit /b 1
 
 cd ..
 set buidl_root=%cd%
@@ -48,7 +48,7 @@ javac -classpath ".;.\lib\*;.\tomcat-embed\*" -d . %buidl_root%\MantaLauncher.ja
 jar cfm .\MantaLauncher.jar %buidl_root%\manifest.txt .\MantaLauncher.class
 exewrap -t 1.8 -L .;.\lib\*;.\tomcat-embed\* -e SHARE -i .\manta.ico .\MantaLauncher.jar
 del .\MantaLauncher.class
-xcopy /s/e/i/y/q %resource_dir%\jre8 %release_path%\jre
+xcopy /s/e/i/y/q %resource_dir%\jdk8\jre %release_path%\jre
 
 cd %release_dir%
 powershell compress-archive %release_name% %release_name%.zip -Force
@@ -72,4 +72,4 @@ REM   -BjvmOptions=-showversion ^
 REM   -v ^
 REM   -Bruntime="%resource_dir%\jre8"
 
-exit 1
+exit /b 0

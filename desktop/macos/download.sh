@@ -5,7 +5,6 @@ JDK="amazon-corretto-8.232.09.1-macosx-x64"
 GWT="gwt-2.7.0"
 ANT="apache-ant-1.10.7"
 TOM="apache-tomcat-8.5.49-embed"
-SERV="apache-tomcat-8.5.49-deployer"
 SQL="sqlite-tools-osx-x86-3300100"
 
 if [ ! -d ./resources ]; then
@@ -30,13 +29,13 @@ if [ ! -d ../../resources/gwt ]; then
 fi
 
 if [ ! -d ant ]; then
-  wget http://ftp.riken.jp/net/apache//ant/binaries/$ANT-bin.tar.gz
+  wget https://archive.apache.org/dist/ant/binaries/$ANT-bin.tar.gz
   tar -xvf $ANT-bin.tar.gz
   mv $ANT ant
 fi
 
 if [ ! -d tomcat-embed ]; then
-  wget http://ftp.riken.jp/net/apache/tomcat/tomcat-8/v8.5.49/bin/embed/$TOM.tar.gz
+  wget https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.49/bin/embed/$TOM.tar.gz
   tar -xvf $TOM.tar.gz
   mv $TOM tomcat-embed
 fi
