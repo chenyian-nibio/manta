@@ -292,13 +292,13 @@ public class UploadProcessService {
 			
 			// calculate the distance; Bray-Curtis dissimilarity & Jaccard distance
 			// To calculate all against all, truncate all distance and recalculate (for convenience)
+			Statement statTruncate = connection.createStatement();
+			
 			if (DataSourceLoader.backend == "sqlite"){
-				Statement statTruncate = connection.createStatement();
 				String sqlTruncate = " DELETE FROM sample_distance ; "; 
 				statTruncate.executeUpdate(sqlTruncate);	
 				statTruncate.execute("VACUUM");	
 			} else {
-				Statement statTruncate = connection.createStatement();
 				String sqlTruncate = " TRUNCATE TABLE sample_distance "; 
 				statTruncate.executeUpdate(sqlTruncate);	
 			}

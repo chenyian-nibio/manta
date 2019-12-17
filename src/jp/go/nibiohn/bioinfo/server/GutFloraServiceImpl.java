@@ -3710,13 +3710,25 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			connection = ds.getConnection();
 			
 			Statement statement = connection.createStatement();
-			
-			String sqlTruncateSample = " TRUNCATE TABLE sample CASCADE ";
-			statement.executeUpdate(sqlTruncateSample);
-			String sqlTruncateTaxonomy = " TRUNCATE TABLE taxonomy CASCADE ";
-			statement.executeUpdate(sqlTruncateTaxonomy);
-			String sqlTruncateParaInfo = " TRUNCATE TABLE parameter_info CASCADE ";
-			statement.executeUpdate(sqlTruncateParaInfo);
+
+			if (DataSourceLoader.backend == "sqlite"){
+				String sqlTruncateSample = " DELETE FROM sample ; ";
+				statement.executeUpdate(sqlTruncateSample);
+				String sqlTruncateTaxonomy = " DELETE FROM taxonomy ; ";
+				statement.executeUpdate(sqlTruncateTaxonomy);
+				String sqlTruncateParaInfo = " DELETE FROM parameter_info ; ";
+				statement.executeUpdate(sqlTruncateParaInfo);
+				String sqlTruncateSampleDisplayColumns = " DELETE FROM sample_display_columns ; ";
+				statement.executeUpdate(sqlTruncateSampleDisplayColumns);
+				statement.execute("VACUUM");
+			} else {
+				String sqlTruncateSample = " TRUNCATE TABLE sample CASCADE ";
+				statement.executeUpdate(sqlTruncateSample);
+				String sqlTruncateTaxonomy = " TRUNCATE TABLE taxonomy CASCADE ";
+				statement.executeUpdate(sqlTruncateTaxonomy);
+				String sqlTruncateParaInfo = " TRUNCATE TABLE parameter_info CASCADE ";
+				statement.executeUpdate(sqlTruncateParaInfo);
+			}
 			
 			PreparedStatement psSampleDisplayColumn = connection.prepareStatement(
 					" INSERT INTO sample_display_columns (position) VALUES (?) ");
