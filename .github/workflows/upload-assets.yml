@@ -1,0 +1,66 @@
+name: Upload Assets
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Set variables
+        id: setenv
+        run: |
+          echo ::set-output name=version::$(echo ${GITHUB_REF:10})
+          echo ${GITHUB_REF:10} > version.txt
+          echo "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF:10}"
+          export res=$(curl "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF:10}")
+          echo $res
+          export url=$(echo $res | jq ".upload_url" | sed -En "s/\{\?name\,label\}//p")
+          echo $url
+          echo ::set-output name=upload_url::"$url"
+      - name: Build Asset
+        run: |
+          bash desktop/macos/download.sh
+          bash desktop/macos/build.sh
+          echo ${{ steps.setenv.outputs.version }}
+          echo ${{ steps.setenv.outputs.upload_url }}
+      - name: Upload Release Asset
+        run: |
+          export VERSION=${{ steps.setenv.outputs.version }}
+          export FILE=desktop/macos/releases/$VERSION/manta-$VERSION-macos/bundles/Manta-$VERSION.pkg
+          echo $FILE
+          curl \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Content-Type: $(file -b --mime-type $FILE)" \
+          --data-binary @$FILE \
+          "${{ steps.setenv.outputs.upload_url }}?name=$(basename $FILE)"
+  
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Set variables
+        id: setenv
+        run: |
+          $ref = $env:GITHUB_REF.SubString(10)
+          echo "::set-output name=version::$ref"
+          echo $ref > version.txt
+          echo https://api.github.com/repos/${{ github.repository }}/releases/tags/$ref
+          $res = Invoke-RestMethod -Uri https://api.github.com/repos/${{ github.repository }}/releases/tags/$ref -Method Get
+          $uri = $res.upload_url.Replace("{?name,label}", "")
+          echo "::set-output name=upload_url::$uri"
+      - name: Create archive
+        run: |
+          .\desktop\windows\build.bat
+      - name: Upload Release Asset
+        run: |
+          $FILE = ".\desktop\windows\releases\manta-${{ steps.setenv.outputs.version }}-windows-x64.zip"
+          $headers = @{}
+          $headers.Add("Authorization", "token ${{ secrets.GITHUB_TOKEN }}")
+          $headers.Add("Content-Type", "application/zip")
+          $name = (Get-ChildItem $FILE).Name
+          echo $name
+          echo "${{ steps.setenv.outputs.upload_url }}?name=$name"
+          Invoke-RestMethod -Uri ${{ steps.setenv.outputs.upload_url }}?name=$name -Method Post -Headers $headers -InFile $FILE
