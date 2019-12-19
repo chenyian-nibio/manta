@@ -1,6 +1,6 @@
 cd /d %~dp0
 
-powershell -ExecutionPolicy Bypass -command .\download.ps1
+powershell -ExecutionPolicy Bypass -command .\download.ps1 || exit /b 1
 
 cd ..
 set buidl_root=%cd%
@@ -39,16 +39,15 @@ mkdir %release_path%\lib
 copy /y war\manta.war %release_path%\manta.war
 xcopy /s/e/i/y/q %resource_dir%\tomcat-embed %release_path%\tomcat-embed
 copy /y %resource_dir%\commons-lang3-3.9.jar %release_path%\lib\commons-lang3-3.9.jar
-copy /y %buidl_root%\icons\manta.ico %release_path%\manta.ico
 
 sqlite3 %release_path%\gutflora.db < documents\create_tables_sqlite.sql
 
 cd %release_path%
 javac -classpath ".;.\lib\*;.\tomcat-embed\*" -d . %buidl_root%\MantaLauncher.java
 jar cfm .\MantaLauncher.jar %buidl_root%\manifest.txt .\MantaLauncher.class
-exewrap -t 1.8 -L .;.\lib\*;.\tomcat-embed\* -e SHARE -i .\manta.ico .\MantaLauncher.jar
+exewrap -t 1.8 -L .;.\lib\*;.\tomcat-embed\* -e SHARE -i %buidl_root%\icons\manta.ico .\MantaLauncher.jar
 del .\MantaLauncher.class
-xcopy /s/e/i/y/q %resource_dir%\jre8 %release_path%\jre
+xcopy /s/e/i/y/q %resource_dir%\jdk8\jre %release_path%\jre
 
 cd %release_dir%
 powershell compress-archive %release_name% %release_name%.zip -Force
@@ -72,4 +71,4 @@ REM   -BjvmOptions=-showversion ^
 REM   -v ^
 REM   -Bruntime="%resource_dir%\jre8"
 
-exit 1
+exit /b 0
