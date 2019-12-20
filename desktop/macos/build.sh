@@ -2,6 +2,8 @@
 # Build script for Mac OS
 cd "$(dirname "$0")"
 
+bash ./download.sh
+
 APP_NAME="manta"
 BUILD_ROOT=`echo $(cd .. && pwd)`
 APP_ROOT=`echo $(cd ../.. && pwd)`
@@ -9,16 +11,17 @@ VERSION=`echo $(cat $APP_ROOT/version.txt)`
 RELEASE_NAME="$APP_NAME-$VERSION"
 BUNDLE_NAME="$RELEASE_NAME-macos"
 RELEASE_DIR=$PWD/releases/$VERSION
-RESOURCE_DIR=$PWD/resources
-PATH=$RESOURCE_DIR/jdk8/bin:$PATH
+MAC_RESOURCE_DIR=$PWD/resources
+PATH=$MAC_RESOURCE_DIR/jdk/Contents/Home/bin:$PATH
+JAVA_HOME=$MAC_RESOURCE_DIR/jdk/Contents/Home/
+export JAVA_HOME
+RESOURCE_DIR=$BUILD_ROOT/resources
 PATH=$RESOURCE_DIR/ant/bin:$PATH
 PATH=$RESOURCE_DIR:$PATH
-JAVA_HOME=$RESOURCE_DIR/jdk8
-export JAVA_HOME
 java -version
 
 
-PATH=$RESOURCE_DIR/sqlite-tools:$PATH
+PATH=$MAC_RESOURCE_DIR/sqlite-tools:$PATH
 
 cd $APP_ROOT
 
@@ -71,6 +74,6 @@ javapackager -deploy \
   -BappVersion=$VERSION \
   -BjvmOptions=-showversion \
   -v \
-  -Bruntime="$RESOURCE_DIR/amazon-corretto-8.jdk"
+  -Bruntime="$MAC_RESOURCE_DIR/jdk"
 
 cd $BUILD_ROOT/macos
