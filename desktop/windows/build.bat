@@ -15,12 +15,13 @@ set /p version=<%app_root%\version.txt
 set release_name=%app_name%-%version%-windows-x64
 set release_dir=%cd%\releases
 set release_path=%release_dir%\%release_name%
-set resource_dir=%cd%\resources
-set PATH=%resource_dir%\jdk8\bin;%PATH%
-set JAVA_HOME=%resource_dir%\jdk8
+set resource_dir=%buidl_root%\resources
 set PATH=%resource_dir%\ant\bin;%PATH%
-set PATH=%resource_dir%\sqlite-tools;%PATH%
-set PATH=%resource_dir%\exewrap\x64;%PATH%
+set win_resource_dir=%cd%\resources
+set PATH=%win_resource_dir%\jdk\bin;%PATH%
+set JAVA_HOME=%win_resource_dir%\jdk
+set PATH=%win_resource_dir%\sqlite-tools;%PATH%
+set PATH=%win_resource_dir%\exewrap\x64;%PATH%
 java -version
 
 cd %app_root%
@@ -47,7 +48,7 @@ javac -classpath ".;.\lib\*;.\tomcat-embed\*" -d . %buidl_root%\MantaLauncher.ja
 jar cfm .\MantaLauncher.jar %buidl_root%\manifest.txt .\MantaLauncher.class
 exewrap -t 1.8 -L .;.\lib\*;.\tomcat-embed\* -e SHARE -i %buidl_root%\icons\manta.ico .\MantaLauncher.jar
 del .\MantaLauncher.class
-xcopy /s/e/i/y/q %resource_dir%\jdk8\jre %release_path%\jre
+xcopy /s/e/i/y/q %win_resource_dir%\jdk\jre %release_path%\jre
 
 cd %release_dir%
 powershell compress-archive %release_name% %release_name%.zip -Force
@@ -69,6 +70,6 @@ REM   -BmainJar=MantaLauncher.jar ^
 REM   -BappVersion=%version% ^
 REM   -BjvmOptions=-showversion ^
 REM   -v ^
-REM   -Bruntime="%resource_dir%\jre8"
+REM   -Bruntime="%set win_resource_dir%\jdk\jre"
 
 exit /b 0
