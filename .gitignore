@@ -4,7 +4,7 @@ war/WEB-INF/classes/
 war/WEB-INF/deploy/
 war/manta/
 manta.war
-desktop/**/resources/
+desktop/*/resources/jdk
 desktop/**/releases/
 .gwt/
 .settings/
