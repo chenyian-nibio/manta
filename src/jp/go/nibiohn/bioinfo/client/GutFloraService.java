@@ -97,6 +97,8 @@ public interface GutFloraService extends RemoteService {
 	
 	String getCurrentUser();
 
+	String createUser(String username, String password, String passwordConfirm);
+
 	boolean loginUser(String username, String password);
 
 	void logoutCurrentUser();

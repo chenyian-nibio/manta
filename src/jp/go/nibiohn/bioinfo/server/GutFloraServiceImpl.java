@@ -26,6 +26,7 @@ import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.RList;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
+import org.mindrot.jbcrypt.BCrypt;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.zaxxer.hikari.HikariConfig;
@@ -3057,43 +3058,53 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	/**
-	 * get display name (not account) 
+	 * get display name (not account)
 	 */
 	@Override
 	public String getCurrentUser() {
-		String ret = null;
-		String username = getCurrentUserFromSession();
-		
-		if (username != null) {
-			HikariDataSource ds = getHikariDataSource();
-			Connection connection = null;
+		String userName = getCurrentUserFromSession() ;
+		String currentUser = userName != null ? userName : "Guest";
+		return currentUser;
+	}
+
+	@Override
+	public String createUser(String username, String password, String passwordConfirm) {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		String result = "fail";
+		try {
+			String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
+
+			connection = ds.getConnection();
+			Statement statement = connection.createStatement();
+
+			String sqlUniqueQuery = "select count(*) from dbuser where username = '" + username + "'";
+			ResultSet uniqueResults = statement.executeQuery(sqlUniqueQuery);
+			uniqueResults.next();
+			if (uniqueResults.getInt(1) == 0) {
+				String sqlInsertQuery = "insert into dbuser (username, password, is_active) values('" + username + "', '" + hashed + "', true)";
+
+				statement.executeUpdate(sqlInsertQuery);
+				result = "success";
+				saveCurrentUserToSession(username);
+			} else {
+				result = "ERROR! username already used.";
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+ 		} finally {
 			try {
-				connection = ds.getConnection();
-				
-				Statement statement = connection.createStatement();
-				String sqlQuery = "select name from dbuser where username = '" + username + "'";
-				
-				ResultSet results = statement.executeQuery(sqlQuery);
-				if (results.next()) {
-					ret = results.getString("name");
+				if (connection != null) {
+					connection.close();
 				}
-				
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					if (connection != null) {
-						connection.close();
-					}
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-				if (ds != null) {
-					ds.close();
-				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			if (ds != null) {
+				ds.close();
 			}
 		}
-		return ret;
+		return result;
 	}
 
 	@Override
@@ -3103,19 +3114,19 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		boolean ret = false;
 		try {
 			connection = ds.getConnection();
-			
+
 			Statement statement = connection.createStatement();
 			String sqlQuery = "select password from dbuser where username = '" + username + "'";
-			
+
 			ResultSet results = statement.executeQuery(sqlQuery);
 			if (results.next()) {
-				String pw = results.getString("password");
-				if (pw.equals(password)) {
+				String hashed = results.getString("password");
+				if (BCrypt.checkpw(password, hashed)) {
 					ret = true;
 					saveCurrentUserToSession(username);
 				}
 			}
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {

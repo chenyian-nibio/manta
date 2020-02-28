@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 
 import jp.go.nibiohn.bioinfo.shared.GutFloraConfig;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
@@ -43,7 +44,7 @@ public class Manta extends BasePage {
 
 	private final GutFloraServiceAsync service = GWT.create(GutFloraService.class);
 
-	private List<BaseWidget> widgetTrails = new ArrayList<BaseWidget>(); 
+	private List<BaseWidget> widgetTrails = new ArrayList<BaseWidget>();
 
 	private SampleListWidget sampleListWidget;
 
@@ -461,18 +462,51 @@ public class Manta extends BasePage {
 		service.getCurrentUser(new AsyncCallback<String>() {
 			
 			@Override
-			public void onSuccess(String result) {
+			public void onSuccess(String currentUser) {
+				if(currentUser == "Guest") {
+					createSignUpButton();
+				} else {
+					RootPanel.get("sighUp").clear();
+				}
 				RootPanel userInfo = RootPanel.get("userInfo");
 				userInfo.clear(true);
-				// TODO should not hard coded here
-				MenuBar menuBar = new MenuBar();
-				MenuBar userMenu = new MenuBar(true);
-				if (result != null) {
-					menuBar.addItem(result, userMenu);
-					MenuItem logoutMenu = new MenuItem("Logout", new Command() {
-						
+				HTMLPanel userPanel = new HTMLPanel("");
+				userInfo.add(userPanel);
+				userPanel.add(new Label(currentUser));
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+				warnMessage(SERVER_ERROR);
+			}
+		});
+		createAuthButton();
+	}
+
+	private void createSignUpButton() {
+		final Button signUpBtn = new Button("Sign Up", new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				DialogBox dialogBox = createAuthDialogBox("Sign Up");
+				dialogBox.setGlassEnabled(true);
+				dialogBox.setAnimationEnabled(true);
+				dialogBox.setAutoHideEnabled(false);
+				dialogBox.center();
+				userIdTb.setFocus(true);
+			}
+		});
+		RootPanel.get("sighUp").add(signUpBtn);
+	}
+
+	private void createAuthButton() {
+		service.getCurrentUser(new AsyncCallback<String>() {
+			@Override
+			public void onSuccess(String currentUser) {
+				RootPanel.get("Auth").clear();
+				if (currentUser != "Guest") {
+					final Button LogoutBtn = new Button("Logout", new ClickHandler() {
 						@Override
-						public void execute() {
+						public void onClick(ClickEvent event) {
 							DialogBox dialogBox = createLogoutDialogBox();
 							dialogBox.setGlassEnabled(true);
 							dialogBox.setAnimationEnabled(true);
@@ -480,15 +514,12 @@ public class Manta extends BasePage {
 							dialogBox.center();
 						}
 					});
-					logoutMenu.addStyleName("userMenu");
-					userMenu.addItem(logoutMenu);
+					RootPanel.get("Auth").add(LogoutBtn);
 				} else {
-					menuBar.addItem(GutFloraConstant.USER_NAME_GUEST, userMenu);
-					MenuItem loginMenu = new MenuItem("Login", new Command() {
-						
+					final Button LoginBtn = new Button("Login", new ClickHandler() {
 						@Override
-						public void execute() {
-							DialogBox dialogBox = createLoginDialogBox();
+						public void onClick(ClickEvent event) {
+							DialogBox dialogBox = createAuthDialogBox("Login");
 							dialogBox.setGlassEnabled(true);
 							dialogBox.setAnimationEnabled(true);
 							dialogBox.setAutoHideEnabled(false);
@@ -496,11 +527,8 @@ public class Manta extends BasePage {
 							userIdTb.setFocus(true);
 						}
 					});
-					loginMenu.addStyleName("userMenu");
-					userMenu.addItem(loginMenu);
+					RootPanel.get("Auth").add(LoginBtn);
 				}
-				userInfo.add(menuBar);
-				
 			}
 			
 			@Override
@@ -511,47 +539,87 @@ public class Manta extends BasePage {
 	}
 	
 	private TextBox userIdTb = new TextBox();
-	private DialogBox createLoginDialogBox() {
+	private DialogBox createAuthDialogBox(final String type) {
 		// Create a dialog box and set the caption text
 		final DialogBox dialogBox = new DialogBox(true);
-		dialogBox.setText("Login");
+		dialogBox.setText(type);
 		VerticalPanel vp = new VerticalPanel();
 		vp.setSpacing(6);
 		vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		
 		final Label infoLabel = new Label("Input your ID & password:");
-		infoLabel.setStyleName("loginInfo");
+		infoLabel.setStyleName("authInfo");
 		vp.add(infoLabel);
 
+		userIdTb.setText("");
 		userIdTb.setSize("150px", "18px");
 		final TextBox passwordTb = new PasswordTextBox();
 		passwordTb.setSize("150px", "18px");
+		final TextBox passwordConfirmTb = new PasswordTextBox();
+		passwordConfirmTb.setSize("150px", "18px");
 
-		Button okBtn = new Button("OK", new ClickHandler() {
+		Button authBtn = new Button(type, new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				service.loginUser(userIdTb.getText(), passwordTb.getText(), new AsyncCallback<Boolean>() {
-					
-					@Override
-					public void onSuccess(Boolean result) {
-						if (result.booleanValue()) {
-							getUserInfo();
-							dialogBox.hide();
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
-							History.fireCurrentHistoryState();
-						} else {
-							infoLabel.setText("ERROR! Incorrect ID or password.");
-							infoLabel.setStyleName("loginError");
-						}
+				String username = userIdTb.getText();
+				String password = passwordTb.getText();
+				String passwordConfirm = passwordConfirmTb.getText();
+
+				if (username == "" || password == "" || (type == "Sign Up" && passwordConfirm == "")) {
+					infoLabel.setText("ERROR! Please fill in all input fields.");
+					infoLabel.setStyleName("authError");
+				} else if (password.length() < 8) {
+					infoLabel.setText("password require at least 8 characters");
+					infoLabel.setStyleName("authError");
+				} else if (type == "Sign Up" && !password.equals(passwordConfirm)) {
+					infoLabel.setText("Password and Password Confirm is Not Match");
+					infoLabel.setStyleName("authError");
+				} else {
+					if (type == "Sign Up") {
+						service.createUser(username, password, passwordConfirm, new AsyncCallback<String>() {
+							@Override
+							public void onSuccess(String result) {
+								if (result.equals("success")) {
+									getUserInfo();
+									dialogBox.hide();
+									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
+									History.fireCurrentHistoryState();
+								} else {
+									infoLabel.setText(result);
+									infoLabel.setStyleName("authError");
+								}
+							}
+
+							@Override
+							public void onFailure(Throwable caught) {
+								infoLabel.setText(SERVER_ERROR);
+								infoLabel.setStyleName("authError");
+							}
+						});
+					} else {
+						service.loginUser(username, password, new AsyncCallback<Boolean>() {
+							@Override
+							public void onSuccess(Boolean result) {
+								if (result.booleanValue()) {
+									getUserInfo();
+									dialogBox.hide();
+									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
+									History.fireCurrentHistoryState();
+								} else {
+									infoLabel.setText("ERROR! Incorrect ID or password.");
+									infoLabel.setStyleName("authError");
+								}
+							}
+
+							@Override
+							public void onFailure(Throwable caught) {
+								infoLabel.setText(SERVER_ERROR);
+								infoLabel.setStyleName("authError");
+							}
+						});
 					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-						infoLabel.setText(SERVER_ERROR);
-						infoLabel.setStyleName("loginError");
-					}
-				});
+				}
 			}
 		});
 		Button cancelBtn = new Button("Cancel", new ClickHandler() {
@@ -561,25 +629,34 @@ public class Manta extends BasePage {
 				dialogBox.hide();
 			}
 		});
-		okBtn.setWidth("80px");
+		authBtn.setWidth("80px");
 		cancelBtn.setWidth("80px");
 
-		Grid grid = new Grid(2, 2);
+		int row_number = type == "Sign Up" ? 3 : 2;
+		Grid grid = new Grid(row_number, 2);
 		Label idLabel = new Label("User ID:");
-		idLabel.setWidth("80px");
+		String setWidth = type == "Sign Up" ? "120px" : "80px";
+		idLabel.setWidth(setWidth);
 		idLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		grid.setWidget(0, 0, idLabel);
 		grid.setWidget(0, 1, userIdTb);
 		Label pwLabel = new Label("Password:");
-		pwLabel.setWidth("80px");
+		pwLabel.setWidth(setWidth);
 		pwLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		grid.setWidget(1, 0, pwLabel);
 		grid.setWidget(1, 1, passwordTb);
+		if (type == "Sign Up") {
+			Label pwConfirmLabel = new Label("Password Confirm:");
+			pwConfirmLabel.setWidth(setWidth);
+			pwConfirmLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+			grid.setWidget(2, 0, pwConfirmLabel);
+			grid.setWidget(2, 1, passwordConfirmTb);
+		}
 
 		HorizontalPanel hp = new HorizontalPanel();
 		hp.setSpacing(6);
 		hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		hp.add(okBtn);
+		hp.add(authBtn);
 		hp.add(cancelBtn);
 
 		vp.add(grid);
@@ -599,11 +676,11 @@ public class Manta extends BasePage {
 		vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		
 		final Label infoLabel = new Label("Logout current user?");
-		infoLabel.setStyleName("loginInfo");
+		infoLabel.setStyleName("authInfo");
 		vp.add(infoLabel);
-		
-		Button okBtn = new Button("Yes", new ClickHandler() {
-			
+
+		Button logoutBtn = new Button("Logout", new ClickHandler() {
+
 			@Override
 			public void onClick(ClickEvent event) {
 				service.logoutCurrentUser(new AsyncCallback<Void>() {
@@ -619,25 +696,25 @@ public class Manta extends BasePage {
 					@Override
 					public void onFailure(Throwable caught) {
 						infoLabel.setText("System ERROR!");
-						infoLabel.setStyleName("loginError");
+						infoLabel.setStyleName("authError");
 					}
 				});
 			}
 		});
-		Button cancelBtn = new Button("No", new ClickHandler() {
-			
+		Button cancelBtn = new Button("Cancel", new ClickHandler() {
+
 			@Override
 			public void onClick(ClickEvent event) {
 				dialogBox.hide();
 			}
 		});
-		okBtn.setWidth("80px");
+		logoutBtn.setWidth("80px");
 		cancelBtn.setWidth("80px");
 		
 		HorizontalPanel hp = new HorizontalPanel();
 		hp.setSpacing(6);
 		hp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		hp.add(okBtn);
+		hp.add(logoutBtn);
 		hp.add(cancelBtn);
 		
 		vp.add(hp);
