@@ -114,7 +114,7 @@ CREATE TABLE user_role (
 );
 
 CREATE TABLE dbuser (
-	id integer PRIMARY KEY,
+	id serial PRIMARY KEY,
 	username text,
 	password text,
 	is_active boolean NOT NULL,
