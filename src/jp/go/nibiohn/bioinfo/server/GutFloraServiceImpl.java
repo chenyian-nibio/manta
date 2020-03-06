@@ -3093,7 +3093,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				result = "success";
 				saveCurrentUserToSession(username);
 			} else {
-				result = "ERROR! username already used.";
+				result = "The username is already in use.";
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

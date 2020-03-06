@@ -537,7 +537,25 @@ public class Manta extends BasePage {
 			}
 		});
 	}
-	
+
+	private void onSuccessOperation(String result, DialogBox dialogBox, Label infoLabel) {
+		if (result.equals("success") || Boolean.valueOf(result) || result == "Logout") {
+			getUserInfo();
+			dialogBox.hide();
+			History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
+			History.fireCurrentHistoryState();
+		} else {
+			String message = result == "false" ? "Incorrect ID or password." : result;
+			infoLabel.setText(message);
+			infoLabel.setStyleName("authError");
+		}
+	}
+
+	private void onFailureOperation(Label infoLabel, Throwable caught) {
+		infoLabel.setText(SERVER_ERROR);
+		infoLabel.setStyleName("authError");
+	}
+
 	private TextBox userIdTb = new TextBox();
 	private DialogBox createAuthDialogBox(final String type) {
 		// Create a dialog box and set the caption text
@@ -580,42 +598,24 @@ public class Manta extends BasePage {
 						service.createUser(username, password, passwordConfirm, new AsyncCallback<String>() {
 							@Override
 							public void onSuccess(String result) {
-								if (result.equals("success")) {
-									getUserInfo();
-									dialogBox.hide();
-									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
-									History.fireCurrentHistoryState();
-								} else {
-									infoLabel.setText(result);
-									infoLabel.setStyleName("authError");
-								}
+								onSuccessOperation(result, dialogBox, infoLabel);
 							}
 
 							@Override
 							public void onFailure(Throwable caught) {
-								infoLabel.setText(SERVER_ERROR);
-								infoLabel.setStyleName("authError");
+								onFailureOperation(infoLabel, caught);
 							}
 						});
 					} else {
 						service.loginUser(username, password, new AsyncCallback<Boolean>() {
 							@Override
 							public void onSuccess(Boolean result) {
-								if (result.booleanValue()) {
-									getUserInfo();
-									dialogBox.hide();
-									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
-									History.fireCurrentHistoryState();
-								} else {
-									infoLabel.setText("ERROR! Incorrect ID or password.");
-									infoLabel.setStyleName("authError");
-								}
+								onSuccessOperation(String.valueOf(result), dialogBox, infoLabel);
 							}
 
 							@Override
 							public void onFailure(Throwable caught) {
-								infoLabel.setText(SERVER_ERROR);
-								infoLabel.setStyleName("authError");
+								onFailureOperation(infoLabel, caught);
 							}
 						});
 					}
@@ -687,16 +687,12 @@ public class Manta extends BasePage {
 					
 					@Override
 					public void onSuccess(Void result) {
-						getUserInfo();
-						dialogBox.hide();
-						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
-						History.fireCurrentHistoryState();
+						onSuccessOperation("Logout", dialogBox, infoLabel);
 					}
 					
 					@Override
 					public void onFailure(Throwable caught) {
-						infoLabel.setText("System ERROR!");
-						infoLabel.setStyleName("authError");
+						onFailureOperation(infoLabel, caught);
 					}
 				});
 			}
