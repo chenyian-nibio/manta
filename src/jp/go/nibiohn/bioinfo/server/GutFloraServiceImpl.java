@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3077,15 +3078,18 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
 
 			connection = ds.getConnection();
-			Statement statement = connection.createStatement();
-
-			String sqlUniqueQuery = "select count(*) from dbuser where username = '" + username + "'";
-			ResultSet uniqueResults = statement.executeQuery(sqlUniqueQuery);
+			PreparedStatement uniquePstmt = connection.prepareStatement("select count(*) from dbuser where username = ?");
+			uniquePstmt.setString(1, username);
+			ResultSet uniqueResults = uniquePstmt.executeQuery();
 			uniqueResults.next();
-			if (uniqueResults.getInt(1) == 0) {
-				String sqlInsertQuery = "insert into dbuser (username, password, is_active) values('" + username + "', '" + hashed + "', true)";
 
-				statement.executeUpdate(sqlInsertQuery);
+			if (uniqueResults.getInt(1) == 0) {
+				PreparedStatement insertPstmt = connection.prepareStatement("insert into dbuser (username, password, is_active) values (?, ?, ?)");
+				insertPstmt.setString(1, username);
+				insertPstmt.setString(2, hashed);
+				insertPstmt.setBoolean(3, true);
+				insertPstmt.executeUpdate();
+
 				result = "success";
 				saveCurrentUserToSession(username);
 			} else {
@@ -3115,11 +3119,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		boolean ret = false;
 		try {
 			connection = ds.getConnection();
+			PreparedStatement pstmt = connection.prepareStatement("select password from dbuser where username = ?");
+			pstmt.setString(1, username);
+			ResultSet results = pstmt.executeQuery();
 
-			Statement statement = connection.createStatement();
-			String sqlQuery = "select password from dbuser where username = '" + username + "'";
-
-			ResultSet results = statement.executeQuery(sqlQuery);
 			if (results.next()) {
 				String hashed = results.getString("password");
 				if (BCrypt.checkpw(password, hashed)) {
