@@ -3071,13 +3071,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public String createUser(String username, String password, String passwordConfirm) {
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
 		String result = "fail";
-		try {
+		try (HikariDataSource ds = getHikariDataSource(); Connection connection = ds.getConnection();) {
 			String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
 
-			connection = ds.getConnection();
 			PreparedStatement uniquePstmt = connection.prepareStatement("select count(*) from dbuser where username = ?");
 			uniquePstmt.setString(1, username);
 			ResultSet uniqueResults = uniquePstmt.executeQuery();
@@ -3097,28 +3094,14 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
- 		} finally {
-			try {
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			if (ds != null) {
-				ds.close();
-			}
-		}
+ 		}
 		return result;
 	}
 
 	@Override
 	public boolean loginUser(String username, String password) {
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
 		boolean ret = false;
-		try {
-			connection = ds.getConnection();
+		try (HikariDataSource ds = getHikariDataSource(); Connection connection = ds.getConnection();) {
 			PreparedStatement pstmt = connection.prepareStatement("select password from dbuser where username = ?");
 			pstmt.setString(1, username);
 			ResultSet results = pstmt.executeQuery();
@@ -3133,17 +3116,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			if (ds != null) {
-				ds.close();
-			}
 		}
 		return ret;
 	}
