@@ -466,7 +466,7 @@ public class Manta extends BasePage {
 				if(currentUser == "Guest") {
 					createSignUpButton();
 				} else {
-					RootPanel.get("sighUp").clear();
+					RootPanel.get("signUp").clear();
 				}
 				RootPanel userInfo = RootPanel.get("userInfo");
 				userInfo.clear(true);
@@ -495,7 +495,7 @@ public class Manta extends BasePage {
 				userIdTb.setFocus(true);
 			}
 		});
-		RootPanel.get("sighUp").add(signUpBtn);
+		RootPanel.get("signUp").add(signUpBtn);
 	}
 
 	private void createAuthButton() {
@@ -566,14 +566,14 @@ public class Manta extends BasePage {
 				String password = passwordTb.getText();
 				String passwordConfirm = passwordConfirmTb.getText();
 
-				if (username == "" || password == "" || (type == "Sign Up" && passwordConfirm == "")) {
-					infoLabel.setText("ERROR! Please fill in all input fields.");
+				if (username == "" || password == "") {
+					infoLabel.setText("Please fill both your username and password.");
 					infoLabel.setStyleName("authError");
 				} else if (password.length() < 8) {
-					infoLabel.setText("password require at least 8 characters");
+					infoLabel.setText("The password requires at least 8 characters.");
 					infoLabel.setStyleName("authError");
 				} else if (type == "Sign Up" && !password.equals(passwordConfirm)) {
-					infoLabel.setText("Password and Password Confirm is Not Match");
+					infoLabel.setText("The confirmation does not match the password.");
 					infoLabel.setStyleName("authError");
 				} else {
 					if (type == "Sign Up") {
@@ -635,19 +635,19 @@ public class Manta extends BasePage {
 		int row_number = type == "Sign Up" ? 3 : 2;
 		Grid grid = new Grid(row_number, 2);
 		Label idLabel = new Label("User ID:");
-		String setWidth = type == "Sign Up" ? "120px" : "80px";
-		idLabel.setWidth(setWidth);
+		String labelWidth = type == "Sign Up" ? "120px" : "80px";
+		idLabel.setWidth(labelWidth);
 		idLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		grid.setWidget(0, 0, idLabel);
 		grid.setWidget(0, 1, userIdTb);
 		Label pwLabel = new Label("Password:");
-		pwLabel.setWidth(setWidth);
+		pwLabel.setWidth(labelWidth);
 		pwLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 		grid.setWidget(1, 0, pwLabel);
 		grid.setWidget(1, 1, passwordTb);
 		if (type == "Sign Up") {
 			Label pwConfirmLabel = new Label("Password Confirm:");
-			pwConfirmLabel.setWidth(setWidth);
+			pwConfirmLabel.setWidth(labelWidth);
 			pwConfirmLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
 			grid.setWidget(2, 0, pwConfirmLabel);
 			grid.setWidget(2, 1, passwordConfirmTb);
