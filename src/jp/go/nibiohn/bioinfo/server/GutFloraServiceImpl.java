@@ -21,12 +21,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
-import org.rosuda.REngine.REXP;
-import org.rosuda.REngine.REXPDouble;
-import org.rosuda.REngine.REXPMismatchException;
-import org.rosuda.REngine.RList;
-import org.rosuda.REngine.Rserve.RConnection;
-import org.rosuda.REngine.Rserve.RserveException;
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
