@@ -3093,17 +3093,17 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public boolean loginUser(String username, String password) {
-		boolean ret = false;
+	public String loginUser(String username, String password) {
+		String result = "Incorrect ID or password.";
 		try (HikariDataSource ds = getHikariDataSource(); Connection connection = ds.getConnection();) {
 			PreparedStatement pstmt = connection.prepareStatement("select password from dbuser where username = ?");
 			pstmt.setString(1, username);
-			ResultSet results = pstmt.executeQuery();
+			ResultSet queryResults = pstmt.executeQuery();
 
-			if (results.next()) {
-				String hashed = results.getString("password");
+			if (queryResults.next()) {
+				String hashed = queryResults.getString("password");
 				if (BCrypt.checkpw(password, hashed)) {
-					ret = true;
+					result = "success";
 					saveCurrentUserToSession(username);
 				}
 			}
@@ -3111,7 +3111,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return ret;
+		return result;
 	}
 
 	@Override

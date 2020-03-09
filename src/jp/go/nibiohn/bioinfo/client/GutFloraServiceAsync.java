@@ -111,7 +111,7 @@ public interface GutFloraServiceAsync {
 
 	void createUser(String username, String password, String passwordConfirm, AsyncCallback<String> callback);
 
-	void loginUser(String username, String password, AsyncCallback<Boolean> callback);
+	void loginUser(String username, String password, AsyncCallback<String> callback);
 
 	void logoutCurrentUser(AsyncCallback<Void> callback);
 

@@ -539,14 +539,13 @@ public class Manta extends BasePage {
 	}
 
 	private void onSuccessOperation(String result, DialogBox dialogBox, Label infoLabel) {
-		if (result.equals("success") || Boolean.valueOf(result) || result == "Logout") {
+		if (result.equals("success")) {
 			getUserInfo();
 			dialogBox.hide();
 			History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
 			History.fireCurrentHistoryState();
 		} else {
-			String message = result == "false" ? "Incorrect ID or password." : result;
-			infoLabel.setText(message);
+			infoLabel.setText(result);
 			infoLabel.setStyleName("authError");
 		}
 	}
@@ -607,10 +606,10 @@ public class Manta extends BasePage {
 							}
 						});
 					} else {
-						service.loginUser(username, password, new AsyncCallback<Boolean>() {
+						service.loginUser(username, password, new AsyncCallback<String>() {
 							@Override
-							public void onSuccess(Boolean result) {
-								onSuccessOperation(String.valueOf(result), dialogBox, infoLabel);
+							public void onSuccess(String result) {
+								onSuccessOperation(result, dialogBox, infoLabel);
 							}
 
 							@Override
@@ -687,7 +686,7 @@ public class Manta extends BasePage {
 					
 					@Override
 					public void onSuccess(Void result) {
-						onSuccessOperation("Logout", dialogBox, infoLabel);
+						onSuccessOperation("success", dialogBox, infoLabel);
 					}
 					
 					@Override
