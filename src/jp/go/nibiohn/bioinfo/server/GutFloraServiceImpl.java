@@ -111,7 +111,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			List<SampleEntry> ret = new ArrayList<SampleEntry>();
 			while (results.next()) {
 				String sampleId = results.getString("id");
-				ret.add(new SampleEntry(sampleId, results.getInt("age"), getGenderValue(results.getInt("gender"), lang),
+				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
 						results.getString("pj_name"), results.getDate("exp_date"), sampleSet.contains(sampleId)));
 
 			}
@@ -389,7 +389,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Set<SampleEntry> ret = new HashSet<SampleEntry>();
 			while (results.next()) {
 				String sampleId = results.getString("id");
-				ret.add(new SampleEntry(sampleId, results.getInt("age"), getGenderValue(results.getInt("gender"), lang),
+				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
 						results.getDate("exp_date"), true));
 			}
 			
@@ -437,7 +437,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			SampleEntry ret = null;
 			while (results.next()) {
 				ret = new SampleEntry(results.getString("id"), results.getInt("age"),
-						getGenderValue(results.getInt("gender"), lang), results.getString("pj_name"),
+						results.getString("gender"), results.getString("pj_name"),
 						results.getDate("exp_date"), null);
 			}
 			
@@ -4123,46 +4123,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		ret.append("</svg>\n");
 		
 		return ret.toString();
-	}
-	
-	Map<String, String> genderMap = new HashMap<String, String>();
-	private String getGenderValue(Integer option, String lang) {
-		if (genderMap == null || genderMap.isEmpty()) {
-			HikariDataSource ds = getHikariDataSource();
-			Connection connection = null;
-			try {
-				connection = ds.getConnection();
-				
-				Statement statSex = connection.createStatement();
-				String sqlQuerySex = " select choice_option, choice_value, choice_value_jp "
-						+ " from choice as ch join parameter_info as pi on pi.id = ch.parameter_id where db_code = 'sex' ";
-				ResultSet resultsSex = statSex.executeQuery(sqlQuerySex);
-				while (resultsSex.next()) {
-					String key = resultsSex.getString("choice_option");
-					String valueE = resultsSex.getString("choice_value");
-					String valueJ = resultsSex.getString("choice_value_jp");
-					genderMap.put(String.format("%s-%s", GutFloraConstant.LANG_EN, key), valueE);
-					genderMap.put(String.format("%s-%s", GutFloraConstant.LANG_JP, key), valueJ);
-				}
-				
-				connection.close();
-				ds.close();
-				
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			
-			try {
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			ds.close();
-		}
-
-		return genderMap.get(String.format("%s-%d", lang, option));
 	}
 	
 	private int getMaxItemLength(List<String> itemStringList) {
