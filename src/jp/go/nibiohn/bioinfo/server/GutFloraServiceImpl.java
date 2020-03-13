@@ -533,7 +533,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	/**
 	 * (unused)
 	 */
-	public GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, int numOfColumns) {
+	private GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, int numOfColumns) {
 		if (rank.equals("kingdom")) {
 			return getKingdomReadsAnalysisData(selectedSamples);
 		} else {
@@ -575,6 +575,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 						+ " group by sample_id, t.id, t.name ";
 				
 				Map<String, Map<String, String>> rows = new HashMap<String, Map<String,String>>();
+				for (String sid : sampleIdList) {
+					rows.put(sid, new HashMap<String, String>());
+				}
+				
 				ResultSet results1 = statement1.executeQuery(sqlQuery1);
 				Map<String, String> taxonomyMap = new HashMap<String, String>();
 				while (results1.next()) {
@@ -583,9 +587,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					String name = results1.getString("taxon_name");
 					taxonomyMap.put(tid, name);
 					double allReads = results1.getDouble("all_reads");
-					if (rows.get(sid) == null) {
-						rows.put(sid, new HashMap<String, String>());
-					}
 					String displayValue = String.valueOf((int) allReads);
 					rows.get(sid).put(name, displayValue);
 				}
@@ -1483,6 +1484,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " group by sample_id, t.id, t.name ";
 			
 			Map<String, Map<String, String>> rows = new HashMap<String, Map<String,String>>();
+			for (String sid : sampleIdList) {
+				rows.put(sid, new HashMap<String, String>());
+			}
+
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
 			Map<String, String> taxonomyMap = new HashMap<String, String>();
 			while (results1.next()) {
@@ -1491,9 +1496,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = results1.getString("taxon_name");
 				taxonomyMap.put(tid, name);
 				int allReads = results1.getInt("all_reads");
-				if (rows.get(sid) == null) {
-					rows.put(sid, new HashMap<String, String>());
-				}
 				String displayValue = String.valueOf((int) allReads);
 				rows.get(sid).put(name, displayValue);
 			}
@@ -1568,6 +1570,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
 			
 			Map<String, Map<String, String>> rows = new HashMap<String, Map<String,String>>();
+			for (String sid : sampleIdList) {
+				rows.put(sid, new HashMap<String, String>());
+			}
+			
 			Statement statement0 = connection.createStatement();
 			
 			String queryFields = "select pi.id as id, pi.title as title, pi.unit as unit, pt.type_name as type ";
@@ -1632,9 +1638,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = results2.getString("title");
 				String valueString = results2.getString("parameter_value");
 				String choiceValue = results2.getString("choice_value");
-				if (rows.get(sid) == null) {
-					rows.put(sid, new HashMap<String, String>());
-				}
 				String para = "-";
 				if (choiceValue != null) {
 					para = choiceValue;
@@ -1694,6 +1697,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String columnString = "'" + StringUtils.join(selectedcolumns, "','") + "'";
 			
 			Map<String, Map<String, String>> rows = new HashMap<String, Map<String,String>>();
+			for (String sid : sampleIdList) {
+				rows.put(sid, new HashMap<String, String>());
+			}
+			
 			Statement statement0 = connection.createStatement();
 			// TODO: [to be improved] maybe it's better to use id instead of name
 			// then we don'nt need this query...
@@ -1733,9 +1740,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = results2.getString("title");
 				String valueString = results2.getString("parameter_value");
 				String choiceValue = results2.getString("choice_value");
-				if (rows.get(sid) == null) {
-					rows.put(sid, new HashMap<String, String>());
-				}
 				String para = "-";
 				if (choiceValue != null) {
 					para = choiceValue;

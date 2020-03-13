@@ -330,7 +330,6 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 	private void updateTable(String categoryId) {
 		loadingPopupPanel.show();
 
-		// TODO have to show non-value type data
 		service.getProfilesAnalysisData(selectedSamples, categoryId, profileGroupListBox.getSelectedValue(), currentLang, new AsyncCallback<GutFloraAnalysisData>() {
 			
 			@Override
