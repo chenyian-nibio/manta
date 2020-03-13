@@ -1,15 +1,13 @@
 package jp.go.nibiohn.bioinfo.client;
 
-import java.util.List;
 import java.util.Set;
+
+import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.TabPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * 
@@ -44,27 +42,9 @@ public class SampleAnalysisWidget extends BaseWidget {
 		tabPanel.setSize("100%", "100%");
 		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
 		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
-		tabPanel.add(new ImmunologicalAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
-		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[3], false);
+		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.selectTab(0);
 		
-		// remove immune tab if no immune parameter is available
-		service.getImmunologicalGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				if (result == null || result.size() == 0) {
-					tabPanel.remove(2);
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				// remove it, whatever ...
-				tabPanel.remove(2);
-			}
-		});
-
 		// the border around the tab panel is not very good looking
 		tabPanel.addStyleName("noBorder");
 		return tabPanel;
@@ -73,31 +53,11 @@ public class SampleAnalysisWidget extends BaseWidget {
 	private TabPanel loadSubsetTabPanel(Set<SampleEntry> selectedSamples, String initRank, String suffix) {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
-		String[] tabTitles = { "Gut microbiota composition", "Diet and fitness parameters",
-				"Immunological parameters", "Compare two parameters" };
-		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, initRank, suffix, currentLang), tabTitles[0], false);
-		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, suffix, currentLang), tabTitles[1], false);
-		tabPanel.add(new ImmunologicalAnalysisWidget(selectedSamples, suffix, currentLang), tabTitles[2], false);
-		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), tabTitles[3], false);
+		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
+		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.selectTab(0);
 		
-		// remove immune tab if no immune parameter is available
-		service.getImmunologicalGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
-			
-			@Override
-			public void onSuccess(List<List<String>> result) {
-				if (result == null || result.size() == 0) {
-					tabPanel.remove(2);
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				// remove it, whatever ...
-				tabPanel.remove(2);
-			}
-		});
-
 		// the border around the tab panel is not very good looking
 		tabPanel.addStyleName("noBorder");
 		return tabPanel;

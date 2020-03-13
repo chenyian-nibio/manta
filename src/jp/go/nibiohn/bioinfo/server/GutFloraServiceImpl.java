@@ -1936,126 +1936,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public List<List<String>> getDietFitnessGroupNames(String lang) {
-		return getCategoryNames("fitness", lang);
-	}
-
-	@Override
-	public List<List<String>> getImmunologicalGroupNames(String lang) {
-		return getCategoryNames("immuno", lang);
-	}
-	
-	private List<List<String>> getCategoryNames(String classCode, String lang) {
-		String currentUser = getUserForQuery();
-
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		try {
-			connection = ds.getConnection();
-			
-			Statement statement0 = connection.createStatement();
-			
-			String queryFields = " select distinct pc.id as id, category_name ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select distinct pc.id as id, category_name_jp as category_name ";
-			}
-
-			// TODO seems good enough? should I rewrite the SQL?
-			String sqlQuery0 = queryFields
-					+ " from parameter_category as pc "
-					+ " join parameter_class as cl on cl.id = pc.class_id "
-					+ " join parameter_group as pg on pg.category_id = pc.id "
-					+ " join parameter_privilege as pp on pp.group_id = pg.id "
-					+ " join dbuser as du on du.id = pp.user_id "
-					+ " where class_code = '" + classCode + "'"
-					+ " and du.username = '" + currentUser + "' "
-					+ " order by pc.id ";
-			
-			ResultSet results0 = statement0.executeQuery(sqlQuery0);
-			List<List<String>> profileNameList = new ArrayList<List<String>>();
-			while (results0.next()) {
-				String name = results0.getString("category_name");
-				profileNameList.add(Arrays.asList(name, String.valueOf(results0.getInt("id"))));
-			}
-			
-			connection.close();
-			ds.close();
-
-			return profileNameList;
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		ds.close();
-
-		return null;
-	}
-	
-	@Override
-	public List<List<String>> getProfileGroupNames(String lang) {
-		String currentUser = getUserForQuery();
-		
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		try {
-			connection = ds.getConnection();
-			
-			Statement statement0 = connection.createStatement();
-			
-			String queryFields = "select distinct pc.id as id, category_name ";
-			if (lang.equals(GutFloraConstant.LANG_JP)) {
-				queryFields = " select distinct pc.id as id, category_name_jp as category_name ";
-			}
-			
-			String sqlQuery0 = queryFields + " from parameter_info as pi "
-					+ " join parameter_type as pt on pt.id = pi.type_id "
-					+ " join parameter_group as pg on pg.id = pi.group_id "
-					+ " join parameter_category as pc on pc.id = pg.category_id "
-					+ " join parameter_class as cl on cl.id = pc.class_id "
-					+ " where class_code = 'fitness' "
-					+ " and pg.id in (" + " select group_id "
-					+ " from parameter_privilege as pp "
-					+ " join dbuser as du on du.id = pp.user_id "  
-					+ " where du.username = '" + currentUser + "' ) "
-					+ " order by pc.id";
-
-			ResultSet results0 = statement0.executeQuery(sqlQuery0);
-			List<List<String>> profileNameList = new ArrayList<List<String>>();
-			while (results0.next()) {
-				String name = results0.getString("category_name");
-				profileNameList.add(Arrays.asList(name, String.valueOf(results0.getInt("id"))));
-			}
-			
-			connection.close();
-			ds.close();
-
-			return profileNameList;
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			if (connection != null) {
-				connection.close();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		ds.close();
-
-		return null;
-	}
-	
-	@Override
 	public List<List<String>> getAllParameterGroupNames(String lang) {
 		String currentUser = getUserForQuery();
 		
@@ -4147,5 +4027,53 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 		}
 		return maxItemLength;
+	}
+
+	@Override
+	public boolean hasImmunologicalData() {
+		String currentUser = getUserForQuery();
+		
+		boolean ret = false;
+
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			
+			String sqlQuery = " select distinct pc.id as id, category_name "
+					+ " from parameter_category as pc "
+					+ " join parameter_class as cl on cl.id = pc.class_id "
+					+ " join parameter_group as pg on pg.category_id = pc.id "
+					+ " join parameter_privilege as pp on pp.group_id = pg.id "
+					+ " join dbuser as du on du.id = pp.user_id "
+					+ " where class_code = 'immuno' "
+					+ " and du.username = '" + currentUser + "' "
+					+ " order by pc.id ";
+			
+			ResultSet results = statement.executeQuery(sqlQuery);
+
+			ret = results.next();
+			
+			connection.close();
+			ds.close();
+
+			return ret;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+
+		return ret;
 	}
 }

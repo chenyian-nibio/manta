@@ -249,7 +249,7 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		
 		profileGroupHp.add(new HTML("&nbsp;&nbsp;&nbsp;&nbsp;"));
 		
-		service.getProfileGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
+		service.getAllParameterGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
 			
 			@Override
 			public void onSuccess(List<List<String>> result) {
@@ -282,11 +282,11 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		loadingVp.add(loadingLabel);
 		loadingPopupPanel.add(loadingVp);
 		
-		service.getImmunologicalGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
+		service.hasImmunologicalData(new AsyncCallback<Boolean>() {
 			
 			@Override
-			public void onSuccess(List<List<String>> result) {
-				if (result == null || result.size() == 0) {
+			public void onSuccess(Boolean result) {
+				if (!result.booleanValue()) {
 					refTypeListBox.removeItem(3);
 					refTypeListBox.removeItem(2);
 				}
@@ -294,11 +294,11 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
-				
+				// remove it, whatever ...
+				refTypeListBox.removeItem(3);
+				refTypeListBox.removeItem(2);
 			}
 		});
-
 
 		initWidget(vp);
 	}

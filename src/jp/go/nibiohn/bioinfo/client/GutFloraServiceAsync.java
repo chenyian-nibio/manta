@@ -66,12 +66,6 @@ public interface GutFloraServiceAsync {
 
 	void getProfileGroups(String categoryId, String lang, AsyncCallback<List<List<String>>> callback);
 
-	void getDietFitnessGroupNames(String lang, AsyncCallback<List<List<String>>> callback);
-
-	void getImmunologicalGroupNames(String lang, AsyncCallback<List<List<String>>> callback);
-
-	void getProfileGroupNames(String lang, AsyncCallback<List<List<String>>> callback);
-
 	void getAllParameterGroupNames(String lang, AsyncCallback<List<List<String>>> callback);
 	
 	void getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId,
@@ -129,5 +123,7 @@ public interface GutFloraServiceAsync {
 	void getPCoAScatterPlot(PcoaResult pcoaResult, String profileName, String lang, AsyncCallback<String> callback);
 
 	void getPCoAScatterPlot(PcoaResult pcoaResult, String customTagString, AsyncCallback<String> callback);
+
+	void hasImmunologicalData(AsyncCallback<Boolean> callback);
 
 }

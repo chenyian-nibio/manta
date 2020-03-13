@@ -59,12 +59,6 @@ public interface GutFloraService extends RemoteService {
 	
 	List<List<String>> getProfileGroups(String categoryId, String lang);
 
-	List<List<String>> getDietFitnessGroupNames(String lang);
-
-	List<List<String>> getImmunologicalGroupNames(String lang);
-
-	List<List<String>> getProfileGroupNames(String lang);
-	
 	List<List<String>> getAllParameterGroupNames(String lang);
 
 	PairListData getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId);
@@ -116,4 +110,7 @@ public interface GutFloraService extends RemoteService {
 	String getPCoAScatterPlot(PcoaResult pcoaResult, String profileName, String lang);
 	
 	String getPCoAScatterPlot(PcoaResult pcoaResult, String customTagString);
+
+	boolean hasImmunologicalData();
+
 }

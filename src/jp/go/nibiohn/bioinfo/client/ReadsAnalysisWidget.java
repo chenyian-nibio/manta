@@ -341,11 +341,11 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		loadingVp.add(loadingLabel);
 		loadingPopupPanel.add(loadingVp);
 		
-		service.getImmunologicalGroupNames(currentLang, new AsyncCallback<List<List<String>>>() {
+		service.hasImmunologicalData(new AsyncCallback<Boolean>() {
 			
 			@Override
-			public void onSuccess(List<List<String>> result) {
-				if (result == null || result.size() == 0) {
+			public void onSuccess(Boolean result) {
+				if (!result.booleanValue()) {
 					paraTypeListBox.removeItem(1);
 				}
 			}
@@ -356,7 +356,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 				paraTypeListBox.removeItem(1);
 			}
 		});
-
+		
 		initWidget(vp);
 	}
 
