@@ -3902,7 +3902,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		double interval = 0;
 		double max = 0;
 		double min = 0;
-		if (isContinous) {
+		if (isContinous && paraValueMap.size() > 1) {
 			List<Double> valueList = new ArrayList<Double>(paraValueMap.values());
 			Collections.sort(valueList);
 			// TODO find the median
@@ -3938,69 +3938,79 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String stroke = "none";
 			Double paraValue = paraValueMap.get(sampleId);
 			if (paraValue == null) {
-				// skip the sample, which contains no data..
-				continue;
-			}
-			if (isContinous) {
-				double doubleValue = paraValue.doubleValue();
-				if (doubleValue < min) {
-					doubleValue = min;
-					stroke = "#666";
-				} else if (doubleValue > max) {
-					doubleValue = max;
-					stroke = "#666";
-				}
-				int cValue = (int) ((doubleValue - min) / interval * 255);
-				color = String.format("rgb(%d,%d,%d)", cValue, 255 - cValue, 0);
+				// should not skip, draw a gray spot instead
+				color = GutFloraConstant.BARCHART_COLORLESS;
 			} else {
-				color = GutFloraConstant.BARCHART_COLOR.get(paraValue.intValue());
+				if (isContinous) {
+					double doubleValue = paraValue.doubleValue();
+					if (doubleValue < min) {
+						doubleValue = min;
+						stroke = "#666";
+					} else if (doubleValue > max) {
+						doubleValue = max;
+						stroke = "#666";
+					}
+					int cValue = (int) ((doubleValue - min) / interval * 255);
+					color = String.format("rgb(%d,%d,%d)", cValue, 255 - cValue, 0);
+				} else {
+					color = GutFloraConstant.BARCHART_COLOR.get(paraValue.intValue());
+				}
 			}
 			
 			ret.append(String.format("\t<circle cx=\"%d\" cy=\"%d\" r=\"3\" style=\"fill: %s; stroke: %s;\" class=\"point\">\n", 
 					nX, nY, color, stroke));
-			String titleString = paraValue.toString();
-			if (!isContinous && choiceMap != null) {
-				titleString = choiceMap.get(Integer.valueOf(titleString.substring(0, titleString.indexOf("."))));
+			if (paraValue != null) {
+				String titleString = paraValue.toString();
+				if (!isContinous && choiceMap != null) {
+					titleString = choiceMap.get(Integer.valueOf(titleString.substring(0, titleString.indexOf("."))));
+				}
+				ret.append(String.format("<title>%s (%.2f, %.2f), %s</title>", sampleId, coord.get(0), coord.get(1), titleString));
 			}
-			ret.append(String.format("<title>%s (%.2f, %.2f), %s</title>", sampleId, coord.get(0), coord.get(1), titleString));
 			ret.append("\t</circle>\n");
 		}
 		ret.append("</g>\n");
 		
 		// draw the legend
 		ret.append("<g stroke-width=\"1\" stroke=\"none\" class=\"pcoaLegend\">\n");
-		if (isContinous) {
-			// gradient bar
-			int shiftX = 50;
-			int shiftY = 600;
-			int cellWidth = 28;
-			int cellHeight = 28;
-			ret.append("<g stroke-width=\"1\" stroke=\"none\">\n");
-			ret.append(String.format("<defs><linearGradient id=\"MyGradient\">"
-					+ "<stop offset=\"5%%\"  stop-color=\"%s\"/><stop offset=\"95%%\" stop-color=\"%s\"/>"
-					+ "</linearGradient></defs>", "#0f0", "#f00"));
-			ret.append(String.format("<rect fill=\"url(#MyGradient)\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\"/>",
-					shiftX + 100, shiftY, cellWidth * 5, cellHeight - 1));
+		if (paraValueMap.isEmpty()) {
 			ret.append(String
-					.format("\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\" text-anchor=\"end\">%s</text>\n",
-							shiftX + 100 - 6, shiftY + 16, String.format("%.0f", min)));
-			ret.append(String
-					.format("\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\" text-anchor=\"start\">%s</text>\n",
-							shiftX + 100 + cellWidth * 5 + 6, shiftY + 16, String.format("%.0f", max) + " (" + unit + ")"));
+					.format("\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"16\" fill=\"black\" text-anchor=\"start\">%s</text>\n",
+							50 + 100 - 6, 600 + 16, "No available data for this parameter."));
 		} else {
-			int shiftX = 100;
-			int shiftY = 600;
-			List<Integer> choiceValues = new ArrayList<Integer>(choiceMap.keySet());
-			Collections.sort(choiceValues);
-			for (int i = 0; i < choiceValues.size(); i++) {
-				Integer colName = choiceValues.get(i);
-				int colorIndex = colName.intValue();
-				ret.append(String.format("\t<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" />\n",
-						shiftX + 0, shiftY + i * 18, 12, 12, GutFloraConstant.BARCHART_COLOR.get(colorIndex)));
-
-				ret.append(String.format(
-						"\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\">%s</text>\n",
-						shiftX + 20, shiftY + i * 18 + 10, choiceMap.get(colName)));
+			if (isContinous) {
+				if (paraValueMap.size() > 1) {
+					// gradient bar
+					int shiftX = 50;
+					int shiftY = 600;
+					int cellWidth = 28;
+					int cellHeight = 28;
+					ret.append(String.format("<defs><linearGradient id=\"MyGradient\">"
+							+ "<stop offset=\"5%%\"  stop-color=\"%s\"/><stop offset=\"95%%\" stop-color=\"%s\"/>"
+							+ "</linearGradient></defs>", "#0f0", "#f00"));
+					ret.append(String.format("<rect fill=\"url(#MyGradient)\" x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\"/>",
+							shiftX + 100, shiftY, cellWidth * 5, cellHeight - 1));
+					ret.append(String
+							.format("\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\" text-anchor=\"end\">%s</text>\n",
+									shiftX + 100 - 6, shiftY + 16, String.format("%.0f", min)));
+					ret.append(String
+							.format("\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\" text-anchor=\"start\">%s</text>\n",
+									shiftX + 100 + cellWidth * 5 + 6, shiftY + 16, String.format("%.0f", max) + " (" + unit + ")"));
+				}
+			} else {
+				int shiftX = 100;
+				int shiftY = 600;
+				List<Integer> choiceValues = new ArrayList<Integer>(choiceMap.keySet());
+				Collections.sort(choiceValues);
+				for (int i = 0; i < choiceValues.size(); i++) {
+					Integer colName = choiceValues.get(i);
+					int colorIndex = colName.intValue();
+					ret.append(String.format("\t<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" />\n",
+							shiftX + 0, shiftY + i * 18, 12, 12, GutFloraConstant.BARCHART_COLOR.get(colorIndex)));
+					
+					ret.append(String.format(
+							"\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\">%s</text>\n",
+							shiftX + 20, shiftY + i * 18 + 10, choiceMap.get(colName)));
+				}
 			}
 		}
 		ret.append("</g>\n");
