@@ -157,6 +157,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join parameter_info as pi on pi.id = pv.parameter_id "  
 					+ " left outer join choice as ch on ch.parameter_id = pi.id and parameter_value = ch.choice_option "  
 					+ " where sample_id = '" + sampleId + "'  "
+					+ " and pi.visible = true "
 					+ " and pi.group_id in (select group_id "
 					+ " from parameter_category as pc "  
 					+ " join parameter_group as pg on pg.category_id = pc.id "  
@@ -238,6 +239,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join parameter_info as pi on pi.id = pv.parameter_id "  
 					+ " left outer join choice as ch on ch.parameter_id = pi.id and parameter_value = ch.choice_option "  
 					+ " where sample_id = '" + sampleId + "'  "
+					+ " and pi.visible = true "
 					+ groupIdConstraint
 					+ " order by pi.id ";
 			
@@ -1595,7 +1597,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join parameter_type as pt on pt.id = pi.type_id "
 					+ " join parameter_group as pg on pg.id = pi.group_id "
 					+ " join parameter_category as pc on pc.id = pg.category_id "
-					+ groupIdConstraint + " order by pi.id";
+					+ groupIdConstraint
+					+ " and pi.visible = true " 
+					+ " order by pi.id";
 
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
 			List<String> profileNameList = new ArrayList<String>();
@@ -1851,6 +1855,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " from parameter_privilege as pp "
 					+ " join dbuser as du on du.id = pp.user_id "  
 					+ " where du.username = '" + currentUser + "' ) "
+					+ " and pi.visible = true "
 					+ " order by pg.id ";
 			
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
@@ -1906,6 +1911,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join dbuser as du on du.id = pp.user_id "
 					+ " where pg.category_id = " + categoryId 
 					+ " and du.username = '" + currentUser + "' "
+					+ " and pi.visible = true "
 					+ " order by pg.id";
 
 			ResultSet results = statement.executeQuery(sqlQuery);
@@ -1959,6 +1965,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " from parameter_privilege as pp "
 					+ " join dbuser as du on du.id = pp.user_id "  
 					+ " where du.username = '" + currentUser + "' ) "
+					+ " and pi.visible = true "
 					+ " order by pc.id";
 			
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
@@ -2356,6 +2363,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join parameter_info as pi on pi.id = parameter_id "
 					+ " join parameter_type as pt on pt.id = pi.type_id " 
 					+ " where sample_id in (" + sampleIdString + ") " 
+					+ " and pi.visible = true "
 					+ " and pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' " + groupState;
 			
 			// key: profile_name -> value: (key: sample_id -> value: profile_value)
@@ -2485,6 +2493,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join parameter_info as pi on pi.id = parameter_id "
 					+ " join parameter_type as pt on pt.id = pi.type_id " 
 					+ " where sample_id in (" + sampleIdString + ") "
+					+ " and pi.visible = true "
 					+ " and pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' " + groupState;
 			
 			// key: profile_name -> value: (key: sample_id -> value: profile_value)
@@ -2710,6 +2719,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join parameter_info as pi on pi.id = parameter_id "
 					+ " join parameter_type as pt on pt.id = pi.type_id " 
 					+ " where sample_id in (" + sampleIdString + ") "
+					+ " and pi.visible = true "
 					+ " and pt.type_name = '" + GutFloraConstant.PARA_TYPE_CONTINUOUS + "' " + groupState;
 			
 			// key: profile_name -> value: (key: sample_id -> value: profile_value)
@@ -3634,6 +3644,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ GutFloraConstant.PARA_TYPE_UNRANKED_CATEGORY + "','"
 					+ GutFloraConstant.PARA_TYPE_RANKED_CATEGORY + "') "
 					+ groupConstraint
+					+ " and pi.visible = true "
 					+ " order by pg.id ";
 			
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
