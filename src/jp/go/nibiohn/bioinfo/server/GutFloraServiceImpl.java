@@ -20,7 +20,16 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.jfree.graphics2d.svg.SVGGraphics2D;
 
+import com.apporiented.algorithm.clustering.AverageLinkageStrategy;
+import com.apporiented.algorithm.clustering.Cluster;
+import com.apporiented.algorithm.clustering.ClusteringAlgorithm;
+import com.apporiented.algorithm.clustering.CompleteLinkageStrategy;
+import com.apporiented.algorithm.clustering.DefaultClusteringAlgorithm;
+import com.apporiented.algorithm.clustering.LinkageStrategy;
+import com.apporiented.algorithm.clustering.SingleLinkageStrategy;
+import com.apporiented.algorithm.clustering.visualization.DendrogramSVG;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -1100,15 +1109,23 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			DendrogramCache cache = cacheMap.get(Integer.valueOf(distanceType * 10 + linkageType));
 			if (cache == null) {
-				Dendrogram dendrogram = sampleDistanceClustering(sampleIdList, distanceType, linkageTypes[linkageType]);
-				
-				sequence = dendrogram.getSequence();
-				svgDendrogram = dendrogram.getScaleUpSvgImageContentAtLeft(0, 6, 1, 2, 130d, true);
-				dendrogramWidth = dendrogram.getDendrogramWidth(130d);
-				dendrogramHeight = dendrogram.getDendrogramHeight(2);
-				
-				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType),
-						new DendrogramCache(sequence, svgDendrogram, dendrogramWidth, dendrogramHeight));
+//				Dendrogram dendrogram = sampleDistanceClustering(sampleIdList, distanceType, linkageTypes[linkageType]);
+//				
+//				sequence = dendrogram.getSequence();
+//				svgDendrogram = dendrogram.getScaleUpSvgImageContentAtLeft(0, 6, 1, 2, 130d, true);
+//				dendrogramWidth = dendrogram.getDendrogramWidth(130d);
+//				dendrogramHeight = dendrogram.getDendrogramHeight(2);
+//				
+//				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType),
+//						new DendrogramCache(sequence, svgDendrogram, dendrogramWidth, dendrogramHeight));
+
+				String[] sampleArray = sampleIdList.toArray(new String[sampleIdList.size()]);				
+				DendrogramCache dc = sampleDistanceClustering(sampleArray, distanceType, linkageTypes[linkageType]);
+				sequence = dc.getSequence();
+				svgDendrogram = dc.getSvgDendrogram();
+				dendrogramWidth = dc.getDendrogramWidth();
+				dendrogramHeight = dc.getDendrogramHeight();
+				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType), dc);
 			} else {
 				sequence = cache.getSequence();
 				svgDendrogram = cache.getSvgDendrogram();
@@ -1121,7 +1138,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			int maxSampleLength = getMaxItemLength(sequence);
 			
 			String svgBarChart = createSvgBarChart(rows, sequence.toArray(new String[] {}), selectedcolumns, rankIdList,
-					allReadsMap, dendrogramWidth + maxSampleLength * 10 + 10);
+					allReadsMap, dendrogramWidth + 10);
 			
 			int maxItemLength = getMaxItemLength(selectedcolumns);
 			int charWidth = 7;
@@ -1262,15 +1279,23 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			DendrogramCache cache = cacheMap.get(Integer.valueOf(distanceType * 10 + linkageType));
 			if (cache == null) {
-				Dendrogram dendrogram = sampleDistanceClustering(sampleIdList, distanceType, linkageTypes[linkageType]);
+//				Dendrogram dendrogram = sampleDistanceClustering(sampleIdList, distanceType, linkageTypes[linkageType]);
+//				
+//				sequence = dendrogram.getSequence();
+//				svgDendrogram = dendrogram.getScaleUpSvgImageContentAtLeft(0, 6, 1, 2, 130d, true);
+//				dendrogramWidth = dendrogram.getDendrogramWidth(130d);
+//				dendrogramHeight = dendrogram.getDendrogramHeight(2);
+//				
+//				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType), new DendrogramCache(sequence, svgDendrogram,
+//						dendrogramWidth, dendrogramHeight));
 				
-				sequence = dendrogram.getSequence();
-				svgDendrogram = dendrogram.getScaleUpSvgImageContentAtLeft(0, 6, 1, 2, 130d, true);
-				dendrogramWidth = dendrogram.getDendrogramWidth(130d);
-				dendrogramHeight = dendrogram.getDendrogramHeight(2);
-				
-				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType), new DendrogramCache(sequence, svgDendrogram,
-						dendrogramWidth, dendrogramHeight));
+				String[] sampleArray = sampleIdList.toArray(new String[sampleIdList.size()]);				
+				DendrogramCache dc = sampleDistanceClustering(sampleArray, distanceType, linkageTypes[linkageType]);
+				sequence = dc.getSequence();
+				svgDendrogram = dc.getSvgDendrogram();
+				dendrogramWidth = dc.getDendrogramWidth();
+				dendrogramHeight = dc.getDendrogramHeight();
+				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType), dc);
 			} else {
 				sequence = cache.getSequence();
 				svgDendrogram = cache.getSvgDendrogram();
@@ -1283,7 +1308,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			int maxSampleLength = getMaxItemLength(sequence);
 			
 			String svgBarChart = createSvgBarChart(rows, sequence.toArray(new String[] {}), rhList, topNRankIdList,
-					allReadsMap, dendrogramWidth + maxSampleLength * 10 + 10);
+					allReadsMap, dendrogramWidth + 10);
 			
 			int maxItemLength = getMaxItemLength(rhList);
 			int charWidth = 7;
@@ -1327,6 +1352,57 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		Dendrogram dendrogram = hc.getDendrogram(type);
 		
 		return dendrogram;
+	}
+
+	private DendrogramCache sampleDistanceClustering(String[] sampleIdList, int distanceType, LinkageType type) {
+		double[][] matrix = getSampleDistanceMatrix2(sampleIdList, distanceType);
+		
+		ClusteringAlgorithm alg = new DefaultClusteringAlgorithm();
+		
+		LinkageStrategy linkageStrategy;
+		switch (type) {
+		case AVERAGE:
+			linkageStrategy = new AverageLinkageStrategy();
+			break;
+		case COMPLETE:
+			linkageStrategy = new CompleteLinkageStrategy();
+			break;
+		case SINGLE:
+			linkageStrategy = new SingleLinkageStrategy();
+			break;
+		default:
+			return null;
+		}
+		
+		Cluster cluster = alg.performClustering(matrix, sampleIdList, linkageStrategy);
+		List<String> sequence = getClusterSequence(cluster);
+		
+		int dendrogramWidth = 400;
+		int dendrogramHeight = sampleIdList.length * 32;
+		DendrogramSVG dend = new DendrogramSVG();
+		dend.setModel(cluster);
+		SVGGraphics2D g2 = dend.drawDendrogram(dendrogramWidth, dendrogramHeight);
+		String svgString = g2.getSVGElement();
+//		svgString = svgString.replaceAll("<ellipse ", "<ellipse class=\"dendroNode\" ");
+		
+//		sequence = dendrogram.getSequence();
+//		svgDendrogram = dendrogram.getScaleUpSvgImageContentAtLeft(0, 210, 1, 2, 130d, true);
+//		dendrogramWidth = dendrogram.getDendrogramWidth(130d);
+//		dendrogramHeight = dendrogram.getDendrogramHeight(2);
+		return new DendrogramCache(sequence, svgString, dendrogramWidth, dendrogramHeight);
+	}
+	
+	private List<String> getClusterSequence(Cluster cluster) {
+		List<String> ret = new ArrayList<String>();
+		if (cluster.isLeaf()) {
+			ret.add(cluster.getName());
+		} else {
+			List<Cluster> children = cluster.getChildren();
+			for (Cluster child : children) {
+				ret.addAll(getClusterSequence(child));
+			}
+		}
+		return ret;
 	}
 
 	private Double calculateCorrelation(Integer correlationMethod, double[] list1, double[] list2) {
@@ -3255,15 +3331,13 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			DendrogramCache cache = cacheMap.get(Integer.valueOf(distanceType * 10 + linkageType));
 			if (cache == null) {
-				Dendrogram dendrogram = sampleDistanceClustering(sampleIdList, distanceType, linkageTypes[linkageType]);
-				
-				sequence = dendrogram.getSequence();
-				svgDendrogram = dendrogram.getScaleUpSvgImageContentAtLeft(0, 210, 1, 2, 130d, true);
-				dendrogramWidth = dendrogram.getDendrogramWidth(130d);
-				dendrogramHeight = dendrogram.getDendrogramHeight(2);
-				
-				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType), new DendrogramCache(sequence, svgDendrogram,
-						dendrogramWidth, dendrogramHeight));
+				String[] sampleArray = sampleIdList.toArray(new String[sampleIdList.size()]);				
+				DendrogramCache dc = sampleDistanceClustering(sampleArray, distanceType, linkageTypes[linkageType]);
+				sequence = dc.getSequence();
+				svgDendrogram = dc.getSvgDendrogram();
+				dendrogramWidth = dc.getDendrogramWidth();
+				dendrogramHeight = dc.getDendrogramHeight();
+				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType), dc);
 			} else {
 				sequence = cache.getSequence();
 				svgDendrogram = cache.getSvgDendrogram();
@@ -3274,18 +3348,20 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			// add heat map
 			// shiftX depend on the sample id length
 			int maxSampleLength = getMaxItemLength(sampleIdList);
-			String heatMap = createSvgHeatMap(rows, sequence, selectedcolumns, 150 + maxSampleLength * 10, 0, 200,
+			String heatMap = createSvgHeatMap(rows, sequence, selectedcolumns, dendrogramWidth, 0, 200,
 					false);
 			
 			StringBuffer ret = new StringBuffer();
 			
 			int canvasHeight = dendrogramHeight + 260;
-			int canvasWidth = 200 + taxonList.size() * 32 + 80;
+			int canvasWidth = dendrogramWidth + taxonList.size() * 32 + 80;
 			ret.append(String.format("<svg height=\"%d\" width=\"%d\">\n", canvasHeight, canvasWidth));
 			ret.append(String.format("\t<rect x=\"1\" y=\"1\" fill=\"white\" id=\"chart_body\" height=\"%d\" width=\"%d\" />\n", canvasHeight - 2, canvasWidth - 2));
 			
 			ret.append(heatMap);
+			ret.append("<g transform=\"translate(0 200)\">");
 			ret.append(svgDendrogram);
+			ret.append("</g>");
 			
 			ret.append("</svg>\n");
 
@@ -3482,25 +3558,123 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		}
 		return matrix;
 	}
+
+	// TODO
+	private double[][] getSampleDistanceMatrix(String[] sampleIdList, Integer distanceType) {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		Map<String, Map<String, Double>> matrix = new HashMap<String, Map<String,Double>>();
+		double[][] ret = null;
+		try {
+			connection = ds.getConnection();
+			
+			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
+			
+			Statement statement3 = connection.createStatement();
+			String sqlQuery3 = " select * from sample_distance " 
+					+ " where sample_id_1 in (" + sampleIdString + ") "
+					+ " and sample_id_2 in (" + sampleIdString + ") "
+					+ " and distance_type_id = " + distanceType;
+			
+			ResultSet results3 = statement3.executeQuery(sqlQuery3);
+			while (results3.next()) {
+				String sid1 = results3.getString("sample_id_1");
+				String sid2 = results3.getString("sample_id_2");
+				Double dist = results3.getDouble("distance");
+				if (matrix.get(sid1) == null) {
+					matrix.put(sid1, new HashMap<String, Double>());
+				}
+				matrix.get(sid1).put(sid2, dist);
+			}
+			
+			ret = new double[sampleIdList.length][sampleIdList.length];
+			for (int i = 0; i < sampleIdList.length; i++) {
+				for (int j = 0; j < sampleIdList.length; j++) {
+					if (i == j) {
+						ret[i][j] = 0;
+					} else {
+						ret[i][j] = matrix.get(sampleIdList[i]).get(sampleIdList[j]).doubleValue();
+					}
+				}
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			if (ds != null) {
+				ds.close();
+			}
+		}
+		return ret;
+	}
+
+	private double[][] getSampleDistanceMatrix2(String[] sampleIdList, Integer distanceType) {
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		Map<String, Map<String, Double>> matrix = new HashMap<String, Map<String,Double>>();
+		double[][] ret = null;
+		try {
+			connection = ds.getConnection();
+			
+			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
+			
+			Statement statement3 = connection.createStatement();
+			String sqlQuery3 = " select * from sample_all_distance "
+					+ " where sample_id in (" + sampleIdString + ") "
+					+ " and distance_type_id = " + distanceType;
+			
+			ResultSet results3 = statement3.executeQuery(sqlQuery3);
+			while (results3.next()) {
+				String sid1 = results3.getString("sample_id");
+				String distanceText = results3.getString("all_distance");
+				String[] allDist = distanceText.split(";");
+				Map<String,Double> map = new HashMap<String, Double>();
+				for (String dist : allDist) {
+					String[] split = dist.split(":");
+					map.put(split[0], Double.valueOf(split[1]));
+				}
+				matrix.put(sid1, map);
+			}
+			
+			ret = new double[sampleIdList.length][sampleIdList.length];
+			for (int i = 0; i < sampleIdList.length; i++) {
+				for (int j = 0; j < sampleIdList.length; j++) {
+					if (i == j) {
+						ret[i][j] = 0;
+					} else {
+						ret[i][j] = matrix.get(sampleIdList[i]).get(sampleIdList[j]).doubleValue();
+					}
+				}
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			if (ds != null) {
+				ds.close();
+			}
+		}
+		return ret;
+	}
 	
 	@Override
 	public PcoaResult getPCoAResult(List<String> sampleIdList, Integer distanceType) {
-		Map<String, Map<String, Double>> matrix = getSampleDistanceMatrix(sampleIdList, distanceType);
-		
-		List<String> sampleList = new ArrayList<>(matrix.keySet());
-		Collections.sort(sampleList);
-		
-		int len = sampleList.size();
-		double[][] dmat = new double[len][len];
-		for (int i = 0; i < len; i++) {
-			for (int j = 0; j < len; j++) {
-				if (i==j) {
-					dmat[i][j] = 0;
-				} else {
-					dmat[i][j] = matrix.get(sampleList.get(i)).get(sampleList.get(j)); 
-				}
-			}
-		}
+		String[] sampleArray = sampleIdList.toArray(new String[sampleIdList.size()]);
+		double[][] dmat = getSampleDistanceMatrix2(sampleArray, distanceType);
 		
 		MDSTweak mds = new MDSTweak(dmat, dmat.length - 1);
 
@@ -3511,7 +3685,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		for (int i = 0; i < coordinates.length; i++) {
 			Double xCoord = Double.valueOf(coordinates[i][0]);
 			Double yCoord = Double.valueOf(coordinates[i][1]);
-			coordinateMap.put(sampleList.get(i), Arrays.asList(xCoord, yCoord));
+			coordinateMap.put(sampleIdList.get(i), Arrays.asList(xCoord, yCoord));
 			xList.add(xCoord);
 			yList.add(yCoord);
 		}

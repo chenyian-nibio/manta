@@ -7,10 +7,9 @@ CREATE TABLE project (
 
 CREATE TABLE sample (
 	id text PRIMARY KEY,
-	subject_id text,
 	exp_date date,
 	age integer,
-	gender integer
+	gender text
 );
 
 CREATE TABLE project_sample (
@@ -81,7 +80,6 @@ CREATE TABLE parameter_type (
 
 CREATE TABLE parameter_info (
 	id integer PRIMARY KEY,
-	db_code text,
 	title text,
 	title_jp text,
 	unit text,
@@ -97,7 +95,8 @@ CREATE TABLE parameter_value (
 	sample_id text REFERENCES sample NOT NULL,
 	parameter_id integer REFERENCES parameter_info NOT NULL,
 	parameter_value text,
-	parameter_flag text
+	parameter_flag text, 
+	PRIMARY KEY (sample_id, parameter_id)
 );
 
 CREATE TABLE choice (
@@ -157,3 +156,14 @@ CREATE TABLE sample_diversity (
 	simpson numeric,
 	chao1 integer
 );
+
+CREATE INDEX parameter_value_sample_id_idx ON parameter_value (sample_id);
+CREATE INDEX sample_distance_idx ON sample_distance (sample_id_1, sample_id_2, distance_type_id);
+
+CREATE TABLE sample_all_distance (
+	sample_id text REFERENCES sample NOT NULL,
+	all_distance text NOT NULL,
+	distance_type_id integer REFERENCES distance_type NOT NULL
+);
+
+CREATE INDEX sample_all_distance_idx ON sample_all_distance (sample_id, distance_type_id);
