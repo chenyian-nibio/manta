@@ -15,6 +15,16 @@
     <servlet-name>gutfloraServlet</servlet-name>
     <url-pattern>/manta/analysis</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>managementServlet</servlet-name>
+    <servlet-class>jp.go.nibiohn.bioinfo.server.management.UserManagementImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>managementServlet</servlet-name>
+    <url-pattern>/manta/management</url-pattern>
+  </servlet-mapping>
   
   <servlet>
     <servlet-name>gwtExportDataServlet</servlet-name>
@@ -44,5 +54,12 @@
     <filter-name>gwtCacheControlFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
+
+  <resource-ref>
+    <description>PostgreSQL connection resource</description>
+    <res-ref-name>jdbc/postgresql</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
 
 </web-app>

@@ -8,6 +8,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
+import jp.go.nibiohn.bioinfo.client.management.UserManagementAsync;
+import jp.go.nibiohn.bioinfo.client.management.UserManagement;
+
 public abstract class BaseWidget extends Composite {
 	protected static final String SERVER_ERROR = "An error occurred while attempting to contact the server. "
 			+ "Please check your network connection and try again.";
@@ -15,6 +18,7 @@ public abstract class BaseWidget extends Composite {
 	protected static Logger rootLogger = Logger.getLogger("");
 
 	protected final GutFloraServiceAsync service = GWT.create(GutFloraService.class);
+	protected final UserManagementAsync management = GWT.create(UserManagement.class);
 
 	protected String name;
 	protected String link;

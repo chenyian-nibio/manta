@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.mindrot.jbcrypt.BCrypt;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.zaxxer.hikari.HikariConfig;
@@ -84,7 +86,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join project_sample as ps on ps.sample_id = mb.sample_id "
 					+ " join project as pj on pj.id = ps.project_id "
 					+ " join project_privilege as pp on pp.project_id = pj.id "
-					+ " join dbuser as du on du.id = pp.user_id " 
+					+ " join dbuser as du on du.id = pp.user_id "
 					+ " where du.username = '" + currentUser + "'";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
@@ -3052,80 +3054,64 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	/**
-	 * get display name (not account) 
+	 * get display name (not account)
 	 */
 	@Override
 	public String getCurrentUser() {
-		String ret = null;
-		String username = getCurrentUserFromSession();
-		
-		if (username != null) {
-			HikariDataSource ds = getHikariDataSource();
-			Connection connection = null;
-			try {
-				connection = ds.getConnection();
-				
-				Statement statement = connection.createStatement();
-				String sqlQuery = "select name from dbuser where username = '" + username + "'";
-				
-				ResultSet results = statement.executeQuery(sqlQuery);
-				if (results.next()) {
-					ret = results.getString("name");
-				}
-				
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					if (connection != null) {
-						connection.close();
-					}
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-				if (ds != null) {
-					ds.close();
-				}
-			}
-		}
-		return ret;
+		String userName = getCurrentUserFromSession() ;
+		String currentUser = userName != null ? userName : "Guest";
+		return currentUser;
 	}
 
 	@Override
-	public boolean loginUser(String username, String password) {
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		boolean ret = false;
-		try {
-			connection = ds.getConnection();
-			
-			Statement statement = connection.createStatement();
-			String sqlQuery = "select password from dbuser where username = '" + username + "'";
-			
-			ResultSet results = statement.executeQuery(sqlQuery);
-			if (results.next()) {
-				String pw = results.getString("password");
-				if (pw.equals(password)) {
-					ret = true;
+	public String createUser(String username, String password, String passwordConfirm) {
+		String result = "fail";
+		try (HikariDataSource ds = getHikariDataSource(); Connection connection = ds.getConnection();) {
+			String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
+
+			PreparedStatement uniquePstmt = connection.prepareStatement("select count(*) from dbuser where username = ?");
+			uniquePstmt.setString(1, username);
+			ResultSet uniqueResults = uniquePstmt.executeQuery();
+			uniqueResults.next();
+
+			if (uniqueResults.getInt(1) == 0) {
+				PreparedStatement insertPstmt = connection.prepareStatement("insert into dbuser (username, password, is_active) values (?, ?, ?)");
+				insertPstmt.setString(1, username);
+				insertPstmt.setString(2, hashed);
+				insertPstmt.setBoolean(3, true);
+				insertPstmt.executeUpdate();
+
+				result = "success";
+				saveCurrentUserToSession(username);
+			} else {
+				result = "The username is already in use.";
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+ 		}
+		return result;
+	}
+
+	@Override
+	public String loginUser(String username, String password) {
+		String result = "Incorrect ID or password.";
+		try (HikariDataSource ds = getHikariDataSource(); Connection connection = ds.getConnection();) {
+			PreparedStatement pstmt = connection.prepareStatement("select password from dbuser where username = ?");
+			pstmt.setString(1, username);
+			ResultSet queryResults = pstmt.executeQuery();
+
+			if (queryResults.next()) {
+				String hashed = queryResults.getString("password");
+				if (BCrypt.checkpw(password, hashed)) {
+					result = "success";
 					saveCurrentUserToSession(username);
 				}
 			}
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			if (ds != null) {
-				ds.close();
-			}
 		}
-		return ret;
+		return result;
 	}
 
 	@Override

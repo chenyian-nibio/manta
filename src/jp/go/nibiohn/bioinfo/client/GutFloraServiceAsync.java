@@ -50,14 +50,14 @@ public interface GutFloraServiceAsync {
 	void getReadsClusteredBarChart(Set<SampleEntry> selectedSamples, String selectedRank, String parentRank,
 			String parentTaxonId, int distanceType, int linkageType, int numOfColumns, Map<Integer, DendrogramCache> cacheMap,
 			AsyncCallback<VisualizationtResult> callback);
-	
-	void getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String categoryId, String groupId, String lang,   
+
+	void getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String categoryId, String groupId, String lang,
 			AsyncCallback<GutFloraAnalysisData> callback);
 	
 	void getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, List<String> selectedcolumns,
 			AsyncCallback<GutFloraAnalysisData> callback);
 
-	void getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns, String lang, 
+	void getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns, String lang,
 			AsyncCallback<GutFloraAnalysisData> callback);
 
 	void getAllTaxonEntries(Set<SampleEntry> selectedSamples, String rank, AsyncCallback<List<TaxonEntry>> callback);
@@ -109,7 +109,9 @@ public interface GutFloraServiceAsync {
 
 	void getCurrentUser(AsyncCallback<String> callback);
 
-	void loginUser(String username, String password, AsyncCallback<Boolean> callback);
+	void createUser(String username, String password, String passwordConfirm, AsyncCallback<String> callback);
+
+	void loginUser(String username, String password, AsyncCallback<String> callback);
 
 	void logoutCurrentUser(AsyncCallback<Void> callback);
 
