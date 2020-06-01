@@ -86,7 +86,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join project_sample as ps on ps.sample_id = mb.sample_id "
 					+ " join project as pj on pj.id = ps.project_id "
 					+ " join project_privilege as pp on pp.project_id = pj.id "
-					+ " join dbuser as du on du.id = pp.user_id " 
+					+ " join dbuser as du on du.id = pp.user_id "
 					+ " where du.username = '" + currentUser + "'";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);

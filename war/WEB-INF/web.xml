@@ -15,6 +15,16 @@
     <servlet-name>gutfloraServlet</servlet-name>
     <url-pattern>/manta/analysis</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>managementServlet</servlet-name>
+    <servlet-class>jp.go.nibiohn.bioinfo.server.management.UserManagementImpl</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>managementServlet</servlet-name>
+    <url-pattern>/manta/management</url-pattern>
+  </servlet-mapping>
   
   <servlet>
     <servlet-name>gwtExportDataServlet</servlet-name>
