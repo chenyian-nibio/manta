@@ -50,6 +50,7 @@ public class VisualizeResultWidget extends AnalysisWidget {
 	private Label profileNameLabel = new Label("TO BE SELECTED");
 	
 	private SimplePanel corrValuePanel = new SimplePanel();
+	private SimplePanel pValuePanel = new SimplePanel();
 
 	private SimplePanel chartPanel = new SimplePanel();
 	private SimplePanel tablePanel = new SimplePanel();
@@ -170,6 +171,12 @@ public class VisualizeResultWidget extends AnalysisWidget {
 		corrLablePanel.add(corrValuePanel);
 		corrValuePanel.setWidget(new Label("-.--"));
 		corrValuePanel.setStyleName("corrValue");
+
+		// p-value
+		corrLablePanel.add(pValuePanel);
+		pValuePanel.setWidget(new Label(""));
+		pValuePanel.setStyleName("pvalueLabel");
+		
 		selectHp.add(corrLablePanel);
 		corrValueDec.add(selectHp);
 
@@ -392,8 +399,9 @@ public class VisualizeResultWidget extends AnalysisWidget {
 		return sampleIdList;
 	}
 
-	public void setCorrelationValue(String value) {
-		corrValuePanel.setWidget(new Label(value));		
+	public void setCorrelationValue(String correlationLable, String pvalueLable) {
+		corrValuePanel.setWidget(new Label(correlationLable));
+		pValuePanel.setWidget(new HTML(pvalueLable));
 	}
 
 	public void setSelectNameAndUpdate(String name) {

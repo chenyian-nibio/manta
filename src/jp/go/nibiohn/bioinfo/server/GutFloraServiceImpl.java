@@ -17,9 +17,11 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.apache.commons.math3.util.FastMath;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.zaxxer.hikari.HikariConfig;
@@ -2433,7 +2435,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return null;
 	}
 	
-	@Override
+	@Deprecated
+	// TO BE REMOVE
 	public String getCorrelationString(Integer correlationMethod, List<String> list1, List<String> list2) {
 		double[] doubleList1 = new double[list1.size()];
 		for (int i = 0; i < list1.size(); i++) {
@@ -2444,6 +2447,37 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			doubleList2[i] = Double.valueOf(list2.get(i)).doubleValue();
 		}
 		return String.format("%+.2f", calculateCorrelation(correlationMethod, doubleList1, doubleList2));
+	}
+
+	/**
+	 * return a formatted string for correlation and p-value in a list
+	 */
+	@Override
+	public List<String> getCorrelationStringWithPvalue(Integer correlationMethod, List<String> list1, List<String> list2) {
+		double[] doubleList1 = new double[list1.size()];
+		for (int i = 0; i < list1.size(); i++) {
+			doubleList1[i] = Double.valueOf(list1.get(i)).doubleValue();
+		}
+		double[] doubleList2 = new double[list2.size()];
+		for (int i = 0; i < list2.size(); i++) {
+			doubleList2[i] = Double.valueOf(list2.get(i)).doubleValue();
+		}
+		return Arrays.asList(String.format("%+.2f", calculateCorrelation(correlationMethod, doubleList1, doubleList2)),
+				getPrettyPvalue(calculateCorrelation(correlationMethod, doubleList1, doubleList2), doubleList1.length));
+	}
+
+	private String getPrettyPvalue(double correlation, int sampleNumber) {
+		double pvalue = getCorrelationPValue(correlation, sampleNumber);
+		
+		String pvalueLabel = "<span class=\"isSignificant\">p < 0.0001</span>";
+		if (pvalue > 0.0001) {
+			if (pvalue < 0.05) {
+				pvalueLabel  = String.format("<span class=\"isSignificant\">p = %.4f</span>", pvalue);
+			} else {
+				pvalueLabel  = String.format("p = %.4f", pvalue);
+			}
+		}
+		return pvalueLabel;
 	}
 	
 	/**
@@ -2563,7 +2597,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				// ignore those correction could nor be calculated (cause NaN)
 				Double corrValue = results.get(n);
 				if (!corrValue.equals(Double.NaN)) {
-					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue)));
+					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue),
+							getPrettyPvalue(corrValue, referenceList.length)));
 				}
 			}
 			
@@ -2695,7 +2730,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				// ignore those correction could nor be calculated (cause NaN)
 				Double corrValue = results.get(n);
 				if (!corrValue.equals(Double.NaN)) {
-					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue)));
+					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue),
+							getPrettyPvalue(corrValue, referenceList.length)));
 				}
 			}
 			
@@ -2795,7 +2831,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				// ignore those correction could nor be calculated (cause NaN)
 				Double corrValue = results.get(n);
 				if (!corrValue.equals(Double.NaN)) {
-					ret.add(Arrays.asList(taxonomyMap.get(n), String.format("%+.2f", corrValue)));
+					ret.add(Arrays.asList(taxonomyMap.get(n), String.format("%+.2f", corrValue), 
+							getPrettyPvalue(corrValue, referenceList.length)));
 				}
 			}
 
@@ -2928,7 +2965,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			for (String n : nameList) {
 				Double corrValue = results.get(n);
 				if (!corrValue.equals(Double.NaN)) {
-					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue)));
+					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue),
+							getPrettyPvalue(corrValue, referenceList.length)));
 				}
 			}
 			
@@ -4251,4 +4289,18 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		}
 		return maxItemLength;
 	}
+	
+	/**
+	 * calculate the p-value of correlation
+	 * 
+	 * @param correlation
+	 * @param sampleNumber
+	 * @return p-value
+	 */
+	private double getCorrelationPValue(double correlation, int sampleNumber) {
+		TDistribution tDistribution = new TDistribution(sampleNumber - 2);
+		double t = FastMath.abs(correlation * FastMath.sqrt((sampleNumber - 2) / (1 - correlation * correlation)));
+		return 2 * tDistribution.cumulativeProbability(-t);
+	}
+
 }

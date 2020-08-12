@@ -75,7 +75,7 @@ public interface GutFloraService extends RemoteService {
 
 	PairListData getProfilesListById(Set<SampleEntry> selectedSamples, String paraId);
 	
-	String getCorrelationString(Integer correlationMethod, List<String> list1, List<String> list2);
+	List<String> getCorrelationStringWithPvalue(Integer correlationMethod, List<String> list1, List<String> list2);
 	
 	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
 			String paraType, Integer correlationMethod, String lang);

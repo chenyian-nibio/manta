@@ -84,8 +84,8 @@ public interface GutFloraServiceAsync {
 
 	void getProfilesListById(Set<SampleEntry> selectedSamples, String paraId, AsyncCallback<PairListData> callback);
 
-	void getCorrelationString(Integer correlationMethod, List<String> list1, List<String> list2,
-			AsyncCallback<String> callback);
+	void getCorrelationStringWithPvalue(Integer correlationMethod, List<String> list1, List<String> list2,
+			AsyncCallback<List<String>> callback);
 	
 	void searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName, String paraType,
 			Integer correlationMethod, String lang, AsyncCallback<SearchResultData> callback);
