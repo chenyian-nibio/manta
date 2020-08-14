@@ -27,7 +27,8 @@ public class GutFloraConstant {
 	public static final String[] DIVERSITY_INDEX = new String[]{"Shannon index", "Simpson index", "Chao1 index"};
 
 	public static final String[] ANALYSIS_TAB_TITLES = new String[] { "Microbiota composition",
-			"Diet and fitness parameters", "Immunological parameters", "Compare two parameters" };
+			"Diet and fitness parameters", "Immunological parameters", "Correlate two parameters",
+			"Unranked categorical parameters" };
 
 	public static final String NAVI_LINK_SAMPLE = "sample";
 	public static final String NAVI_LINK_ANALYSIS = "analysis";

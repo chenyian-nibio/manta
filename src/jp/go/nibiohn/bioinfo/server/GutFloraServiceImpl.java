@@ -20,6 +20,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.math3.stat.inference.OneWayAnova;
+import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.apache.commons.math3.util.FastMath;
 
@@ -1921,6 +1924,61 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
+	public List<ParameterEntry> getAllUnrankedCategoryParameterEntry(String lang) {
+		String currentUser = getUserForQuery();
+		
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement0 = connection.createStatement();
+			String queryFields = " select pi.id as id, pi.title as title, pi.unit as unit ";
+			if (lang.equals(GutFloraConstant.LANG_JP)) {
+				queryFields = " select pi.id as id, pi.title_jp as title, pi.unit_jp as unit ";
+			}
+			String sqlQuery0 = queryFields + " from parameter_info as pi "
+					+ " join parameter_type as pt on pt.id = pi.type_id "
+					+ " join parameter_group as pg on pg.id = pi.group_id " 
+					+ " where pt.type_name = '" + GutFloraConstant.PARA_TYPE_UNRANKED_CATEGORY + "' " 
+					+ " and pg.id in (" + " select group_id "
+					+ " from parameter_privilege as pp "
+					+ " join dbuser as du on du.id = pp.user_id "  
+					+ " where du.username = '" + currentUser + "' ) "
+					+ " order by pg.id ";
+			
+			ResultSet results0 = statement0.executeQuery(sqlQuery0);
+			List<ParameterEntry> profileNameList = new ArrayList<ParameterEntry>();
+			while (results0.next()) {
+				String name = results0.getString("title");
+				int paraId = results0.getInt("id");
+				String unit = results0.getString("unit");
+				profileNameList.add(new ParameterEntry(String.valueOf(paraId), name, unit));
+			}
+			statement0.close();
+			
+			connection.close();
+			ds.close();
+			
+			return profileNameList;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return null;
+	}
+	
+	@Override
 	public List<List<String>> getProfileGroups(String categoryId, String lang) {
 		String currentUser = getUserForQuery();
 
@@ -2175,24 +2233,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			statement1.close();
 
-			Statement statement2 = connection.createStatement();
-			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
-					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and " + rank + "_id = '" + taxonId + "' " + " group by sample_id ";
-			
-			ResultSet results2 = statement2.executeQuery(sqlQuery2);
-			Map<String, Double> readMap = new HashMap<String, Double>();
-			while (results2.next()) {
-				String sid = results2.getString("sample_id");
-				double allReads = results2.getDouble("all_reads");
-				readMap.put(sid, Double.valueOf(allReads));
-			}
-			statement2.close();
-			
 			connection.close();
 			ds.close();
-			return new PairListData(getOriginalPctList(sampleIdList, readPctMap), getOriginalList(sampleIdList,
-					readMap, true));
+			return new PairListData(getOriginalPctList(sampleIdList, readPctMap));
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2221,21 +2264,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
 			
-			Statement statement0 = connection.createStatement();
-			String sqlQuery0 = " select sample_id, sum(read_num) as all_reads from microbiota "
-					+ " join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and t.name = '" + taxonName + "' " + " group by sample_id ";
-			
-			ResultSet results0 = statement0.executeQuery(sqlQuery0);
-			Map<String, Double> readMap = new HashMap<String, Double>();
-			while (results0.next()) {
-				String sid = results0.getString("sample_id");
-				double allReads = results0.getDouble("all_reads");
-				readMap.put(sid, Double.valueOf(allReads));
-			}
-			statement0.close();
-			
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, sum(read_pct) as all_reads_pct from microbiota "
 					+ " join taxonomy as t on t.id = " + rank + "_id "
@@ -2253,8 +2281,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			connection.close();
 			ds.close();
-			return new PairListData(getOriginalPctList(sampleIdList, readPctMap),
-					getOriginalList(sampleIdList, readMap, true));
+			return new PairListData(getOriginalPctList(sampleIdList, readPctMap));
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2389,7 +2416,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public PairListData getProfilesListById(Set<SampleEntry> selectedSamples, String paraId) {
+	public PairListData getNumericParameterValueById(Set<SampleEntry> selectedSamples, String paraId) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -2418,6 +2445,74 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			PairListData ret = new PairListData(getOriginalList(sampleIdList, readMap, false));
 			return ret;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return null;
+	}
+
+	@Override
+	public PairListData getStringParameterValueById(Set<SampleEntry> selectedSamples, String paraId) {
+		List<String> sampleIdList = getSortedSampleList(selectedSamples);
+		
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
+			
+			Statement statement1 = connection.createStatement();
+			String sqlQuery1 = " select sample_id, parameter_value " + " from parameter_value "
+					+ " where sample_id in (" + sampleIdString + ") "
+					+ " and parameter_id = " + paraId;
+			
+			ResultSet results1 = statement1.executeQuery(sqlQuery1);
+			Map<String, String> valueMap = new HashMap<String, String>();
+			while (results1.next()) {
+				String sid = results1.getString("sample_id");
+				String value = results1.getString("parameter_value");
+				valueMap.put(sid, value);
+			}
+			statement1.close();
+
+			Statement statement2 = connection.createStatement();
+			String sqlQuery2 = " select choice_option, " + " choice_value " + " as title from choice " 
+					+ " where parameter_id = " + paraId;
+			
+			ResultSet results2 = statement2.executeQuery(sqlQuery2);
+			Map<String, String> choiceMap = new HashMap<String, String>();
+			while (results2.next()) {
+				String id = results2.getString("choice_option");
+				String value = results2.getString("title");
+				choiceMap.put(id, value);
+			}
+			statement2.close();
+			
+			connection.close();
+			ds.close();
+			
+			List<String> orderedList = new ArrayList<String>();
+			for (int i = 0; i < sampleIdList.size(); i++) {
+				String value = valueMap.get(sampleIdList.get(i));
+				if (value == null) {
+					value = "";
+				}
+				orderedList.add(value);
+			}
+			
+			return new PairListData(orderedList, choiceMap);
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2478,6 +2573,51 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 		}
 		return pvalueLabel;
+	}
+	
+	@Override
+	public String getFormattedPvalueForUnrankedCategoricalParameter(Map<String, List<String>> groupValue) {
+		int size = groupValue.keySet().size();
+		if (size < 2) {
+			// Do nothing ...
+			return "na";
+		} else {
+			double pvalue = 0;
+			// convert to List<double[]>
+			List<double[]> categoryData = new ArrayList<double[]>();
+			for (String key : groupValue.keySet()) {
+				List<String> list = groupValue.get(key);
+				if (list.size() < 2) {
+					continue;
+				}
+				double[] values = new double[list.size()];
+				for (int i = 0; i < list.size(); i++) {
+					values[i] = Double.valueOf(list.get(i)).doubleValue();
+				}
+				categoryData.add(values);
+			}
+			if (categoryData.size() == 2) {
+				// t-test
+				TTest test = new TTest();
+				pvalue = test.tTest(categoryData.get(0), categoryData.get(1));
+			} else if (categoryData.size() > 2) {
+				// ANNOVA
+				OneWayAnova test = new OneWayAnova();
+				pvalue = test.anovaPValue(categoryData);
+			} else {
+				return "na";
+			}
+			
+			String pvalueLabel = "<span class=\"isSignificant\">p < 0.0001</span>";
+			if (pvalue > 0.0001) {
+				if (pvalue < 0.05) {
+					pvalueLabel  = String.format("<span class=\"isSignificant\">p = %.4f</span>", pvalue);
+				} else {
+					pvalueLabel  = String.format("p = %.4f", pvalue);
+				}
+			}
+			return pvalueLabel;
+		}
 	}
 	
 	/**
@@ -4303,4 +4443,138 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return 2 * tDistribution.cumulativeProbability(-t);
 	}
 
+	@Override
+	public String plotBarChartWithErrorBars(Map<String, List<String>> groupValue, Map<String, String> choiceMap,
+			String xAxisLabel, String lang) {
+		List<String> groups = new ArrayList<String>(groupValue.keySet());
+		
+		Map<String, double[]> data = new HashMap<String, double[]>();
+		List<Double> maxValue = new ArrayList<Double>();
+		for (String groupName : groups) {
+			double average = groupValue.get(groupName).stream().mapToDouble(v -> Double.parseDouble(v)).average().orElse(0.0);
+			double[] array = groupValue.get(groupName).stream().mapToDouble(v -> Double.parseDouble(v)).toArray();
+			double sd = new StandardDeviation().evaluate(array);
+			double se = sd / Math.sqrt(array.length);
+			data.put(groupName, new double[] {average, sd, se});
+			maxValue.add(average + se);
+		}
+		
+		
+		// settings
+		int fullWidth = 500;
+		int barHeight = 40;
+		int shiftX = 20;
+		int shiftY = 20;
+		int x = 1 + shiftX;
+		int y = shiftY + 30;
+		
+		int groupHeight = 60;
+		
+		int canvasHeight = 600;
+		int canvasWidth = 600; // should be flexible
+		
+		// estimate height
+		int plotHeight = groupHeight * groups.size() + 30;
+		// estimate max x-value
+		double maxWidth = maxValue.stream().mapToDouble(v -> v).max().orElse(0.0);
+		
+		StringBuffer ret = new StringBuffer();
+		ret.append(String.format("<svg height=\"%d\" width=\"%d\">\n", canvasHeight, canvasWidth));
+		ret.append(String.format(
+				"\t<rect x=\"1\" y=\"1\" fill=\"white\" id=\"chart_body\" height=\"%d\" width=\"%d\" />\n",
+				canvasHeight - 2, canvasWidth - 2));
+
+		// axis
+		ret.append("<g stroke-width=\"1\" stroke=\"none\" class=\"axis\" id=\"axis\">\n");
+		String lineStyle = "style=\"stroke:rgb(0,0,0);stroke-width:1.0;stroke-opacity:0.8;\"";
+		// vertical axis
+		ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x, shiftY, x,
+				shiftY + plotHeight, lineStyle));
+		// horizon axis
+		ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x, shiftY + plotHeight,
+				x + fullWidth, shiftY + plotHeight, lineStyle));
+		// ticks
+		List<Double> ticks = new ArrayList<Double>();
+		if (maxWidth > 10) {
+			long round = Math.round(maxWidth / 10);
+			for (long i = round; i > 0; i--) {
+				ticks.add(Double.valueOf(i * 10));
+			}
+		} else {
+			long round = Math.round(maxWidth);
+			for (long i = round; i > 0; i--) {
+				ticks.add(Double.valueOf(i));
+			}
+		}
+		for (Double tick : ticks) {
+			long width = Math.round(tick / (maxWidth * 1.1) * fullWidth);
+			ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x + width,
+					shiftY + plotHeight + 1, x + width, shiftY + plotHeight + 6, lineStyle));
+			ret.append(String
+					.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%.0f</text>\n",
+							x + width, shiftY + plotHeight + 24, 16, tick));
+		}
+		
+		ret.append(String.format(
+				"\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
+				shiftX + fullWidth / 2, shiftY + plotHeight + 60, 16, xAxisLabel));
+		
+		ret.append("</g>\n");
+		
+		// bars
+		ret.append("<g stroke-width=\"1\" stroke=\"none\" class=\"bars\" id=\"bars\">\n");
+
+		for (int i = 0; i < groups.size(); i++) {
+			double[] ds = data.get(groups.get(i));
+			long width = Math.round(ds[0] / (maxWidth * 1.1) * fullWidth);
+			long se = Math.round(ds[2] / (maxWidth * 1.1) * fullWidth);
+			long h = width - 1;
+			
+			int choiceIndex = Integer.parseInt(groups.get(i));
+			ret.append(String.format("\t<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" class=\"taxonBar\">\n",
+					x + 1, y, h, barHeight, GutFloraConstant.BARCHART_COLOR.get(choiceIndex)));
+			ret.append(String.format("<title>%.2f &plusmn; %.2f</title>\n", ds[0], ds[2]));
+			ret.append("</rect>\n");
+			
+			// error bar
+			ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x + h - se,
+					y + barHeight / 2, x + h + se, y + barHeight / 2, lineStyle));
+			ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x + h - se,
+					y - 5 + barHeight / 2, x + h - se, y + 5 + barHeight / 2, lineStyle));
+			ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x + h + se,
+					y - 5 + barHeight / 2, x + h + se, y + 5 + barHeight / 2, lineStyle));
+			
+			y += groupHeight;
+		}
+		ret.append("</g>\n");
+		
+		// legend
+		// draw the legend
+		ret.append("<g stroke-width=\"1\" stroke=\"none\" class=\"legend\">\n");
+		int legendY = shiftY + plotHeight + 100;
+		for (int i = 0; i < groups.size(); i++) {
+			String groupName = groups.get(i);
+			String choiceTitle = choiceMap.get(groupName);
+			if (choiceTitle != null) {
+				int choiceIndex = Integer.parseInt(groupName);
+				ret.append(String.format("\t<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" />\n",
+						shiftX + 40, legendY + i * 18, 12, 12, GutFloraConstant.BARCHART_COLOR.get(choiceIndex)));
+				
+				ret.append(String.format(
+						"\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\">%s</text>\n",
+						shiftX + 60, legendY + i * 18 + 10, choiceTitle));
+				
+				ret.append(String.format(
+						"\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\" text-anchor=\"end\">(%d)</text>\n",
+						shiftX + 36, legendY + i * 18 + 10, groupValue.get(groupName).size()));
+			} else {
+				System.err.println("");
+			}
+		}
+		ret.append("</g>\n");
+		
+		ret.append("</svg>\n");
+		
+		return ret.toString();
+	}
 }

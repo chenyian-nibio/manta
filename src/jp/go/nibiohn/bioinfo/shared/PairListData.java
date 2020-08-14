@@ -1,35 +1,33 @@
 package jp.go.nibiohn.bioinfo.shared;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class PairListData implements IsSerializable {
 
 	private List<String> originalList;
+	private Map<String, String> metaDataMap;
 
-	private List<String> supplementList;
-	
 	public PairListData() {
 	}
 
 	public PairListData(List<String> originalList) {
 		this.originalList = originalList;
-		this.supplementList = new ArrayList<String>();
 	}
 
-	public PairListData(List<String> originalList, List<String> supplementList) {
+	public PairListData(List<String> originalList, Map<String, String> metaDataMap) {
 		this.originalList = originalList;
-		this.supplementList = supplementList;
+		this.metaDataMap = metaDataMap;
 	}
 
 	public List<String> getOriginalList() {
 		return originalList;
 	}
 
-	public List<String> getSupplementList() {
-		return supplementList;
+	public Map<String, String> getMetaDataMap() {
+		return metaDataMap;
 	}
 
 }

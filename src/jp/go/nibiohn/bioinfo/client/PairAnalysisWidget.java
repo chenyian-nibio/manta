@@ -204,7 +204,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				if (rank.equals(OPTION_PARAMETER)) {
 					String paraId = paraListBoxX.getSelectedValue();
 					if (paraId != null && !paraId.equals("")) {
-						service.getProfilesListById(PairAnalysisWidget.this.selectedSamples, paraId, new AsyncCallback<PairListData>() {
+						service.getNumericParameterValueById(PairAnalysisWidget.this.selectedSamples, paraId, new AsyncCallback<PairListData>() {
 							
 							@Override
 							public void onSuccess(PairListData result) {
@@ -247,7 +247,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				if (rank.equals(OPTION_PARAMETER)) {
 					String paraId = paraListBoxY.getSelectedValue();
 					if (paraId != null && !paraId.equals("")) {
-						service.getProfilesListById(PairAnalysisWidget.this.selectedSamples, paraId, new AsyncCallback<PairListData>() {
+						service.getNumericParameterValueById(PairAnalysisWidget.this.selectedSamples, paraId, new AsyncCallback<PairListData>() {
 							
 							@Override
 							public void onSuccess(PairListData result) {
