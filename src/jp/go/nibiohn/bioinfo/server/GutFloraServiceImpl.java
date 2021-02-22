@@ -17,8 +17,12 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+import org.apache.commons.math3.stat.inference.OneWayAnova;
+import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 
@@ -30,6 +34,8 @@ import com.apporiented.algorithm.clustering.DefaultClusteringAlgorithm;
 import com.apporiented.algorithm.clustering.LinkageStrategy;
 import com.apporiented.algorithm.clustering.SingleLinkageStrategy;
 import com.apporiented.algorithm.clustering.visualization.DendrogramSVG;
+import org.apache.commons.math3.util.FastMath;
+
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -76,7 +82,12 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			config = new HikariConfig(props);
 		}
-		return new HikariDataSource(config);
+		HikariDataSource ds = new HikariDataSource(config);
+		// somehow these properties wasn't able to set in the properties file
+		ds.setMaximumPoolSize(20);
+		ds.setMinimumIdle(20);
+		ds.setMaxLifetime(600000);
+		return ds;
 	}
 	
 	@Override
@@ -102,6 +113,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String string = results1.getString("sample_id");
 				sampleSet.add(string);
 			}
+			statement1.close();
 
 			String query_pjname = " pj.name as pj_name ";
 			if (lang.equals(GutFloraConstant.LANG_JP)) {
@@ -124,6 +136,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 						results.getString("pj_name"), results.getDate("exp_date"), sampleSet.contains(sampleId)));
 
 			}
+			statement.close();
 			
 			connection.close();
 			ds.close();
@@ -196,13 +209,14 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				ret.add(Arrays.asList(results.getString("title"), parameter, unit));
 			}
+			statement.close();
+			
 			connection.close();
 			ds.close();
 			return ret;
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			ds.close();
 		}
 		
 		try {
@@ -273,13 +287,14 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				ret.add(Arrays.asList(results.getString("title"), parameter, unit));
 			}
+			statement.close();
+			
 			connection.close();
 			ds.close();
 			return ret;
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			ds.close();
 		}
 		
 		try {
@@ -316,6 +331,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				List<String> asList = Arrays.asList(results.getString("taxon_name"), results.getString("sum_reads"), results.getString("taxon_id"));
 				ret.add(asList);
 			}
+			statement.close();
+			
 			connection.close();
 			ds.close();
 			return ret;
@@ -359,9 +376,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				List<String> asList = Arrays.asList(results.getString("taxon_name"), results.getString("sum_reads"), results.getString("taxon_id"));
 				ret.add(asList);
 			}
+			statement.close();
+			
 			connection.close();
 			ds.close();
-			
 			return ret;
 			
 		} catch (SQLException e) {
@@ -403,6 +421,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
 						results.getDate("exp_date"), true));
 			}
+			statement.close();
 			
 			connection.close();
 			ds.close();
@@ -451,6 +470,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 						results.getString("gender"), results.getString("pj_name"),
 						results.getDate("exp_date"), null);
 			}
+			statement.close();
 			
 			connection.close();
 			ds.close();
@@ -500,6 +520,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String displayValue = String.valueOf((int) allReads);
 				rows.get(sid).put(name, displayValue);
 			}
+			statement1.close();
 			
 			connection.close();
 			ds.close();
@@ -575,6 +596,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 						topNRankIdList.add(rid);
 					}
 				}
+				statement0.close();
 
 				String rankIdString = "'" + StringUtils.join(topNRankIdList, "','") + "'";
 				
@@ -601,6 +623,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					String displayValue = String.valueOf((int) allReads);
 					rows.get(sid).put(name, displayValue);
 				}
+				statement1.close();
 
 				// add others column 
 				Statement statement2 = connection.createStatement();
@@ -625,6 +648,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					String displayValue = String.valueOf((int) (allReads - sum));
 					rows.get(sid).put(GutFloraConstant.COLUMN_HEADER_OTHERS, displayValue);
 				}
+				statement2.close();
 
 				connection.close();
 				ds.close();
@@ -687,6 +711,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = resultsA.getString("taxon_name");
 				taxonList.add(tid + "::" + name);
 			}
+			statementA.close();
 
 			Statement statement0 = connection.createStatement();
 			String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
@@ -709,6 +734,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					taxonList.add(taxonString);
 				}
 			}
+			statement0.close();
 			
 			Collections.sort(taxonList, new Comparator<String>() {
 
@@ -749,6 +775,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(name, String.valueOf(allReads));
 			}
+			statement1.close();
 			
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
@@ -775,6 +802,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(GutFloraConstant.COLUMN_HEADER_OTHERS, String.valueOf(allReads - sum));
 			}
+			statement2.close();
 			
 			connection.close();
 			ds.close();
@@ -831,8 +859,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	@Override
 	public VisualizationtResult getReadsBarChart(Set<SampleEntry> selectedSamples, String selectedRank, String parentRank,
 			String parentTaxonId) {
-//		System.out.println(String.format("%s, %s, %s", selectedRank, parentRank, parentTaxonId));
-		
 		// suppose the maximal display number is 15
 		int maximalDisplayNumber = 15;
 
@@ -866,6 +892,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					topNRankIdList.add(rid);
 				}
 			}
+			statement0.close();
 			
 			String rankIdString = "'" + StringUtils.join(topNRankIdList, "','") + "'";
 			
@@ -891,6 +918,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(name, String.valueOf(allReads));
 			}
+			statement1.close();
 			
 			// add others column 
 			Statement statement2 = connection.createStatement();
@@ -919,6 +947,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(GutFloraConstant.COLUMN_HEADER_OTHERS, String.valueOf(allReads - sum));
 			}
+			statement2.close();
 			
 			connection.close();
 			ds.close();
@@ -1008,6 +1037,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = resultsA.getString("taxon_name");
 				taxonList.add(tid + "::" + name);
 			}
+			statementA.close();
 
 			Statement statement0 = connection.createStatement();
 			String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
@@ -1030,6 +1060,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					taxonList.add(taxonString);
 				}
 			}
+			statement0.close();
 			
 			Collections.sort(taxonList, new Comparator<String>() {
 
@@ -1070,6 +1101,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(name, String.valueOf(allReads));
 			}
+			statement1.close();
 			
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
@@ -1096,6 +1128,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(GutFloraConstant.COLUMN_HEADER_OTHERS, String.valueOf(allReads - sum));
 			}
+			statement2.close();
 			
 			connection.close();
 			ds.close();
@@ -1208,6 +1241,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					topNRankIdList.add(rid);
 				}
 			}
+			statement0.close();
 			
 			String rankIdString = "'" + StringUtils.join(topNRankIdList, "','") + "'";
 			
@@ -1233,6 +1267,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(name, String.valueOf(allReads));
 			}
+			statement1.close();
 			
 			// add others column 
 			Statement statement2 = connection.createStatement();
@@ -1261,6 +1296,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(GutFloraConstant.COLUMN_HEADER_OTHERS, String.valueOf(allReads - sum));
 			}
+			statement2.close();
 			
 			connection.close();
 			ds.close();
@@ -1551,6 +1587,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String rid = results0.getString(1);
 				rankIdList.add(rid);
 			}
+			statement0.close();
 			
 			String rankIdString = "'" + StringUtils.join(rankIdList, "','") + "'";
  			
@@ -1577,6 +1614,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String displayValue = String.valueOf((int) allReads);
 				rows.get(sid).put(name, displayValue);
 			}
+			statement1.close();
  			
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
@@ -1603,6 +1641,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String displayValue = String.valueOf((int) (allReads - sum));
 				rows.get(sid).put(GutFloraConstant.COLUMN_HEADER_OTHERS, displayValue);
 			}
+			statement2.close();
 
 			connection.close();
 			ds.close();
@@ -1698,6 +1737,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					topNIdList.add(id);
 				}
 			}
+			statement0.close();
 			
 			String topIdString = StringUtils.join(topNIdList, ",");
 			
@@ -1730,6 +1770,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(name, para);
 			}
+			statement2.close();
 			
 			connection.close();
 			ds.close();
@@ -1797,6 +1838,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String id = results0.getString("id");
 				profileIdList.add(id);
 			}
+			statement0.close();
 			
 			String idString = "'" + StringUtils.join(profileIdList, "','") + "'";
 			
@@ -1837,6 +1879,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					numericParameters.add(name);
 				}
 			}
+			statement2.close();
 			
 			connection.close();
 			ds.close();
@@ -1888,6 +1931,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = results0.getString("taxon_name");
 				rankNameList.add(new TaxonEntry(name, id, rank));
 			}
+			statement0.close();
 			
 			connection.close();
 			ds.close();
@@ -1942,6 +1986,62 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String unit = results0.getString("unit");
 				profileNameList.add(new ParameterEntry(String.valueOf(paraId), name, unit));
 			}
+			statement0.close();
+			
+			connection.close();
+			ds.close();
+			
+			return profileNameList;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return null;
+	}
+	
+	@Override
+	public List<ParameterEntry> getAllUnrankedCategoryParameterEntry(String lang) {
+		String currentUser = getUserForQuery();
+		
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement0 = connection.createStatement();
+			String queryFields = " select pi.id as id, pi.title as title, pi.unit as unit ";
+			if (lang.equals(GutFloraConstant.LANG_JP)) {
+				queryFields = " select pi.id as id, pi.title_jp as title, pi.unit_jp as unit ";
+			}
+			String sqlQuery0 = queryFields + " from parameter_info as pi "
+					+ " join parameter_type as pt on pt.id = pi.type_id "
+					+ " join parameter_group as pg on pg.id = pi.group_id " 
+					+ " where pt.type_name = '" + GutFloraConstant.PARA_TYPE_UNRANKED_CATEGORY + "' " 
+					+ " and pg.id in (" + " select group_id "
+					+ " from parameter_privilege as pp "
+					+ " join dbuser as du on du.id = pp.user_id "  
+					+ " where du.username = '" + currentUser + "' ) "
+					+ " order by pg.id ";
+			
+			ResultSet results0 = statement0.executeQuery(sqlQuery0);
+			List<ParameterEntry> profileNameList = new ArrayList<ParameterEntry>();
+			while (results0.next()) {
+				String name = results0.getString("title");
+				int paraId = results0.getInt("id");
+				String unit = results0.getString("unit");
+				profileNameList.add(new ParameterEntry(String.valueOf(paraId), name, unit));
+			}
+			statement0.close();
 			
 			connection.close();
 			ds.close();
@@ -1995,6 +2095,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			while (results.next()) {
 				ret.add(Arrays.asList(results.getString("group_name"), String.valueOf(results.getInt("id"))));
 			}
+			statement.close();
 			
 			connection.close();
 			ds.close();
@@ -2050,6 +2151,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = results0.getString("category_name");
 				profileNameList.add(Arrays.asList(name, String.valueOf(results0.getInt("id"))));
 			}
+			statement0.close();
 			
 			connection.close();
 			ds.close();
@@ -2095,24 +2197,11 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				double allReadsPct = results1.getDouble("all_reads_pct");
 				readPctMap.put(sid, Double.valueOf(allReadsPct));
 			}
+			statement1.close();
 
-			Statement statement2 = connection.createStatement();
-			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
-					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and " + rank + "_id = '" + taxonId + "' " + " group by sample_id ";
-			
-			ResultSet results2 = statement2.executeQuery(sqlQuery2);
-			Map<String, Double> readMap = new HashMap<String, Double>();
-			while (results2.next()) {
-				String sid = results2.getString("sample_id");
-				double allReads = results2.getDouble("all_reads");
-				readMap.put(sid, Double.valueOf(allReads));
-			}
-			
 			connection.close();
 			ds.close();
-			return new PairListData(getOriginalPctList(sampleIdList, readPctMap), getOriginalList(sampleIdList,
-					readMap, true));
+			return new PairListData(getOriginalPctList(sampleIdList, readPctMap));
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2141,20 +2230,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
 			
-			Statement statement0 = connection.createStatement();
-			String sqlQuery0 = " select sample_id, sum(read_num) as all_reads from microbiota "
-					+ " join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and t.name = '" + taxonName + "' " + " group by sample_id ";
-			
-			ResultSet results0 = statement0.executeQuery(sqlQuery0);
-			Map<String, Double> readMap = new HashMap<String, Double>();
-			while (results0.next()) {
-				String sid = results0.getString("sample_id");
-				double allReads = results0.getDouble("all_reads");
-				readMap.put(sid, Double.valueOf(allReads));
-			}
-			
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, sum(read_pct) as all_reads_pct from microbiota "
 					+ " join taxonomy as t on t.id = " + rank + "_id "
@@ -2168,11 +2243,11 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				double allReadsPct = results1.getDouble("all_reads_pct");
 				readPctMap.put(sid, Double.valueOf(allReadsPct));
 			}
+			statement1.close();
 			
 			connection.close();
 			ds.close();
-			return new PairListData(getOriginalPctList(sampleIdList, readPctMap),
-					getOriginalList(sampleIdList, readMap, true));
+			return new PairListData(getOriginalPctList(sampleIdList, readPctMap));
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2283,6 +2358,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				double value = results2.getDouble("parameter_value");
 				readMap.put(sid, Double.valueOf(value));
 			}
+			statement2.close();
 			
 			connection.close();
 			ds.close();
@@ -2306,7 +2382,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public PairListData getProfilesListById(Set<SampleEntry> selectedSamples, String paraId) {
+	public PairListData getNumericParameterValueById(Set<SampleEntry> selectedSamples, String paraId) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -2328,6 +2404,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				double value = results1.getDouble("parameter_value");
 				readMap.put(sid, Double.valueOf(value));
 			}
+			statement1.close();
 			
 			connection.close();
 			ds.close();
@@ -2350,8 +2427,77 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		
 		return null;
 	}
-	
+
 	@Override
+	public PairListData getStringParameterValueById(Set<SampleEntry> selectedSamples, String paraId) {
+		List<String> sampleIdList = getSortedSampleList(selectedSamples);
+		
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
+			
+			Statement statement1 = connection.createStatement();
+			String sqlQuery1 = " select sample_id, parameter_value " + " from parameter_value "
+					+ " where sample_id in (" + sampleIdString + ") "
+					+ " and parameter_id = " + paraId;
+			
+			ResultSet results1 = statement1.executeQuery(sqlQuery1);
+			Map<String, String> valueMap = new HashMap<String, String>();
+			while (results1.next()) {
+				String sid = results1.getString("sample_id");
+				String value = results1.getString("parameter_value");
+				valueMap.put(sid, value);
+			}
+			statement1.close();
+
+			Statement statement2 = connection.createStatement();
+			String sqlQuery2 = " select choice_option, " + " choice_value " + " as title from choice " 
+					+ " where parameter_id = " + paraId;
+			
+			ResultSet results2 = statement2.executeQuery(sqlQuery2);
+			Map<String, String> choiceMap = new HashMap<String, String>();
+			while (results2.next()) {
+				String id = results2.getString("choice_option");
+				String value = results2.getString("title");
+				choiceMap.put(id, value);
+			}
+			statement2.close();
+			
+			connection.close();
+			ds.close();
+			
+			List<String> orderedList = new ArrayList<String>();
+			for (int i = 0; i < sampleIdList.size(); i++) {
+				String value = valueMap.get(sampleIdList.get(i));
+				if (value == null) {
+					value = "";
+				}
+				orderedList.add(value);
+			}
+			
+			return new PairListData(orderedList, choiceMap);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		ds.close();
+		
+		return null;
+	}
+	
+	@Deprecated
+	// TO BE REMOVE
 	public String getCorrelationString(Integer correlationMethod, List<String> list1, List<String> list2) {
 		double[] doubleList1 = new double[list1.size()];
 		for (int i = 0; i < list1.size(); i++) {
@@ -2362,6 +2508,82 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			doubleList2[i] = Double.valueOf(list2.get(i)).doubleValue();
 		}
 		return String.format("%+.2f", calculateCorrelation(correlationMethod, doubleList1, doubleList2));
+	}
+
+	/**
+	 * return a formatted string for correlation and p-value in a list
+	 */
+	@Override
+	public List<String> getCorrelationStringWithPvalue(Integer correlationMethod, List<String> list1, List<String> list2) {
+		double[] doubleList1 = new double[list1.size()];
+		for (int i = 0; i < list1.size(); i++) {
+			doubleList1[i] = Double.valueOf(list1.get(i)).doubleValue();
+		}
+		double[] doubleList2 = new double[list2.size()];
+		for (int i = 0; i < list2.size(); i++) {
+			doubleList2[i] = Double.valueOf(list2.get(i)).doubleValue();
+		}
+		return Arrays.asList(String.format("%+.2f", calculateCorrelation(correlationMethod, doubleList1, doubleList2)),
+				getPrettyPvalue(calculateCorrelation(correlationMethod, doubleList1, doubleList2), doubleList1.length));
+	}
+
+	private String getPrettyPvalue(double correlation, int sampleNumber) {
+		double pvalue = getCorrelationPValue(correlation, sampleNumber);
+		
+		String pvalueLabel = "<span class=\"isSignificant\">p < 0.0001</span>";
+		if (pvalue > 0.0001) {
+			if (pvalue < 0.05) {
+				pvalueLabel  = String.format("<span class=\"isSignificant\">p = %.4f</span>", pvalue);
+			} else {
+				pvalueLabel  = String.format("p = %.4f", pvalue);
+			}
+		}
+		return pvalueLabel;
+	}
+	
+	@Override
+	public String getFormattedPvalueForUnrankedCategoricalParameter(Map<String, List<String>> groupValue) {
+		int size = groupValue.keySet().size();
+		if (size < 2) {
+			// Do nothing ...
+			return "na";
+		} else {
+			double pvalue = 0;
+			// convert to List<double[]>
+			List<double[]> categoryData = new ArrayList<double[]>();
+			for (String key : groupValue.keySet()) {
+				List<String> list = groupValue.get(key);
+				if (list.size() < 2) {
+					continue;
+				}
+				double[] values = new double[list.size()];
+				for (int i = 0; i < list.size(); i++) {
+					values[i] = Double.valueOf(list.get(i)).doubleValue();
+				}
+				categoryData.add(values);
+			}
+			if (categoryData.size() == 2) {
+				// t-test
+				TTest test = new TTest();
+				pvalue = test.tTest(categoryData.get(0), categoryData.get(1));
+			} else if (categoryData.size() > 2) {
+				// ANNOVA
+				OneWayAnova test = new OneWayAnova();
+				pvalue = test.anovaPValue(categoryData);
+			} else {
+				return "na";
+			}
+			
+			String pvalueLabel = "<span class=\"isSignificant\">p < 0.0001</span>";
+			if (pvalue > 0.0001) {
+				if (pvalue < 0.05) {
+					pvalueLabel  = String.format("<span class=\"isSignificant\">p = %.4f</span>", pvalue);
+				} else {
+					pvalueLabel  = String.format("p = %.4f", pvalue);
+				}
+			}
+			return pvalueLabel;
+		}
 	}
 	
 	/**
@@ -2401,6 +2623,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					}
 					readMap.get(sid)[i] = Double.valueOf(allReadsPct);
 				}
+				statement1.close();
 			}
 			
 			Statement statement2 = connection.createStatement();
@@ -2454,6 +2677,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(profileName).put(sampleId, Double.valueOf(value));
 			}
+			statement2.close();
+			
 			connection.close();
 			ds.close();
 			
@@ -2479,7 +2704,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				// ignore those correction could nor be calculated (cause NaN)
 				Double corrValue = results.get(n);
 				if (!corrValue.equals(Double.NaN)) {
-					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue)));
+					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue),
+							getPrettyPvalue(corrValue, referenceList.length)));
 				}
 			}
 			
@@ -2532,6 +2758,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				double allReadsPct = results1.getDouble("all_reads_pct");
 				readMap.put(sid, Double.valueOf(allReadsPct));
 			}
+			statement1.close();
 			
 			Statement statement2 = connection.createStatement();
 			
@@ -2584,6 +2811,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(profileName).put(sampleId, Double.valueOf(value));
 			}
+			statement2.close();
+			
 			connection.close();
 			ds.close();
 			
@@ -2609,7 +2838,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				// ignore those correction could nor be calculated (cause NaN)
 				Double corrValue = results.get(n);
 				if (!corrValue.equals(Double.NaN)) {
-					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue)));
+					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue),
+							getPrettyPvalue(corrValue, referenceList.length)));
 				}
 			}
 			
@@ -2659,6 +2889,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				double value = results2.getDouble("parameter_value");
 				readMap.put(sid, Double.valueOf(value));
 			}
+			statement2.close();
 			
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, sum(read_pct) as all_reads_pct "
@@ -2681,6 +2912,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				readValueMaps.get(taxonId).put(sampleId, Double.valueOf(allReadsPct));
 			}
+			statement1.close();
 
 			connection.close();
 			ds.close();
@@ -2707,7 +2939,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				// ignore those correction could nor be calculated (cause NaN)
 				Double corrValue = results.get(n);
 				if (!corrValue.equals(Double.NaN)) {
-					ret.add(Arrays.asList(taxonomyMap.get(n), String.format("%+.2f", corrValue)));
+					ret.add(Arrays.asList(taxonomyMap.get(n), String.format("%+.2f", corrValue), 
+							getPrettyPvalue(corrValue, referenceList.length)));
 				}
 			}
 
@@ -2759,6 +2992,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				double value = results1.getDouble("parameter_value");
 				readMap.put(sid, Double.valueOf(value));
 			}
+			statement1.close();
 			
 			String userPrivilege = " and pg.id in (" + " select group_id "
 					+ " from parameter_privilege as pp "
@@ -2810,6 +3044,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(profileName).put(sampleId, Double.valueOf(value));
 			}
+			statement2.close();
+			
 			connection.close();
 			ds.close();
 			
@@ -2838,7 +3074,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			for (String n : nameList) {
 				Double corrValue = results.get(n);
 				if (!corrValue.equals(Double.NaN)) {
-					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue)));
+					ret.add(Arrays.asList(n, String.format("%+.2f", corrValue),
+							getPrettyPvalue(corrValue, referenceList.length)));
 				}
 			}
 			
@@ -2891,6 +3128,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					}
 					readMap.get(sid)[i] = Double.valueOf(allReadsPct);
 				}
+				statement1.close();
 			}
 			
 			connection.close();
@@ -2941,6 +3179,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String chao1 = results3.getString("chao1");
 				diverMap.put(sid, String.format("%s|%s|%s", shannon, simpson, chao1));
 			}
+			statement3.close();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2980,6 +3219,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String chao1 = results3.getString("chao1");
 				ret = Arrays.asList(shannon, simpson, chao1);
 			}
+			statement3.close();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -3042,6 +3282,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				if (results.next()) {
 					ret = results.getString("name");
 				}
+				statement.close();
 				
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -3080,6 +3321,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					saveCurrentUserToSession(username);
 				}
 			}
+			statement.close();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -3133,6 +3375,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = resultsA.getString("taxon_name");
 				taxonList.add(tid + "::" + name);
 			}
+			statementA.close();
 
 			Statement statement0 = connection.createStatement();
 			String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
@@ -3155,6 +3398,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					taxonList.add(taxonString);
 				}
 			}
+			statement0.close();
 			
 			Collections.sort(taxonList, new Comparator<String>() {
 
@@ -3192,6 +3436,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(name, Double.valueOf(allReads));
 			}
+			statement1.close();
 			
 			connection.close();
 			ds.close();
@@ -3259,6 +3504,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = resultsA.getString("taxon_name");
 				taxonList.add(tid + "::" + name);
 			}
+			statementA.close();
 
 			Statement statement0 = connection.createStatement();
 			String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
@@ -3281,6 +3527,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					taxonList.add(taxonString);
 				}
 			}
+			statement0.close();
 			
 			Collections.sort(taxonList, new Comparator<String>() {
 
@@ -3318,6 +3565,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				rows.get(sid).put(name, Double.valueOf(allReads));
 			}
+			statement1.close();
 			
 			connection.close();
 			ds.close();
@@ -3541,6 +3789,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 				matrix.get(sid1).put(sid2, dist);
 			}
+			statement3.close();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -3827,6 +4076,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String name = results0.getString("title");
 				profileNameList.add(name);
 			}
+			statement0.close();
 			
 			connection.close();
 			ds.close();
@@ -3913,7 +4163,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				unit = results.getString("unit");
 				isContinous = GutFloraConstant.PARA_TYPE_CONTINUOUS.equals(results.getString("type"));
 				isRanked = GutFloraConstant.PARA_TYPE_RANKED_CATEGORY.equals(results.getString("type"));
-			} 
+			}
+			statement.close();
 
 			Statement statement2 = connection.createStatement();
 			String queryFields2 = " and pi.title = '";
@@ -3934,6 +4185,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					usedOptions.add(Integer.valueOf((int)value));
 				}
 			}
+			statement2.close();
 			
 			if (!isContinous) {
 				Statement statement3 = connection.createStatement();
@@ -3950,6 +4202,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 						choiceMap.put(Integer.valueOf(option), value);
 					}
 				}
+				statement3.close();
 			}
 			
 			connection.close();
@@ -4260,5 +4513,153 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		ds.close();
 
 		return ret;
+	}
+	
+	/**
+	 * calculate the p-value of correlation
+	 * 
+	 * @param correlation
+	 * @param sampleNumber
+	 * @return p-value
+	 */
+	private double getCorrelationPValue(double correlation, int sampleNumber) {
+		TDistribution tDistribution = new TDistribution(sampleNumber - 2);
+		double t = FastMath.abs(correlation * FastMath.sqrt((sampleNumber - 2) / (1 - correlation * correlation)));
+		return 2 * tDistribution.cumulativeProbability(-t);
+	}
+
+	@Override
+	public String plotBarChartWithErrorBars(Map<String, List<String>> groupValue, Map<String, String> choiceMap,
+			String xAxisLabel, String lang) {
+		List<String> groups = new ArrayList<String>(groupValue.keySet());
+		
+		Map<String, double[]> data = new HashMap<String, double[]>();
+		List<Double> maxValue = new ArrayList<Double>();
+		for (String groupName : groups) {
+			double average = groupValue.get(groupName).stream().mapToDouble(v -> Double.parseDouble(v)).average().orElse(0.0);
+			double[] array = groupValue.get(groupName).stream().mapToDouble(v -> Double.parseDouble(v)).toArray();
+			double sd = new StandardDeviation().evaluate(array);
+			double se = sd / Math.sqrt(array.length);
+			data.put(groupName, new double[] {average, sd, se});
+			maxValue.add(average + se);
+		}
+		
+		
+		// settings
+		int fullWidth = 500;
+		int barHeight = 40;
+		int shiftX = 20;
+		int shiftY = 20;
+		int x = 1 + shiftX;
+		int y = shiftY + 30;
+		
+		int groupHeight = 60;
+		
+		int canvasHeight = 600;
+		int canvasWidth = 600; // should be flexible
+		
+		// estimate height
+		int plotHeight = groupHeight * groups.size() + 30;
+		// estimate max x-value
+		double maxWidth = maxValue.stream().mapToDouble(v -> v).max().orElse(0.0);
+		
+		StringBuffer ret = new StringBuffer();
+		ret.append(String.format("<svg height=\"%d\" width=\"%d\">\n", canvasHeight, canvasWidth));
+		ret.append(String.format(
+				"\t<rect x=\"1\" y=\"1\" fill=\"white\" id=\"chart_body\" height=\"%d\" width=\"%d\" />\n",
+				canvasHeight - 2, canvasWidth - 2));
+
+		// axis
+		ret.append("<g stroke-width=\"1\" stroke=\"none\" class=\"axis\" id=\"axis\">\n");
+		String lineStyle = "style=\"stroke:rgb(0,0,0);stroke-width:1.0;stroke-opacity:0.8;\"";
+		// vertical axis
+		ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x, shiftY, x,
+				shiftY + plotHeight, lineStyle));
+		// horizon axis
+		ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x, shiftY + plotHeight,
+				x + fullWidth, shiftY + plotHeight, lineStyle));
+		// ticks
+		List<Double> ticks = new ArrayList<Double>();
+		if (maxWidth > 10) {
+			long round = Math.round(maxWidth / 10);
+			for (long i = round; i > 0; i--) {
+				ticks.add(Double.valueOf(i * 10));
+			}
+		} else {
+			long round = Math.round(maxWidth);
+			for (long i = round; i > 0; i--) {
+				ticks.add(Double.valueOf(i));
+			}
+		}
+		for (Double tick : ticks) {
+			long width = Math.round(tick / (maxWidth * 1.1) * fullWidth);
+			ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x + width,
+					shiftY + plotHeight + 1, x + width, shiftY + plotHeight + 6, lineStyle));
+			ret.append(String
+					.format("\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%.0f</text>\n",
+							x + width, shiftY + plotHeight + 24, 16, tick));
+		}
+		
+		ret.append(String.format(
+				"\t<text x=\"%d\" y=\"%d\" style=\"text-anchor: middle; font-family: Arial; font-size: %d; fill: black; font-style: italic;\">%s</text>\n",
+				shiftX + fullWidth / 2, shiftY + plotHeight + 60, 16, xAxisLabel));
+		
+		ret.append("</g>\n");
+		
+		// bars
+		ret.append("<g stroke-width=\"1\" stroke=\"none\" class=\"bars\" id=\"bars\">\n");
+
+		for (int i = 0; i < groups.size(); i++) {
+			double[] ds = data.get(groups.get(i));
+			long width = Math.round(ds[0] / (maxWidth * 1.1) * fullWidth);
+			long se = Math.round(ds[2] / (maxWidth * 1.1) * fullWidth);
+			long h = width - 1;
+			
+			int choiceIndex = Integer.parseInt(groups.get(i));
+			ret.append(String.format("\t<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" class=\"taxonBar\">\n",
+					x + 1, y, h, barHeight, GutFloraConstant.BARCHART_COLOR.get(choiceIndex)));
+			ret.append(String.format("<title>%.2f &plusmn; %.2f</title>\n", ds[0], ds[2]));
+			ret.append("</rect>\n");
+			
+			// error bar
+			ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x + h - se,
+					y + barHeight / 2, x + h + se, y + barHeight / 2, lineStyle));
+			ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x + h - se,
+					y - 5 + barHeight / 2, x + h - se, y + 5 + barHeight / 2, lineStyle));
+			ret.append(String.format("\t<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" %s />\n", x + h + se,
+					y - 5 + barHeight / 2, x + h + se, y + 5 + barHeight / 2, lineStyle));
+			
+			y += groupHeight;
+		}
+		ret.append("</g>\n");
+		
+		// legend
+		// draw the legend
+		ret.append("<g stroke-width=\"1\" stroke=\"none\" class=\"legend\">\n");
+		int legendY = shiftY + plotHeight + 100;
+		for (int i = 0; i < groups.size(); i++) {
+			String groupName = groups.get(i);
+			String choiceTitle = choiceMap.get(groupName);
+			if (choiceTitle != null) {
+				int choiceIndex = Integer.parseInt(groupName);
+				ret.append(String.format("\t<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" fill=\"%s\" />\n",
+						shiftX + 40, legendY + i * 18, 12, 12, GutFloraConstant.BARCHART_COLOR.get(choiceIndex)));
+				
+				ret.append(String.format(
+						"\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\">%s</text>\n",
+						shiftX + 60, legendY + i * 18 + 10, choiceTitle));
+				
+				ret.append(String.format(
+						"\t<text x=\"%d\" y=\"%d\" font-family=\"Arial\" font-size=\"14\" fill=\"black\" text-anchor=\"end\">(%d)</text>\n",
+						shiftX + 36, legendY + i * 18 + 10, groupValue.get(groupName).size()));
+			} else {
+				System.err.println("");
+			}
+		}
+		ret.append("</g>\n");
+		
+		ret.append("</svg>\n");
+		
+		return ret.toString();
 	}
 }

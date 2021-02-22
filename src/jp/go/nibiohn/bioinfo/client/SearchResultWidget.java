@@ -126,7 +126,7 @@ public class SearchResultWidget extends BaseWidget {
 					if (column == 0) {
 					}
 					List<String> value = event.getValue();
-					vrWidget.setCorrelationValue(value.get(1));
+					vrWidget.setCorrelationValue(value.get(1), value.get(2));
 					vrWidget.setSelectNameAndUpdate(value.get(0));
 				}
 			}

@@ -43,6 +43,7 @@ public class SampleAnalysisWidget extends BaseWidget {
 		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
 		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
 		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
+		tabPanel.add(new CategoricalAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[3], false);
 		tabPanel.selectTab(0);
 		
 		// the border around the tab panel is not very good looking

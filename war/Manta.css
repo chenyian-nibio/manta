@@ -252,6 +252,16 @@ div.longTable {
 	font-weight: bold; 
 }
 
+.pvalueLabel {
+	margin-top: 10px;
+	font-size: 16px;
+	font-style: italic;
+}
+
+.isSignificant {
+	color: #D00;
+}
+
 .corrResultDec {
 	margin: 12px;
 	background-color: #FF9;

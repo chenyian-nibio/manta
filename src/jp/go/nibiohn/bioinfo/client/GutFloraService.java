@@ -56,6 +56,8 @@ public interface GutFloraService extends RemoteService {
 	List<TaxonEntry> getAllTaxonEntries(Set<SampleEntry> selectedSamples, String rank);
 
 	List<ParameterEntry> getAllNumericParameterEntry(String lang);
+
+	List<ParameterEntry> getAllUnrankedCategoryParameterEntry(String lang);
 	
 	List<List<String>> getProfileGroups(String categoryId, String lang);
 
@@ -67,9 +69,13 @@ public interface GutFloraService extends RemoteService {
 
 	PairListData getProfilesList(Set<SampleEntry> selectedSamples, String name, String lang);
 
-	PairListData getProfilesListById(Set<SampleEntry> selectedSamples, String paraId);
+	PairListData getNumericParameterValueById(Set<SampleEntry> selectedSamples, String paraId);
 	
-	String getCorrelationString(Integer correlationMethod, List<String> list1, List<String> list2);
+	PairListData getStringParameterValueById(Set<SampleEntry> selectedSamples, String paraId);
+	
+	List<String> getCorrelationStringWithPvalue(Integer correlationMethod, List<String> list1, List<String> list2);
+	
+	String getFormattedPvalueForUnrankedCategoricalParameter(Map<String, List<String>> groupValue);
 	
 	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
 			String paraType, Integer correlationMethod, String lang);
@@ -112,5 +118,6 @@ public interface GutFloraService extends RemoteService {
 	String getPCoAScatterPlot(PcoaResult pcoaResult, String customTagString);
 
 	boolean hasImmunologicalData();
-
+	
+	String plotBarChartWithErrorBars(Map<String, List<String>> groupValue, Map<String, String> choiceMap, String xAxisLabel, String lang);
 }

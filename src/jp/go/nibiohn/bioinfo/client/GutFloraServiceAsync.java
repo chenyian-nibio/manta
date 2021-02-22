@@ -64,6 +64,8 @@ public interface GutFloraServiceAsync {
 
 	void getAllNumericParameterEntry(String lang, AsyncCallback<List<ParameterEntry>> callback);
 
+	void getAllUnrankedCategoryParameterEntry(String lang, AsyncCallback<List<ParameterEntry>> callback);
+
 	void getProfileGroups(String categoryId, String lang, AsyncCallback<List<List<String>>> callback);
 
 	void getAllParameterGroupNames(String lang, AsyncCallback<List<List<String>>> callback);
@@ -76,11 +78,15 @@ public interface GutFloraServiceAsync {
 	
 	void getProfilesList(Set<SampleEntry> selectedSamples, String name, String lang, AsyncCallback<PairListData> callback);
 
-	void getProfilesListById(Set<SampleEntry> selectedSamples, String paraId, AsyncCallback<PairListData> callback);
+	void getNumericParameterValueById(Set<SampleEntry> selectedSamples, String paraId, AsyncCallback<PairListData> callback);
 
-	void getCorrelationString(Integer correlationMethod, List<String> list1, List<String> list2,
-			AsyncCallback<String> callback);
+	void getStringParameterValueById(Set<SampleEntry> selectedSamples, String paraId, AsyncCallback<PairListData> callback);
 	
+	void getCorrelationStringWithPvalue(Integer correlationMethod, List<String> list1, List<String> list2,
+			AsyncCallback<List<String>> callback);
+	
+	void getFormattedPvalueForUnrankedCategoricalParameter(Map<String, List<String>> groupValue, AsyncCallback<String> callback);
+
 	void searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName, String paraType,
 			Integer correlationMethod, String lang, AsyncCallback<SearchResultData> callback);
 
@@ -126,4 +132,6 @@ public interface GutFloraServiceAsync {
 
 	void hasImmunologicalData(AsyncCallback<Boolean> callback);
 
+	void plotBarChartWithErrorBars(Map<String, List<String>> groupValue, Map<String, String> choiceMap,
+			String xAxisLabel, String lang, AsyncCallback<String> callback);
 }

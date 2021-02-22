@@ -61,6 +61,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 	private ListBox corrTypeListBox = new ListBox();
 	
 	private SimplePanel corrValuePanel = new SimplePanel();
+	private SimplePanel pValuePanel = new SimplePanel();
 
 	private SimplePanel chartPanel = new SimplePanel();
 	private SimplePanel tablePanel = new SimplePanel();
@@ -166,6 +167,12 @@ public class PairAnalysisWidget extends AnalysisWidget {
 		corrLablePanel.add(corrValuePanel);
 		corrValuePanel.setWidget(new Label("-.--"));
 		corrValuePanel.setStyleName("corrValue");
+
+		// p-value
+		corrLablePanel.add(pValuePanel);
+		pValuePanel.setWidget(new Label(""));
+		pValuePanel.setStyleName("pvalueLabel");
+		
 		selectHp.add(corrLablePanel);
 		corrValueDec.add(selectHp);
 
@@ -197,7 +204,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				if (rank.equals(OPTION_PARAMETER)) {
 					String paraId = paraListBoxX.getSelectedValue();
 					if (paraId != null && !paraId.equals("")) {
-						service.getProfilesListById(PairAnalysisWidget.this.selectedSamples, paraId, new AsyncCallback<PairListData>() {
+						service.getNumericParameterValueById(PairAnalysisWidget.this.selectedSamples, paraId, new AsyncCallback<PairListData>() {
 							
 							@Override
 							public void onSuccess(PairListData result) {
@@ -240,7 +247,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				if (rank.equals(OPTION_PARAMETER)) {
 					String paraId = paraListBoxY.getSelectedValue();
 					if (paraId != null && !paraId.equals("")) {
-						service.getProfilesListById(PairAnalysisWidget.this.selectedSamples, paraId, new AsyncCallback<PairListData>() {
+						service.getNumericParameterValueById(PairAnalysisWidget.this.selectedSamples, paraId, new AsyncCallback<PairListData>() {
 							
 							@Override
 							public void onSuccess(PairListData result) {
@@ -455,12 +462,13 @@ public class PairAnalysisWidget extends AnalysisWidget {
 	
 	private void getCorrection() {
 		if (valueXList.size() != 0 && valueXList.size() == valueYList.size()) {
-			service.getCorrelationString(Integer.valueOf(corrTypeListBox.getSelectedValue()), valueXList,
-					valueYList, new AsyncCallback<String>() {
+			service.getCorrelationStringWithPvalue(Integer.valueOf(corrTypeListBox.getSelectedValue()), valueXList,
+					valueYList, new AsyncCallback<List<String>>() {
 				
 				@Override
-				public void onSuccess(String result) {
-					corrValuePanel.setWidget(new Label(result));
+				public void onSuccess(List<String> result) {
+					corrValuePanel.setWidget(new Label(result.get(0)));
+					pValuePanel.setWidget(new HTML(result.get(1)));
 				}
 				
 				@Override
