@@ -87,15 +87,19 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 	
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
-	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
-		this(selectedSamples, "phylum", "", lang);
+	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+	
+	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, Integer experimentMethod, String lang) {
+		this(selectedSamples, experimentMethod, "phylum", "", lang);
 	}
 	
-	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, String initRank, final String suffix, String lang) {
+	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, Integer experimentMethod, String initRank,
+			final String suffix, String lang) {
 		showOthersCb.setValue(true);
 		
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
+		this.experimentMethod = experimentMethod;
 
 		HorizontalPanel topHp = new HorizontalPanel();
 
@@ -140,43 +144,45 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 				if (taxonName.equals(GutFloraConstant.ALL_ABOVE_MICROBIOTA)) {
 					// Do multiple linear regression
 					service.searchForSimilerProfiles(ReadsAnalysisWidget.this.selectedSamples, rank, currentColumns,
-							paraType, currentLang,
+							ReadsAnalysisWidget.this.experimentMethod, paraType, currentLang,
 							new AsyncCallback<SearchResultData>() {
-						
-						@Override
-						public void onSuccess(SearchResultData result) {
-							searchResultData = result;
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH + GutFloraConstant.NAVI_LINK_MLR
-									+ GutFloraConstant.NAVI_LINK_SUFFIX_READ + suffix);
-							loadingPopupPanel.hide();
-						}
-						
-						@Override
-						public void onFailure(Throwable caught) {
-							warnMessage(BaseWidget.SERVER_ERROR);
-							loadingPopupPanel.hide();
-						}
-					});
+
+								@Override
+								public void onSuccess(SearchResultData result) {
+									searchResultData = result;
+									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH
+											+ GutFloraConstant.NAVI_LINK_MLR + GutFloraConstant.NAVI_LINK_SUFFIX_READ
+											+ suffix);
+									loadingPopupPanel.hide();
+								}
+
+								@Override
+								public void onFailure(Throwable caught) {
+									warnMessage(BaseWidget.SERVER_ERROR);
+									loadingPopupPanel.hide();
+								}
+							});
 					
 				} else {
 					service.searchForSimilerProfiles(ReadsAnalysisWidget.this.selectedSamples, rank, taxonName,
-							paraType, Integer.valueOf(correlationListBox.getSelectedValue()), currentLang,
+							ReadsAnalysisWidget.this.experimentMethod, paraType,
+							Integer.valueOf(correlationListBox.getSelectedValue()), currentLang,
 							new AsyncCallback<SearchResultData>() {
-						
-						@Override
-						public void onSuccess(SearchResultData result) {
-							searchResultData = result;
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH
-									+ GutFloraConstant.NAVI_LINK_SUFFIX_READ + suffix);
-							loadingPopupPanel.hide();
-						}
-						
-						@Override
-						public void onFailure(Throwable caught) {
-							warnMessage(BaseWidget.SERVER_ERROR);
-							loadingPopupPanel.hide();
-						}
-					});
+
+								@Override
+								public void onSuccess(SearchResultData result) {
+									searchResultData = result;
+									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH
+											+ GutFloraConstant.NAVI_LINK_SUFFIX_READ + suffix);
+									loadingPopupPanel.hide();
+								}
+
+								@Override
+								public void onFailure(Throwable caught) {
+									warnMessage(BaseWidget.SERVER_ERROR);
+									loadingPopupPanel.hide();
+								}
+							});
 				}
 			}
 		}));
@@ -362,7 +368,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 
 	private void initTable(final String initRank) {
 		loadingPopupPanel.show();
-		service.getSampleDiversity(selectedSamples, new AsyncCallback<Map<String,String>>() {
+		service.getSampleDiversity(selectedSamples, experimentMethod, new AsyncCallback<Map<String,String>>() {
 			
 			@Override
 			public void onSuccess(Map<String, String> result) {
@@ -381,7 +387,8 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 	private void updateTable(String rank) {
 		loadingPopupPanel.show();
 		
-		service.getReadsAnalysisData(selectedSamples, rank, new AsyncCallback<GutFloraAnalysisData>() {
+		service.getReadsAnalysisData(selectedSamples, rank, experimentMethod,
+				new AsyncCallback<GutFloraAnalysisData>() {
 
 			@Override
 			public void onSuccess(GutFloraAnalysisData result) {
@@ -668,7 +675,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 	private void updateTable(String rank, List<String> selectedColumns) {
 		loadingPopupPanel.show();
 
-		service.getReadsAnalysisData(selectedSamples, rank, selectedColumns,
+		service.getReadsAnalysisData(selectedSamples, rank, experimentMethod, selectedColumns,
 				new AsyncCallback<GutFloraAnalysisData>() {
 
 			@Override
@@ -739,7 +746,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		dialogContents.add(chartPanel);
 		
 		final String rank = getSelectedRank();
-		service.getMicrobiota(sampleId, rank, new AsyncCallback<List<List<String>>>() {
+		service.getMicrobiota(sampleId, rank, experimentMethod, new AsyncCallback<List<List<String>>>() {
 			private List<TaxonEntry> taxonList = new ArrayList<TaxonEntry>();
 			
 			@Override
@@ -770,7 +777,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 			}
 			
 			private void updatePieChart(final String sampleId, final String rank, String taxonId) {
-				service.getSampleReads(sampleId, rank, taxonId, new AsyncCallback<List<List<String>>>() {
+				service.getSampleReads(sampleId, rank, taxonId, experimentMethod, new AsyncCallback<List<List<String>>>() {
 
 					@Override
 					public void onSuccess(final List<List<String>> result) {

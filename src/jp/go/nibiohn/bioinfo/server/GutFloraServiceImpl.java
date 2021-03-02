@@ -24,6 +24,7 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.stat.inference.OneWayAnova;
 import org.apache.commons.math3.stat.inference.TTest;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.apache.commons.math3.util.FastMath;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 
 import com.apporiented.algorithm.clustering.AverageLinkageStrategy;
@@ -34,15 +35,12 @@ import com.apporiented.algorithm.clustering.DefaultClusteringAlgorithm;
 import com.apporiented.algorithm.clustering.LinkageStrategy;
 import com.apporiented.algorithm.clustering.SingleLinkageStrategy;
 import com.apporiented.algorithm.clustering.visualization.DendrogramSVG;
-import org.apache.commons.math3.util.FastMath;
-
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import jp.go.nibiohn.bioinfo.client.GutFloraService;
 import jp.go.nibiohn.bioinfo.server.clustering.Dendrogram;
-import jp.go.nibiohn.bioinfo.server.clustering.HierarchicalClustering;
 import jp.go.nibiohn.bioinfo.server.clustering.HierarchicalClustering.LinkageType;
 import jp.go.nibiohn.bioinfo.shared.DendrogramCache;
 import jp.go.nibiohn.bioinfo.shared.GutFloraAnalysisData;
@@ -99,6 +97,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		try {
 			connection = ds.getConnection();
 
+			// TODO after adding the new columns, this part is no longer necessary. will be removed. 
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select distinct mb.sample_id " + " from microbiota as mb "
 					+ " join project_sample as ps on ps.sample_id = mb.sample_id "
@@ -313,7 +312,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 * return a list of (taxon_name, reads, taxon_id) list
 	 */
 	@Override
-	public List<List<String>> getMicrobiota(String sampleId, String rank) {
+	public List<List<String>> getMicrobiota(String sampleId, String rank, Integer experimentMethod) {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -322,8 +321,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement = connection.createStatement();
 			String sqlQuery = " select t.name as taxon_name, t.id as taxon_id, sum(read_num) as sum_reads "
 					+ " from microbiota join taxonomy as t on t.id=" + rank + "_id "
-					+ " where sample_id = '" + sampleId + "'" + "and " + rank
-					+ "_id is not null group by t.name, t.id order by sum(read_num) desc ";
+					+ " where sample_id = '" + sampleId + "'" + " and " 
+					+ rank + "_id is not null " + " and method_id = " + experimentMethod 
+					+ " group by t.name, t.id order by sum(read_num) desc ";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
 			List<List<String>> ret = new ArrayList<List<String>>();
@@ -354,7 +354,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public List<List<String>> getSampleReads(String sampleId, String rank, String taxonId) {
+	public List<List<String>> getSampleReads(String sampleId, String rank, String taxonId, Integer experimentMethod) {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -368,7 +368,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " from microbiota join taxonomy as t on t.id=" + childRank + "_id "
 					+ " where sample_id = '" + sampleId + "'" 
 					+ " and " + rank + "_id = '" + taxonId + "' " 
-					+ " and " + childRank + "_id is not null group by t.name, t.id order by sum(read_num) desc ";
+					+ " and " + childRank + "_id is not null " + " and method_id = " + experimentMethod
+					+ " group by t.name, t.id order by sum(read_num) desc ";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
 			List<List<String>> ret = new ArrayList<List<String>>();
@@ -492,7 +493,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return null;
 	}
 
-	private GutFloraAnalysisData getKingdomReadsAnalysisData(Set<SampleEntry> selectedSamples) {
+	// TODO to be check
+	private GutFloraAnalysisData getKingdomReadsAnalysisData(Set<SampleEntry> selectedSamples, Integer experimentMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -505,7 +507,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.name as taxon_name, " + "sum(read_num)" + " as all_reads "
 					+ " from microbiota join taxonomy as t on t.id = kingdom_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " group by sample_id, t.name ";
 			
 			Map<String, Map<String, String>> rows = new HashMap<String, Map<String,String>>();
@@ -526,7 +528,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			ds.close();
 			
 			// temporary use a fix order for kingdom categories
-			List<String> rhList = Arrays.asList("Bacteria", "Viruses", "Archaea", "Unclassified");
+			List<String> rhList = Arrays.asList("Bacteria", "Viruses", "Archaea", "Eukaryota", "Unclassified");
 			
 			GutFloraAnalysisData ret = new GutFloraAnalysisData(rows, sampleIdList);
 			ret.setReadsData(rhList, rhList);
@@ -558,16 +560,17 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank) {
-		return getReadsAnalysisData(selectedSamples, rank, GutFloraConstant.DEFAULT_NUM_OF_COLUMNS);
+	public GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod) {
+		return getReadsAnalysisData(selectedSamples, rank, experimentMethod, GutFloraConstant.DEFAULT_NUM_OF_COLUMNS);
 	}
 
 	/**
 	 * (unused)
 	 */
-	private GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, int numOfColumns) {
+	private GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank,
+			Integer experimentMethod, int numOfColumns) {
 		if (rank.equals("kingdom")) {
-			return getKingdomReadsAnalysisData(selectedSamples);
+			return getKingdomReadsAnalysisData(selectedSamples, experimentMethod);
 		} else {
 			List<String> sampleIdList = getSortedSampleList(selectedSamples);
 			
@@ -582,8 +585,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
 						+ " join taxonomy as t on t.id = " + rank + "_id "
 						+ " where sample_id in (" + sampleIdString + ") "
-						+ " and " + rank + "_id is not null group by " + rank 
-						+ "_id, t.name order by sum(read_num) desc ";
+						+ " and " + rank + "_id is not null " + " and method_id = " + experimentMethod
+						+ "group by " + rank + "_id, t.name order by sum(read_num) desc ";
 				
 				ResultSet results0 = statement0.executeQuery(sqlQuery0);
 				List<String> rankNameList = new ArrayList<String>();
@@ -604,7 +607,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, " + "sum(read_num)" + " as all_reads "
 						+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
 						+ " where sample_id in (" + sampleIdString + ") "
-						+ " and t.id in (" + rankIdString + ") "
+						+ " and t.id in (" + rankIdString + ") " + " and method_id = " + experimentMethod
 						+ " group by sample_id, t.id, t.name ";
 				
 				Map<String, Map<String, String>> rows = new HashMap<String, Map<String,String>>();
@@ -628,7 +631,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				// add others column 
 				Statement statement2 = connection.createStatement();
 				String sqlQuery2 = " select sample_id, " + "sum(read_num)" + " as all_reads from microbiota "
-						+ " where sample_id in (" + sampleIdString + ") "
+						+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 						+ " group by sample_id ";
 				
 				ResultSet results2 = statement2.executeQuery(sqlQuery2);
@@ -682,7 +685,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public VisualizationtResult getReadsBarChart(Set<SampleEntry> selectedSamples, String rank) {
+	public VisualizationtResult getReadsBarChart(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod) {
 		// suppose the minimal display number is 10
 		int minimalDisplayNumber = 10;
 		
@@ -702,6 +705,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " join taxon_rank as tr on tr.id = dt.rank_id " 
 					+ " join taxonomy as tx on tx.id = dt.taxon_id " 
 					+ " where sample_id in (" + sampleIdString + ") "
+					+ " and method_id = " + experimentMethod
 					+ " and tr.name = '" + q0Rank + "' ";
 			
 			List<String> taxonList = new ArrayList<String>();
@@ -717,8 +721,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
 					+ " join taxonomy as t on t.id = " + rank + "_id "
 					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and " + rank + "_id is not null group by " + rank 
-					+ "_id, t.name order by sum(read_num) desc ";
+					+ " and " + rank + "_id is not null " + " and method_id = " + experimentMethod
+					+ " group by " + rank + "_id, t.name order by sum(read_num) desc ";
 			
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
 			final Map<String, Integer> taxonOrderMap = new HashMap<String, Integer>();
@@ -757,7 +761,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, sum(read_num) as all_reads "
 					+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and t.id in (" + rankIdString + ") "
 					+ " group by sample_id, t.id, t.name ";
 			
@@ -779,7 +783,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " group by sample_id ";
 			
 			ResultSet results2 = statement2.executeQuery(sqlQuery2);
@@ -858,7 +862,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public VisualizationtResult getReadsBarChart(Set<SampleEntry> selectedSamples, String selectedRank, String parentRank,
-			String parentTaxonId) {
+			String parentTaxonId, Integer experimentMethod) {
 		// suppose the maximal display number is 15
 		int maximalDisplayNumber = 15;
 
@@ -877,7 +881,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " from microbiota "
 					+ " join taxonomy as t on t.id = " + selectedRank + "_id "
 					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and " + selectedRank + "_id is not null "
+					+ " and " + selectedRank + "_id is not null " + " and method_id = " + experimentMethod
 					+ " and " + parentRank + "_id ='" + parentTaxonId + "' "
 					+ " group by " + selectedRank + "_id, t.name order by sum(read_num) desc ";
 			
@@ -899,7 +903,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, sum(read_num) as all_reads "
 					+ " from microbiota join taxonomy as t on t.id = " + selectedRank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and t.id in (" + rankIdString + ") "
 					+ " and " + parentRank + "_id ='" + parentTaxonId + "' "
 					+ " group by sample_id, t.id, t.name ";
@@ -923,7 +927,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			// add others column 
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and " + parentRank + "_id ='" + parentTaxonId + "' "
 					+ " group by sample_id ";
 
@@ -1007,7 +1011,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public VisualizationtResult getReadsClusteredBarChart(Set<SampleEntry> selectedSamples, String rank,
+	public VisualizationtResult getReadsClusteredBarChart(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod,
 			int distanceType, int linkageType, Map<Integer, DendrogramCache> cacheMap) {
 		// suppose the minimal display number is 10
 		int minimalDisplayNumber = 10;
@@ -1027,7 +1031,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " from dominant_taxon as dt " 
 					+ " join taxon_rank as tr on tr.id = dt.rank_id " 
 					+ " join taxonomy as tx on tx.id = dt.taxon_id " 
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and tr.name = '" + q0Rank + "' ";
 			
 			List<String> taxonList = new ArrayList<String>();
@@ -1042,9 +1046,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement0 = connection.createStatement();
 			String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
 					+ " join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and " + rank + "_id is not null group by " + rank 
-					+ "_id, t.name order by sum(read_num) desc ";
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
+					+ " and " + rank + "_id is not null "
+					+ " group by " + rank + "_id, t.name order by sum(read_num) desc ";
 			
 			ResultSet results0 = statement0.executeQuery(sqlQuery0);
 			final Map<String, Integer> taxonOrderMap = new HashMap<String, Integer>();
@@ -1083,7 +1087,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, sum(read_num) as all_reads "
 					+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and t.id in (" + rankIdString + ") "
 					+ " group by sample_id, t.id, t.name ";
 			
@@ -1105,7 +1109,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " group by sample_id ";
 			
 			ResultSet results2 = statement2.executeQuery(sqlQuery2);
@@ -1142,18 +1146,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			DendrogramCache cache = cacheMap.get(Integer.valueOf(distanceType * 10 + linkageType));
 			if (cache == null) {
-//				Dendrogram dendrogram = sampleDistanceClustering(sampleIdList, distanceType, linkageTypes[linkageType]);
-//				
-//				sequence = dendrogram.getSequence();
-//				svgDendrogram = dendrogram.getScaleUpSvgImageContentAtLeft(0, 6, 1, 2, 130d, true);
-//				dendrogramWidth = dendrogram.getDendrogramWidth(130d);
-//				dendrogramHeight = dendrogram.getDendrogramHeight(2);
-//				
-//				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType),
-//						new DendrogramCache(sequence, svgDendrogram, dendrogramWidth, dendrogramHeight));
-
 				String[] sampleArray = sampleIdList.toArray(new String[sampleIdList.size()]);				
-				DendrogramCache dc = sampleDistanceClustering(sampleArray, distanceType, linkageTypes[linkageType]);
+				DendrogramCache dc = sampleDistanceClustering(sampleArray, distanceType, linkageTypes[linkageType], experimentMethod);
 				sequence = dc.getSequence();
 				svgDendrogram = dc.getSvgDendrogram();
 				dendrogramWidth = dc.getDendrogramWidth();
@@ -1209,7 +1203,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public VisualizationtResult getReadsClusteredBarChart(Set<SampleEntry> selectedSamples, String selectedRank,
-			String parentRank, String parentTaxonId, int distanceType, int linkageType, int numOfColumns,
+			String parentRank, String parentTaxonId, Integer experimentMethod, int distanceType, int linkageType, int numOfColumns,
 			Map<Integer, DendrogramCache> cacheMap) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
@@ -1225,7 +1219,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String sqlQuery0 = " select " + selectedRank + "_id as taxon_id, t.name as taxon_name "
 					+ " from microbiota "
 					+ " join taxonomy as t on t.id = " + selectedRank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and " + selectedRank + "_id is not null "
 					+ " and " + parentRank + "_id ='" + parentTaxonId + "' "
 					+ " group by " + selectedRank + "_id, t.name order by sum(read_num) desc ";
@@ -1248,7 +1242,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, sum(read_num) as all_reads "
 					+ " from microbiota join taxonomy as t on t.id = " + selectedRank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and " + parentRank + "_id ='" + parentTaxonId + "' "
 					+ " and t.id in (" + rankIdString + ") "
 					+ " group by sample_id, t.id, t.name ";
@@ -1272,7 +1266,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			// add others column 
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and " + parentRank + "_id ='" + parentTaxonId + "' "
 					+ " group by sample_id ";
 
@@ -1315,18 +1309,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			DendrogramCache cache = cacheMap.get(Integer.valueOf(distanceType * 10 + linkageType));
 			if (cache == null) {
-//				Dendrogram dendrogram = sampleDistanceClustering(sampleIdList, distanceType, linkageTypes[linkageType]);
-//				
-//				sequence = dendrogram.getSequence();
-//				svgDendrogram = dendrogram.getScaleUpSvgImageContentAtLeft(0, 6, 1, 2, 130d, true);
-//				dendrogramWidth = dendrogram.getDendrogramWidth(130d);
-//				dendrogramHeight = dendrogram.getDendrogramHeight(2);
-//				
-//				cacheMap.put(Integer.valueOf(distanceType * 10 + linkageType), new DendrogramCache(sequence, svgDendrogram,
-//						dendrogramWidth, dendrogramHeight));
-				
 				String[] sampleArray = sampleIdList.toArray(new String[sampleIdList.size()]);				
-				DendrogramCache dc = sampleDistanceClustering(sampleArray, distanceType, linkageTypes[linkageType]);
+				DendrogramCache dc = sampleDistanceClustering(sampleArray, distanceType, linkageTypes[linkageType], experimentMethod);
 				sequence = dc.getSequence();
 				svgDendrogram = dc.getSvgDendrogram();
 				dendrogramWidth = dc.getDendrogramWidth();
@@ -1380,18 +1364,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return null;
 	}
 
-	private Dendrogram sampleDistanceClustering(List<String> sampleIdList, int distanceType, LinkageType type) {
-		Map<String, Map<String, Double>> matrix = getSampleDistanceMatrix(sampleIdList, distanceType);
-		
-		HierarchicalClustering hc = new HierarchicalClustering(matrix);
-		
-		Dendrogram dendrogram = hc.getDendrogram(type);
-		
-		return dendrogram;
-	}
-
-	private DendrogramCache sampleDistanceClustering(String[] sampleIdList, int distanceType, LinkageType type) {
-		double[][] matrix = getSampleDistanceMatrix2(sampleIdList, distanceType);
+	private DendrogramCache sampleDistanceClustering(String[] sampleIdList, int distanceType, LinkageType type, Integer experimentMethod) {
+		double[][] matrix = getSampleDistanceMatrix2(sampleIdList, distanceType, experimentMethod);
 		
 		ClusteringAlgorithm alg = new DefaultClusteringAlgorithm();
 		
@@ -1419,12 +1393,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		dend.setModel(cluster);
 		SVGGraphics2D g2 = dend.drawDendrogram(dendrogramWidth, dendrogramHeight);
 		String svgString = g2.getSVGElement();
-//		svgString = svgString.replaceAll("<ellipse ", "<ellipse class=\"dendroNode\" ");
-		
-//		sequence = dendrogram.getSequence();
-//		svgDendrogram = dendrogram.getScaleUpSvgImageContentAtLeft(0, 210, 1, 2, 130d, true);
-//		dendrogramWidth = dendrogram.getDendrogramWidth(130d);
-//		dendrogramHeight = dendrogram.getDendrogramHeight(2);
 		return new DendrogramCache(sequence, svgString, dendrogramWidth, dendrogramHeight);
 	}
 	
@@ -1563,7 +1531,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank,
+	public GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod,
 			List<String> selectedcolumns) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		String q0Rank = rank;
@@ -1594,7 +1562,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, " + "sum(read_num)" + " as all_reads "
 					+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and t.id in (" + rankIdString + ") "
 					+ " group by sample_id, t.id, t.name ";
 			
@@ -1618,7 +1586,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
  			
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select sample_id, sum(read_num) as all_reads from microbiota "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " group by sample_id ";
 			
 			ResultSet results2 = statement2.executeQuery(sqlQuery2);
@@ -1739,7 +1707,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			statement0.close();
 			
-			String topIdString = StringUtils.join(topNIdList, ",");
+			String topIdString = "'" + StringUtils.join(topNIdList, "','") + "'"; 
 			
 			Statement statement2 = connection.createStatement();
 			String queryFields2 = " select sample_id, pi.title as title, pv.parameter_value, choice_value ";
@@ -1906,7 +1874,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public List<TaxonEntry> getAllTaxonEntries(Set<SampleEntry> selectedSamples, String rank) {
+	public List<TaxonEntry> getAllTaxonEntries(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -1920,7 +1888,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement0 = connection.createStatement();
 			String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
 					+ " join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and " + rank + "_id is not null group by " + rank 
 					+ "_id, t.name order by sum(read_num) desc ";
 			
@@ -2175,7 +2143,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public PairListData getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId) {
+	public PairListData getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId, Integer experimentMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -2187,7 +2155,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, sum(read_pct) as all_reads_pct from microbiota "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and " + rank + "_id = '" + taxonId + "' " + " group by sample_id ";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
@@ -2220,7 +2188,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public PairListData getReadsAndPctList(Set<SampleEntry> selectedSamples, String rank, String taxonName) {
+	public PairListData getReadsAndPctList(Set<SampleEntry> selectedSamples, String rank, String taxonName, Integer experimentMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -2233,7 +2201,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, sum(read_pct) as all_reads_pct from microbiota "
 					+ " join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and t.name = '" + taxonName + "' " + " group by sample_id ";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
@@ -2395,7 +2363,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, parameter_value " + " from parameter_value "
 					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and parameter_id = " + paraId;
+					+ " and parameter_id = '" + paraId + "' ";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
 			Map<String, Double> readMap = new HashMap<String, Double>();
@@ -2442,7 +2410,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, parameter_value " + " from parameter_value "
 					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and parameter_id = " + paraId;
+					+ " and parameter_id = '" + paraId + "' ";
 			
 			ResultSet results1 = statement1.executeQuery(sqlQuery1);
 			Map<String, String> valueMap = new HashMap<String, String>();
@@ -2455,7 +2423,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 			Statement statement2 = connection.createStatement();
 			String sqlQuery2 = " select choice_option, " + " choice_value " + " as title from choice " 
-					+ " where parameter_id = " + paraId;
+					+ " where parameter_id = '" + paraId + "' ";
 			
 			ResultSet results2 = statement2.executeQuery(sqlQuery2);
 			Map<String, String> choiceMap = new HashMap<String, String>();
@@ -2591,7 +2559,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 */
 	@Override
 	public SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank,
-			List<String> taxonNames, String paraType, String lang) {
+			List<String> taxonNames, Integer experimentMethod, String paraType, String lang) {
 		// do multiple linear regression (MLR)
 		String currentUser = getUserForQuery();
 
@@ -2610,7 +2578,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				Statement statement1 = connection.createStatement();
 				String sqlQuery1 = " select sample_id, sum(read_pct) as all_reads_pct "
 						+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
-						+ " where sample_id in (" + sampleIdString + ") "
+						+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 						+ " and t.name = '" + taxonName + "' " + " group by sample_id ";
 				
 				
@@ -2732,7 +2700,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
-			String paraType, Integer correlationMethod, String lang) {
+			Integer experimentMethod, String paraType, Integer correlationMethod, String lang) {
 		String currentUser = getUserForQuery();
 		
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
@@ -2747,7 +2715,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, sum(read_pct) as all_reads_pct "
 					+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and t.name = '" + taxonName + "' " + " group by sample_id ";
 			
 			
@@ -2862,8 +2830,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public SearchResultData searchForSimilarReads(Set<SampleEntry> selectedSamples, String rank, String name,
-			Integer correlationMethod, String lang) {
+	public SearchResultData searchForSimilarReads(Set<SampleEntry> selectedSamples, String rank,
+			Integer experimentMethod, String name, Integer correlationMethod, String lang) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 
 		HikariDataSource ds = getHikariDataSource();
@@ -2894,7 +2862,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, sum(read_pct) as all_reads_pct "
 					+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " group by sample_id, t.id, t.name ";
 			
 			// key: taxon_name -> value: (key: sample_id -> value: read_value)
@@ -3100,7 +3068,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public Map<String, Double[]> getAllReadsPctList(Set<SampleEntry> selectedSamples, String rank,
-			List<String> taxonNames) {
+			List<String> taxonNames, Integer experimentMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -3115,7 +3083,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				Statement statement1 = connection.createStatement();
 				String sqlQuery1 = " select sample_id, sum(read_pct) as all_reads_pct "
 						+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
-						+ " where sample_id in (" + sampleIdString + ") "
+						+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 						+ " and t.name = '" + taxonName + "' " + " group by sample_id ";
 				
 				
@@ -3153,7 +3121,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public Map<String, String> getSampleDiversity(Set<SampleEntry> selectedSamples) {
+	public Map<String, String> getSampleDiversity(Set<SampleEntry> selectedSamples, Integer experimentMethod) {
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
 		
 		HikariDataSource ds = getHikariDataSource();
@@ -3167,7 +3135,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement3 = connection.createStatement();
 			String sqlQuery3 = " select sample_id, shannon, simpson, chao1 "
 					+ " from sample_diversity "
-					+ " where sample_id in (" + sampleIdString + ") ";
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod;
 			
 			ResultSet results3 = statement3.executeQuery(sqlQuery3);
 			diverMap = new HashMap<String, String>();
@@ -3199,7 +3167,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 
 	@Override
-	public List<String> getSampleDiversity(String sampleId) {
+	public List<String> getSampleDiversity(String sampleId, Integer experimentMethod) {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		List<String> ret = null;
@@ -3209,7 +3177,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement3 = connection.createStatement();
 			String sqlQuery3 = " select shannon, simpson, chao1 "
 					+ " from sample_diversity "
-					+ " where sample_id = '" + sampleId +"' ";
+					+ " where sample_id = '" + sampleId +"' " + " and method_id = " + experimentMethod;
 			
 			ResultSet results3 = statement3.executeQuery(sqlQuery3);
 			if (results3.next()) {
@@ -3346,7 +3314,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public VisualizationtResult getReadsHeatmap(Set<SampleEntry> selectedSamples, String rank) {
+	public VisualizationtResult getReadsHeatmap(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod) {
 		// suppose the minimal display number is 10
 		int minimalDisplayNumber = 10;
 		
@@ -3365,7 +3333,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " from dominant_taxon as dt " 
 					+ " join taxon_rank as tr on tr.id = dt.rank_id " 
 					+ " join taxonomy as tx on tx.id = dt.taxon_id " 
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and tr.name = '" + q0Rank + "' ";
 			
 			List<String> taxonList = new ArrayList<String>();
@@ -3380,7 +3348,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement0 = connection.createStatement();
 			String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
 					+ " join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and " + rank + "_id is not null group by " + rank 
 					+ "_id, t.name order by sum(read_num) desc ";
 			
@@ -3421,7 +3389,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, sum(read_pct) as all_reads "
 					+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and t.id in (" + rankIdString + ") "
 					+ " group by sample_id, t.id, t.name ";
 			
@@ -3474,8 +3442,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public VisualizationtResult getClusteredReadsHeatmap(Set<SampleEntry> selectedSamples, String rank, int distanceType,
-			int linkageType, Map<Integer, DendrogramCache> cacheMap) {
+	public VisualizationtResult getClusteredReadsHeatmap(Set<SampleEntry> selectedSamples, String rank,
+			Integer experimentMethod, int distanceType, int linkageType, Map<Integer, DendrogramCache> cacheMap) {
 		// suppose the minimal display number is 10
 		int minimalDisplayNumber = 10;
 		
@@ -3494,7 +3462,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 					+ " from dominant_taxon as dt " 
 					+ " join taxon_rank as tr on tr.id = dt.rank_id " 
 					+ " join taxonomy as tx on tx.id = dt.taxon_id " 
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and tr.name = '" + q0Rank + "' ";
 			
 			List<String> taxonList = new ArrayList<String>();
@@ -3509,7 +3477,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement0 = connection.createStatement();
 			String sqlQuery0 = " select " + rank + "_id as taxon_id, t.name as taxon_name from microbiota "
 					+ " join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and " + rank + "_id is not null group by " + rank 
 					+ "_id, t.name order by sum(read_num) desc ";
 			
@@ -3550,7 +3518,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement1 = connection.createStatement();
 			String sqlQuery1 = " select sample_id, t.id as taxon_id, t.name as taxon_name, sum(read_pct) as all_reads "
 					+ " from microbiota join taxonomy as t on t.id = " + rank + "_id "
-					+ " where sample_id in (" + sampleIdString + ") "
+					+ " where sample_id in (" + sampleIdString + ") " + " and method_id = " + experimentMethod
 					+ " and t.id in (" + rankIdString + ") "
 					+ " group by sample_id, t.id, t.name ";
 			
@@ -3580,7 +3548,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			DendrogramCache cache = cacheMap.get(Integer.valueOf(distanceType * 10 + linkageType));
 			if (cache == null) {
 				String[] sampleArray = sampleIdList.toArray(new String[sampleIdList.size()]);				
-				DendrogramCache dc = sampleDistanceClustering(sampleArray, distanceType, linkageTypes[linkageType]);
+				DendrogramCache dc = sampleDistanceClustering(sampleArray, distanceType, linkageTypes[linkageType], experimentMethod);
 				sequence = dc.getSequence();
 				svgDendrogram = dc.getSvgDendrogram();
 				dendrogramWidth = dc.getDendrogramWidth();
@@ -3764,52 +3732,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return ret.toString();
 	}
 	
-	private Map<String, Map<String, Double>> getSampleDistanceMatrix(List<String> sampleIdList, Integer distanceType) {
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		Map<String, Map<String, Double>> matrix = new HashMap<String, Map<String,Double>>();
-		try {
-			connection = ds.getConnection();
-			
-			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
-			
-			Statement statement3 = connection.createStatement();
-			String sqlQuery3 = " select * from sample_distance " 
-					+ " where sample_id_1 in (" + sampleIdString + ") "
-					+ " and sample_id_2 in (" + sampleIdString + ") "
-					+ " and distance_type_id = " + distanceType;
-			
-			ResultSet results3 = statement3.executeQuery(sqlQuery3);
-			while (results3.next()) {
-				String sid1 = results3.getString("sample_id_1");
-				String sid2 = results3.getString("sample_id_2");
-				Double dist = results3.getDouble("distance");
-				if (matrix.get(sid1) == null) {
-					matrix.put(sid1, new HashMap<String, Double>());
-				}
-				matrix.get(sid1).put(sid2, dist);
-			}
-			statement3.close();
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			if (ds != null) {
-				ds.close();
-			}
-		}
-		return matrix;
-	}
-
-	// TODO
-	private double[][] getSampleDistanceMatrix(String[] sampleIdList, Integer distanceType) {
+	private double[][] getSampleDistanceMatrix2(String[] sampleIdList, Integer distanceType, Integer experimentMethod) {
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		Map<String, Map<String, Double>> matrix = new HashMap<String, Map<String,Double>>();
@@ -3820,64 +3743,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
 			
 			Statement statement3 = connection.createStatement();
-			String sqlQuery3 = " select * from sample_distance " 
-					+ " where sample_id_1 in (" + sampleIdString + ") "
-					+ " and sample_id_2 in (" + sampleIdString + ") "
-					+ " and distance_type_id = " + distanceType;
-			
-			ResultSet results3 = statement3.executeQuery(sqlQuery3);
-			while (results3.next()) {
-				String sid1 = results3.getString("sample_id_1");
-				String sid2 = results3.getString("sample_id_2");
-				Double dist = results3.getDouble("distance");
-				if (matrix.get(sid1) == null) {
-					matrix.put(sid1, new HashMap<String, Double>());
-				}
-				matrix.get(sid1).put(sid2, dist);
-			}
-			
-			ret = new double[sampleIdList.length][sampleIdList.length];
-			for (int i = 0; i < sampleIdList.length; i++) {
-				for (int j = 0; j < sampleIdList.length; j++) {
-					if (i == j) {
-						ret[i][j] = 0;
-					} else {
-						ret[i][j] = matrix.get(sampleIdList[i]).get(sampleIdList[j]).doubleValue();
-					}
-				}
-			}
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			if (ds != null) {
-				ds.close();
-			}
-		}
-		return ret;
-	}
-
-	private double[][] getSampleDistanceMatrix2(String[] sampleIdList, Integer distanceType) {
-		HikariDataSource ds = getHikariDataSource();
-		Connection connection = null;
-		Map<String, Map<String, Double>> matrix = new HashMap<String, Map<String,Double>>();
-		double[][] ret = null;
-		try {
-			connection = ds.getConnection();
-			
-			String sampleIdString = "'" + StringUtils.join(sampleIdList, "','") + "'";
-			
-			Statement statement3 = connection.createStatement();
-			String sqlQuery3 = " select * from sample_all_distance "
-					+ " where sample_id in (" + sampleIdString + ") "
-					+ " and distance_type_id = " + distanceType;
+			String sqlQuery3 = " select * from sample_all_distance " + " where sample_id in (" + sampleIdString + ") "
+					+ " and distance_type_id = " + distanceType + " and method_id = " + experimentMethod;
 			
 			ResultSet results3 = statement3.executeQuery(sqlQuery3);
 			while (results3.next()) {
@@ -3921,9 +3788,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	}
 	
 	@Override
-	public PcoaResult getPCoAResult(List<String> sampleIdList, Integer distanceType) {
+	public PcoaResult getPCoAResult(List<String> sampleIdList, Integer experimentMethod, Integer distanceType) {
 		String[] sampleArray = sampleIdList.toArray(new String[sampleIdList.size()]);
-		double[][] dmat = getSampleDistanceMatrix2(sampleArray, distanceType);
+		double[][] dmat = getSampleDistanceMatrix2(sampleArray, distanceType, experimentMethod);
 		
 		MDSTweak mds = new MDSTweak(dmat, dmat.length - 1);
 
@@ -4193,7 +4060,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				if (lang.equals(GutFloraConstant.LANG_JP)) {
 					queryFields3 = " choice_value_jp as value";
 				}
-				String sqlQuery3 = "select choice_option, " + queryFields3 + " from choice where parameter_id = " + piId;				
+				String sqlQuery3 = "select choice_option, " + queryFields3 + " from choice where parameter_id = '" + piId + "' ";				
 				ResultSet results3 = statement3.executeQuery(sqlQuery3);
 				while (results3.next()) {
 					String value = results3.getString("value");

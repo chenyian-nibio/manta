@@ -142,7 +142,9 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 				loadingPopupPanel.show();
 				if (refTypeListBox.getSelectedIndex() == 0) {
 					String rank = rankListBox.getValue(rankListBox.getSelectedIndex());
-					service.searchForSimilarReads(ProfilesAnalysisWidget.this.selectedSamples, rank, targetName,
+					// TODO exp_method should not hardcode here
+					service.searchForSimilarReads(ProfilesAnalysisWidget.this.selectedSamples, rank,
+							GutFloraConstant.EXPERIMENT_METHOD_16S, targetName,
 							Integer.valueOf(correlationListBox.getSelectedValue()), currentLang,
 							new AsyncCallback<SearchResultData>() {
 						

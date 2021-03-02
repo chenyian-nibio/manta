@@ -58,6 +58,9 @@ public class MicrobiotaHeatmapWidget extends ReadVisualizeWidget {
 	
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
+	// maybe become an argument?
+	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+	
 	public MicrobiotaHeatmapWidget(Set<SampleEntry> selectedSamples, String rank, 
 			boolean isSubset, String lang) {
 		this("Heat Map", GutFloraConstant.NAVI_LINK_VIEW_HEATMAP, selectedSamples, rank, isSubset, lang);
@@ -242,7 +245,7 @@ public class MicrobiotaHeatmapWidget extends ReadVisualizeWidget {
 	private void drawNormalHeatmap() {
 		clearMessage();
 		loadingPopupPanel.show();
-		service.getReadsHeatmap(selectedSamples, getSelectedRank(), new AsyncCallback<VisualizationtResult>() {
+		service.getReadsHeatmap(selectedSamples, getSelectedRank(), experimentMethod, new AsyncCallback<VisualizationtResult>() {
 			
 			@Override
 			public void onSuccess(VisualizationtResult result) {
@@ -306,7 +309,7 @@ public class MicrobiotaHeatmapWidget extends ReadVisualizeWidget {
 	private void updateClusteredHeatmap() {
 		clearMessage();
 		loadingPopupPanel.show();
-		service.getClusteredReadsHeatmap(selectedSamples, getSelectedRank(), getDistance(), getLinkage(), cacheMap, 
+		service.getClusteredReadsHeatmap(selectedSamples, getSelectedRank(), experimentMethod, getDistance(), getLinkage(), cacheMap, 
 				new AsyncCallback<VisualizationtResult>() {
 
 					@Override

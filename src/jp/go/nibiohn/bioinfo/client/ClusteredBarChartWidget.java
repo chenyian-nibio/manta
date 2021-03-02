@@ -61,6 +61,9 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
+	// maybe become an argument?
+	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+	
 	public ClusteredBarChartWidget(Set<SampleEntry> selectedSamples, String rank, 
 			boolean isSubset, String lang) {
 		this("Bar Chart", GutFloraConstant.NAVI_LINK_VIEW_BARCHART, selectedSamples, rank, isSubset, lang);
@@ -252,7 +255,7 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 		clearMessage();
 		loadingPopupPanel.show();
 		if (subsetRank != null && subsetTaxonId != null) {
-			service.getReadsBarChart(selectedSamples, getSelectedRank(), subsetRank, subsetTaxonId, 
+			service.getReadsBarChart(selectedSamples, getSelectedRank(), subsetRank, subsetTaxonId, experimentMethod, 
 					new AsyncCallback<VisualizationtResult>() {
 				
 				@Override
@@ -272,7 +275,8 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 			});
 			
 		} else {
-			service.getReadsBarChart(selectedSamples, getSelectedRank(), new AsyncCallback<VisualizationtResult>() {
+			service.getReadsBarChart(selectedSamples, getSelectedRank(), experimentMethod,
+					new AsyncCallback<VisualizationtResult>() {
 				
 				@Override
 				public void onSuccess(VisualizationtResult result) {
@@ -378,8 +382,9 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 		clearMessage();
 		loadingPopupPanel.show();
 		if (subsetRank != null && subsetTaxonId != null) {
-			service.getReadsClusteredBarChart(selectedSamples, getSelectedRank(), subsetRank, subsetTaxonId, getDistance(),
-					getLinkage(), 15, cacheMap, new AsyncCallback<VisualizationtResult>() {
+			service.getReadsClusteredBarChart(selectedSamples, getSelectedRank(), subsetRank, subsetTaxonId,
+					experimentMethod, getDistance(), getLinkage(), 15, cacheMap,
+					new AsyncCallback<VisualizationtResult>() {
 				
 				@Override
 				public void onSuccess(VisualizationtResult result) {
@@ -401,8 +406,8 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 			});
 			
 		} else {
-			service.getReadsClusteredBarChart(selectedSamples, getSelectedRank(), getDistance(), getLinkage(), cacheMap, 
-					new AsyncCallback<VisualizationtResult>() {
+			service.getReadsClusteredBarChart(selectedSamples, getSelectedRank(), experimentMethod, getDistance(),
+					getLinkage(), cacheMap, new AsyncCallback<VisualizationtResult>() {
 				
 				@Override
 				public void onSuccess(VisualizationtResult result) {

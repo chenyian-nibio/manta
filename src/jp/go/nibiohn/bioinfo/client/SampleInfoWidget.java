@@ -191,7 +191,7 @@ public class SampleInfoWidget extends Composite {
 				sampleInfoPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));			}
 		});
 		
-		service.getSampleDiversity(sampleId, new AsyncCallback<List<String>>() {
+		service.getSampleDiversity(sampleId, GutFloraConstant.EXPERIMENT_METHOD_16S, new AsyncCallback<List<String>>() {
 			
 			@Override
 			public void onSuccess(List<String> result) {
@@ -225,7 +225,7 @@ public class SampleInfoWidget extends Composite {
 	private void getMicrobiotaInfo(String sampleId) {
 		
 		String rank = rankListBox.getValue(rankListBox.getSelectedIndex());
-		service.getMicrobiota(sampleId, rank, new AsyncCallback<List<List<String>>>() {
+		service.getMicrobiota(sampleId, rank, GutFloraConstant.EXPERIMENT_METHOD_16S, new AsyncCallback<List<List<String>>>() {
 			
 			@Override
 			public void onSuccess(List<List<String>> result) {

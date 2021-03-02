@@ -49,6 +49,9 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 
 	private List<String> sampleIdList = new ArrayList<String>();
 
+	// maybe become an argument?
+	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+	
 	public PcoaAnalysisWidget(Set<SampleEntry> selectedSamples, boolean isSubset, String lang) {
 		this("PCoA Chart", GutFloraConstant.NAVI_LINK_VIEW_PCOA, selectedSamples, isSubset, lang);
 	}
@@ -130,7 +133,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 				Integer distanceType = Integer.valueOf(sampleDistanceListBox.getSelectedValue());
 				if (pcoaResultMap.get(distanceType) == null) {
 					loadingPopupPanel.show();
-					service.getPCoAResult(sampleIdList, distanceType, new AsyncCallback<PcoaResult>() {
+					service.getPCoAResult(sampleIdList, experimentMethod, distanceType, new AsyncCallback<PcoaResult>() {
 						
 						@Override
 						public void onSuccess(PcoaResult result) {
@@ -275,7 +278,8 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 			sampleIdList.add(sampleEntry.getSampleId());
 		}
 		loadingPopupPanel.show();
-		service.getPCoAResult(sampleIdList, Integer.valueOf(sampleDistanceListBox.getSelectedValue()), new AsyncCallback<PcoaResult>() {
+		service.getPCoAResult(sampleIdList, experimentMethod, Integer.valueOf(sampleDistanceListBox.getSelectedValue()),
+				new AsyncCallback<PcoaResult>() {
 			
 			@Override
 			public void onSuccess(PcoaResult result) {

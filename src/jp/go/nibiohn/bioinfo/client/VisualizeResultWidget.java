@@ -70,6 +70,9 @@ public class VisualizeResultWidget extends AnalysisWidget {
 
 	private String rank;
 
+	// maybe become an argument?
+	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+	
 	public VisualizeResultWidget(Set<SampleEntry> selectedSamples, 
 			String rank, String referenceType, String referenceName, String correlationMethod, String lang) {
 		this.selectedSamples = selectedSamples;
@@ -92,7 +95,8 @@ public class VisualizeResultWidget extends AnalysisWidget {
 		
 		if (referenceType.equals(GutFloraConstant.NAVI_LINK_SUFFIX_READ)) {
 			readNameLabel.setText(referenceName);
-			service.getReadsAndPctList(VisualizeResultWidget.this.selectedSamples, rank, referenceName, new AsyncCallback<PairListData>() {
+			service.getReadsAndPctList(VisualizeResultWidget.this.selectedSamples, rank, referenceName,
+					experimentMethod, new AsyncCallback<PairListData>() {
 				
 				@Override
 				public void onSuccess(PairListData result) {
@@ -439,7 +443,8 @@ public class VisualizeResultWidget extends AnalysisWidget {
 					}
 				});
 			} else {
-				service.getReadsAndPctList(VisualizeResultWidget.this.selectedSamples, VisualizeResultWidget.this.rank, name, new AsyncCallback<PairListData>() {
+				service.getReadsAndPctList(VisualizeResultWidget.this.selectedSamples, VisualizeResultWidget.this.rank,
+						name, experimentMethod, new AsyncCallback<PairListData>() {
 					
 					@Override
 					public void onSuccess(PairListData result) {

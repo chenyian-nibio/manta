@@ -33,27 +33,27 @@ public interface GutFloraService extends RemoteService {
 
 	List<List<String>> getSampleProfile(String sampleId, String categoryId, String groupId, String lang);
 
-	List<List<String>> getMicrobiota(String sampleId, String rank);
+	List<List<String>> getMicrobiota(String sampleId, String rank, Integer experimentMethod);
 
-	List<List<String>> getSampleReads(String sampleId, String rank, String taxonId);
-	
-	GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank);
+	List<List<String>> getSampleReads(String sampleId, String rank, String taxonId, Integer experimentMethod);
 
-	VisualizationtResult getReadsBarChart(Set<SampleEntry> selectedSamples, String rank);
-	
-	VisualizationtResult getReadsBarChart(Set<SampleEntry> selectedSamples, String selectedRank, String parentRank, String parentTaxonId);
-	
-	VisualizationtResult getReadsClusteredBarChart(Set<SampleEntry> selectedSamples, String rank, int distanceType, int linkageType, Map<Integer, DendrogramCache> cacheMap);
-	
-	VisualizationtResult getReadsClusteredBarChart(Set<SampleEntry> selectedSamples, String selectedRank, String parentRank, String parentTaxonId, int distanceType, int linkageType, int numOfColumns, Map<Integer, DendrogramCache> cacheMap);
-	
-	GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, List<String> selectedcolumns);
+	GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod);
+
+	VisualizationtResult getReadsBarChart(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod);
+
+	VisualizationtResult getReadsBarChart(Set<SampleEntry> selectedSamples, String selectedRank, String parentRank, String parentTaxonId, Integer experimentMethod);
+
+	VisualizationtResult getReadsClusteredBarChart(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod, int distanceType, int linkageType, Map<Integer, DendrogramCache> cacheMap);
+
+	VisualizationtResult getReadsClusteredBarChart(Set<SampleEntry> selectedSamples, String selectedRank, String parentRank, String parentTaxonId, Integer experimentMethod, int distanceType, int linkageType, int numOfColumns, Map<Integer, DendrogramCache> cacheMap);
+
+	GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod, List<String> selectedcolumns);
 
 	GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, String categoryId, String groupId, String lang);
 
 	GutFloraAnalysisData getProfilesAnalysisData(Set<SampleEntry> selectedSamples, List<String> selectedcolumns, String lang);
 
-	List<TaxonEntry> getAllTaxonEntries(Set<SampleEntry> selectedSamples, String rank);
+	List<TaxonEntry> getAllTaxonEntries(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod);
 
 	List<ParameterEntry> getAllNumericParameterEntry(String lang);
 
@@ -63,9 +63,9 @@ public interface GutFloraService extends RemoteService {
 
 	List<List<String>> getAllParameterGroupNames(String lang);
 
-	PairListData getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId);
+	PairListData getReadsAndPctListById(Set<SampleEntry> selectedSamples, String rank, String taxonId, Integer experimentMethod);
 	
-	PairListData getReadsAndPctList(Set<SampleEntry> selectedSamples, String rank, String taxonName);
+	PairListData getReadsAndPctList(Set<SampleEntry> selectedSamples, String rank, String taxonName, Integer experimentMethod);
 
 	PairListData getProfilesList(Set<SampleEntry> selectedSamples, String name, String lang);
 
@@ -77,23 +77,23 @@ public interface GutFloraService extends RemoteService {
 	
 	String getFormattedPvalueForUnrankedCategoricalParameter(Map<String, List<String>> groupValue);
 	
-	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName,
+	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, String taxonName, Integer experimentMethod,
 			String paraType, Integer correlationMethod, String lang);
 
-	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames,
+	SearchResultData searchForSimilerProfiles(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames, Integer experimentMethod,
 			String paraType, String lang);
 
 	SearchResultData searchForSimilerProfilesbyProfile(Set<SampleEntry> selectedSamples, String profileName,
 			String paraType, Integer correlationMethod, String lang);
 
-	SearchResultData searchForSimilarReads(Set<SampleEntry> selectedSamples, String rank, String name,
+	SearchResultData searchForSimilarReads(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod, String name,
 			Integer correlationMethod, String lang);
 
-	Map<String, Double[]> getAllReadsPctList(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames);
+	Map<String, Double[]> getAllReadsPctList(Set<SampleEntry> selectedSamples, String rank, List<String> taxonNames, Integer experimentMethod);
 	
-	Map<String, String> getSampleDiversity(Set<SampleEntry> selectedSamples);
+	Map<String, String> getSampleDiversity(Set<SampleEntry> selectedSamples, Integer experimentMethod);
 
-	List<String> getSampleDiversity(String sampleId);
+	List<String> getSampleDiversity(String sampleId, Integer experimentMethod);
 	
 	String getCurrentUser();
 
@@ -101,13 +101,13 @@ public interface GutFloraService extends RemoteService {
 
 	void logoutCurrentUser();
 
-	VisualizationtResult getReadsHeatmap(Set<SampleEntry> selectedSamples, String rank);
+	VisualizationtResult getReadsHeatmap(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod);
 
-	VisualizationtResult getClusteredReadsHeatmap(Set<SampleEntry> selectedSamples, String rank, int distanceType, int linkageType, Map<Integer, DendrogramCache> cacheMap);
+	VisualizationtResult getClusteredReadsHeatmap(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod, int distanceType, int linkageType, Map<Integer, DendrogramCache> cacheMap);
 	
 	String getHeatmapLegend();
 	
-	PcoaResult getPCoAResult(List<String> sampleIdList, Integer distanceType);
+	PcoaResult getPCoAResult(List<String> sampleIdList, Integer experimentMethod, Integer distanceType);
 	
 	List<String> getProfileNames(String categoryId, String groupId, String lang);
 

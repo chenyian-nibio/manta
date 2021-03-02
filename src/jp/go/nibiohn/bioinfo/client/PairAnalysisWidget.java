@@ -77,6 +77,9 @@ public class PairAnalysisWidget extends AnalysisWidget {
 	
 	private List<List<String>> pairDataList = new ArrayList<List<String>>();
 	
+	// maybe become an argument?
+	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+	
 	public PairAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
@@ -221,7 +224,8 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				} else {
 					String taxonId = paraListBoxX.getSelectedValue();
 					if (taxonId != null && !taxonId.equals("")) {
-						service.getReadsAndPctListById(PairAnalysisWidget.this.selectedSamples, rank, taxonId, new AsyncCallback<PairListData>() {
+						service.getReadsAndPctListById(PairAnalysisWidget.this.selectedSamples, rank, taxonId,
+								experimentMethod, new AsyncCallback<PairListData>() {
 							
 							@Override
 							public void onSuccess(PairListData result) {
@@ -264,7 +268,8 @@ public class PairAnalysisWidget extends AnalysisWidget {
 				} else {
 					String taxonId = paraListBoxY.getSelectedValue();
 					if (taxonId != null && !taxonId.equals("")) {
-						service.getReadsAndPctListById(PairAnalysisWidget.this.selectedSamples, rank, taxonId, new AsyncCallback<PairListData>() {
+						service.getReadsAndPctListById(PairAnalysisWidget.this.selectedSamples, rank, taxonId,
+								experimentMethod, new AsyncCallback<PairListData>() {
 							
 							@Override
 							public void onSuccess(PairListData result) {
@@ -346,7 +351,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 			});
 			
 		} else {
-			service.getAllTaxonEntries(selectedSamples, rank, new AsyncCallback<List<TaxonEntry>>() {
+			service.getAllTaxonEntries(selectedSamples, rank, experimentMethod, new AsyncCallback<List<TaxonEntry>>() {
 				
 				@Override
 				public void onSuccess(List<TaxonEntry> result) {
@@ -393,7 +398,7 @@ public class PairAnalysisWidget extends AnalysisWidget {
 			});
 			
 		} else {
-			service.getAllTaxonEntries(selectedSamples, rank, new AsyncCallback<List<TaxonEntry>>() {
+			service.getAllTaxonEntries(selectedSamples, rank, experimentMethod, new AsyncCallback<List<TaxonEntry>>() {
 				
 				@Override
 				public void onSuccess(List<TaxonEntry> result) {

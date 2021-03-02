@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
+import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.PairListData;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
@@ -66,6 +67,9 @@ public class MlrSearchResultWidget extends BaseWidget {
 
 	private List<String> currentColumns;
 	
+	// maybe become an argument?
+	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+	
 	public MlrSearchResultWidget(Set<SampleEntry> selectedSamples, SearchResultData searchResultData,
 			List<String> currentColumns, String historyTag, String lang) {
 		super("Search results (MLR)", lang + historyTag);
@@ -81,7 +85,7 @@ public class MlrSearchResultWidget extends BaseWidget {
 
 		// start to construct plot panel
 		sortedSampleIds = getSortedSampleList(selectedSamples); 
-		service.getAllReadsPctList(selectedSamples, searchResultData.getRank(), currentColumns,
+		service.getAllReadsPctList(selectedSamples, searchResultData.getRank(), currentColumns, experimentMethod, 
 				new AsyncCallback<Map<String, Double[]>>() {
 			
 			@Override

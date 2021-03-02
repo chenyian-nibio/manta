@@ -49,6 +49,9 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 	
 	private Map<String, String> parameterUnitMap = new HashMap<String, String>();
 	
+	// maybe become an argument?
+	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+	
 	public CategoricalAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
@@ -143,7 +146,8 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 				if (rank.equals(OPTION_PARAMETER)) {
 					String paraId = paraListBoxX.getSelectedValue();
 					if (paraId != null && !paraId.equals("")) {
-						service.getNumericParameterValueById(CategoricalAnalysisWidget.this.selectedSamples, paraId, new AsyncCallback<PairListData>() {
+						service.getNumericParameterValueById(CategoricalAnalysisWidget.this.selectedSamples, paraId,
+								new AsyncCallback<PairListData>() {
 							
 							@Override
 							public void onSuccess(PairListData result) {
@@ -160,7 +164,8 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 				} else {
 					String taxonId = paraListBoxX.getSelectedValue();
 					if (taxonId != null && !taxonId.equals("")) {
-						service.getReadsAndPctListById(CategoricalAnalysisWidget.this.selectedSamples, rank, taxonId, new AsyncCallback<PairListData>() {
+						service.getReadsAndPctListById(CategoricalAnalysisWidget.this.selectedSamples, rank, taxonId,
+								experimentMethod, new AsyncCallback<PairListData>() {
 							
 							@Override
 							public void onSuccess(PairListData result) {
@@ -230,7 +235,7 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 			});
 			
 		} else {
-			service.getAllTaxonEntries(selectedSamples, rank, new AsyncCallback<List<TaxonEntry>>() {
+			service.getAllTaxonEntries(selectedSamples, rank, experimentMethod, new AsyncCallback<List<TaxonEntry>>() {
 				
 				@Override
 				public void onSuccess(List<TaxonEntry> result) {

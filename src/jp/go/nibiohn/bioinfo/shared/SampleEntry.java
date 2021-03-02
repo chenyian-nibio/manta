@@ -12,6 +12,9 @@ public class SampleEntry implements IsSerializable {
 	private String project;
 	private Date expDate;
 	private Boolean hasReads;
+	private Boolean hasMetadata;
+	private Boolean has16S;
+	private Boolean hasShotgun;
 	
 	public SampleEntry() {
 	}
