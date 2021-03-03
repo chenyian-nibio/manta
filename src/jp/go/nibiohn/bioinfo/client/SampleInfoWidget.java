@@ -10,6 +10,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
@@ -18,6 +20,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -42,7 +45,10 @@ public class SampleInfoWidget extends Composite {
 	
 	private boolean readInfoDisplay = true;
 	private boolean dietInfoDisplay = false;
-	
+
+	private RadioButton exp16SRb = new RadioButton("expMethod", "16S");
+	private RadioButton expShotgunRb = new RadioButton("expMethod", "Shotgun");
+
 	private String currentLang;
 
 	public SampleInfoWidget(final String sampleId, String lang) {
@@ -85,9 +91,32 @@ public class SampleInfoWidget extends Composite {
 				readPanel.setVisible(readInfoDisplay);
 			}
 		});
+		
+		HorizontalPanel expMethodHp = new HorizontalPanel();
+		expMethodHp.setSpacing(12);
+		expMethodHp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		expMethodHp.add(exp16SRb);
+		expMethodHp.add(expShotgunRb);
+		exp16SRb.setValue(Boolean.TRUE);
+		exp16SRb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				getMicrobiotaInfo(sampleId);
+			}
+		});
+		expShotgunRb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				getMicrobiotaInfo(sampleId);
+			}
+		});
+		
 		readHp.add(readChevron);
 		readHp.add(new HTML("<h3>Microbiota</h3>"));
 		thisWidget.add(readHp);
+		thisWidget.add(expMethodHp);
 		thisWidget.add(diversityPanel);
 		thisWidget.add(readPanel);
 		readPanel.add(loadingLabel);
@@ -190,42 +219,19 @@ public class SampleInfoWidget extends Composite {
 			public void onFailure(Throwable caught) {
 				sampleInfoPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));			}
 		});
-		
-		service.getSampleDiversity(sampleId, GutFloraConstant.EXPERIMENT_METHOD_16S, new AsyncCallback<List<String>>() {
-			
-			@Override
-			public void onSuccess(List<String> result) {
-				if (result != null) {
-					VerticalPanel vp = new VerticalPanel();
-					vp.add(new HTML("<b>Diversity index:</b>"));
-					StringBuffer sb = new StringBuffer();
-					sb.append("<table class=\"sampleInfo diverCol\" >\n");
-					sb.append("<tr>");
-					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[0] + "</th><td>" + result.get(0) + "</td>");
-					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[1] + "</th><td>" + result.get(1) + "</td>");
-					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[2] + "</th><td>" + result.get(2) + "</td>");
-					sb.append("</tr></table>");
-					vp.add(new HTML(sb.toString()));
-					vp.add(new HTML("&nbsp;"));
-					vp.add(rankListBox);
-					diversityPanel.setWidget(vp);
-				} else {
-					// just let it blank...
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				diversityPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
-				
-			}
-		});
 	}
-
+	
 	private void getMicrobiotaInfo(String sampleId) {
+		diversityPanel.clear();
+		readPanel.clear();
+		
+		Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN;
+		if (exp16SRb.getValue()) {
+			experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+		}
 		
 		String rank = rankListBox.getValue(rankListBox.getSelectedIndex());
-		service.getMicrobiota(sampleId, rank, GutFloraConstant.EXPERIMENT_METHOD_16S, new AsyncCallback<List<List<String>>>() {
+		service.getMicrobiota(sampleId, rank, experimentMethod, new AsyncCallback<List<List<String>>>() {
 			
 			@Override
 			public void onSuccess(List<List<String>> result) {
@@ -257,6 +263,38 @@ public class SampleInfoWidget extends Composite {
 				dietPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
 			}
 		});
+		
+		service.getSampleDiversity(sampleId, experimentMethod, new AsyncCallback<List<String>>() {
+			
+			@Override
+			public void onSuccess(List<String> result) {
+				if (result != null) {
+					VerticalPanel vp = new VerticalPanel();
+					vp.add(new HTML("<b>Diversity index:</b>"));
+					StringBuffer sb = new StringBuffer();
+					sb.append("<table class=\"sampleInfo diverCol\" >\n");
+					sb.append("<tr>");
+					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[0] + "</th><td>" + result.get(0) + "</td>");
+					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[1] + "</th><td>" + result.get(1) + "</td>");
+					sb.append("<th>" + GutFloraConstant.DIVERSITY_INDEX[2] + "</th><td>" + result.get(2) + "</td>");
+					sb.append("</tr></table>");
+					vp.add(new HTML(sb.toString()));
+					vp.add(new HTML("&nbsp;"));
+					vp.add(rankListBox);
+					diversityPanel.setWidget(vp);
+				} else {
+					// just let it blank...
+					
+				}
+			}
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				diversityPanel.setWidget(new Label(BaseWidget.SERVER_ERROR));
+				
+			}
+		});
+
 	}
 	
 	private void getProfileData(String sampleId) {
