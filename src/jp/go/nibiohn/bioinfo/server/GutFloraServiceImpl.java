@@ -3746,6 +3746,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			String sqlQuery3 = " select * from sample_all_distance " + " where sample_id in (" + sampleIdString + ") "
 					+ " and distance_type_id = " + distanceType + " and method_id = " + experimentMethod;
 			
+			System.out.println(sqlQuery3);
+			
 			ResultSet results3 = statement3.executeQuery(sqlQuery3);
 			while (results3.next()) {
 				String sid1 = results3.getString("sample_id");

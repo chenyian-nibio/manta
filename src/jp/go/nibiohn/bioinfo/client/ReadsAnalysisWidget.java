@@ -88,6 +88,10 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
 	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+
+	private int rankListSize;
+
+	private int indexOfPiechartIcon = 3;
 	
 	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, Integer experimentMethod, String lang) {
 		this(selectedSamples, experimentMethod, "phylum", "", lang);
@@ -194,7 +198,12 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		vp.add(topHp);
 
 		int index = 0;
-		for (int k = 0; k < GutFloraConstant.RANK_LIST.size(); k++) {
+		rankListSize = GutFloraConstant.RANK_LIST.size();
+		if (experimentMethod.equals(GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+			rankListSize--;
+			indexOfPiechartIcon = 4;
+		}
+		for (int k = 0; k < rankListSize; k++) {
 			rankListBox.addItem(GutFloraConstant.RANK_LIST.get(k));
 			rankListBox2.addItem(GutFloraConstant.RANK_LIST.get(k));
 			if (GutFloraConstant.RANK_LIST.get(k).equals(initRank)) {
@@ -292,11 +301,11 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_VIEW_BARCHART + suffix);
+				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_VIEW_BARCHART + "-" + ReadsAnalysisWidget.this.experimentMethod + suffix);
 			}
 		});
 		barChartIcon.addStyleName("clickable");
-		Hyperlink barChartLink = new Hyperlink("Bar Chart", currentLang + GutFloraConstant.NAVI_LINK_VIEW_BARCHART + suffix);
+		Hyperlink barChartLink = new Hyperlink("Bar Chart", currentLang + GutFloraConstant.NAVI_LINK_VIEW_BARCHART + "-" + ReadsAnalysisWidget.this.experimentMethod + suffix);
 		rankHp.add(barChartLink);
 		barChartLink.addStyleName("fixlink");
 
@@ -308,11 +317,11 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_VIEW_HEATMAP + suffix);
+				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_VIEW_HEATMAP + "-" + ReadsAnalysisWidget.this.experimentMethod + suffix);
 			}
 		});
 		heatMapIcon.addStyleName("clickable");
-		Hyperlink heatMapLink = new Hyperlink("Heat Map", currentLang + GutFloraConstant.NAVI_LINK_VIEW_HEATMAP + suffix);
+		Hyperlink heatMapLink = new Hyperlink("Heat Map", currentLang + GutFloraConstant.NAVI_LINK_VIEW_HEATMAP + "-" + ReadsAnalysisWidget.this.experimentMethod + suffix);
 		rankHp.add(heatMapLink);
 		heatMapLink.addStyleName("fixlink");
 
@@ -324,11 +333,11 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_VIEW_PCOA + suffix);
+				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_VIEW_PCOA + "-" + ReadsAnalysisWidget.this.experimentMethod + suffix);
 			}
 		});
 		pcoaAnalysisIcon.addStyleName("clickable");
-		Hyperlink pcoaAnalysisLink = new Hyperlink("PCoA Chart", currentLang + GutFloraConstant.NAVI_LINK_VIEW_PCOA + suffix);
+		Hyperlink pcoaAnalysisLink = new Hyperlink("PCoA Chart", currentLang + GutFloraConstant.NAVI_LINK_VIEW_PCOA + "-" + ReadsAnalysisWidget.this.experimentMethod + suffix);
 		rankHp.add(pcoaAnalysisLink);
 		pcoaAnalysisLink.addStyleName("fixlink");
 
@@ -470,7 +479,12 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		});
 
 		// add diversity columns
-		for (int i = 0; i < 3; i++) {
+		int divIndex = 2;
+		if (experimentMethod.equals(GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+			// only 16S data contains the 3rd type diversity, chao1 index
+			divIndex = 3;
+		}
+		for (int i = 0; i < divIndex; i++) {
 			final Integer index = Integer.valueOf(i);
 			TextColumn<String> diverColumn = new TextColumn<String>() {
 				
@@ -593,7 +607,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 						}
 						dialogBox.setPopupPosition(left, 70);
 						dialogBox.show();
-					} else if (column == 4) {
+					} else if (column == indexOfPiechartIcon) {
 						DialogBox dialogBox = createReadsPieChart(event.getValue());
 						dialogBox.setGlassEnabled(true);
 						dialogBox.setAnimationEnabled(false);
@@ -602,8 +616,8 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 						dialogBox.center();
 						dialogBox.show();
 
-					} else if (column > 4) {
-						int index = column - 5;
+					} else if (column > indexOfPiechartIcon) {
+						int index = column - indexOfPiechartIcon - 1;
 						if (index < currentColumns.size()) {
 							String columnName = currentColumns.get(index);
 							for (int i = 1; i < readListBox.getItemCount(); i++) {
@@ -785,7 +799,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 						
 						final PieChart pieChart = new PieChart(getChartDataTable(result), createOptions(childRank));
 						
-						if (!childRank.equals(GutFloraConstant.RANK_LIST.get(GutFloraConstant.RANK_LIST.size() - 1))) {
+						if (!childRank.equals(GutFloraConstant.RANK_LIST.get(rankListSize - 1))) {
 							pieChart.addSelectHandler(new SelectHandler() {
 								
 								@Override
@@ -808,8 +822,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 					
 					@Override
 					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-						
+						warnMessage(BaseWidget.SERVER_ERROR);
 					}
 
 				});
@@ -919,6 +932,10 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 
 	public List<String> getCurrentColumns() {
 		return currentColumns;
+	}
+
+	public Integer getExperimentMethod() {
+		return experimentMethod;
 	}
 	
 }

@@ -61,25 +61,34 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
-	// maybe become an argument?
 	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
 	
-	public ClusteredBarChartWidget(Set<SampleEntry> selectedSamples, String rank, 
+	public ClusteredBarChartWidget(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod, 
 			boolean isSubset, String lang) {
-		this("Bar Chart", GutFloraConstant.NAVI_LINK_VIEW_BARCHART, selectedSamples, rank, isSubset, lang);
+		this("Bar Chart", GutFloraConstant.NAVI_LINK_VIEW_BARCHART, selectedSamples, rank, experimentMethod, isSubset, lang);
+	}
+
+	public ClusteredBarChartWidget(String expTag, Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod, 
+			boolean isSubset, String lang) {
+		this("Bar Chart (" + expTag + ")", GutFloraConstant.NAVI_LINK_VIEW_BARCHART, selectedSamples, rank, experimentMethod, isSubset, lang);
 	}
 	
 	public ClusteredBarChartWidget(String name, String link, Set<SampleEntry> selectedSamples, String rank,
-			boolean isSubset, String lang) {
+			Integer experimentMethod, boolean isSubset, String lang) {
 		super(name, lang + link);
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
+		this.experimentMethod = experimentMethod;
 		if (isSubset) {
 			showViewSample = false;
 		}
 		
 		VerticalPanel thisWidget = new VerticalPanel();
-		for (int i = 0; i < GutFloraConstant.RANK_LIST.size(); i++) {
+		int rankListSize = GutFloraConstant.RANK_LIST.size();
+		if (experimentMethod.equals(GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+			rankListSize--;
+		}
+		for (int i = 0; i < rankListSize; i++) {
 			String item = GutFloraConstant.RANK_LIST.get(i);
 			rankListBox.addItem(item);
 			if (item.equals(rank)) {
@@ -160,10 +169,17 @@ public class ClusteredBarChartWidget extends ReadVisualizeWidget {
 		linkageOptHp.add(new HTML("<b>Linkage:</b>"));
 		linkageOptHp.add(linkageListBox);
 		
-		distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
-		distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE.toString());
-		distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
-		distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE.toString());
+		if (experimentMethod.equals(GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+			distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
+			distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE.toString());
+			distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
+			distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE.toString());
+		} else if (experimentMethod.equals(GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN)) {
+			distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_SPECIES, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_SPECIES_VALUE.toString());
+			distanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_JACCARD, GutFloraConstant.SAMPLE_DISTANCE_JACCARD_VALUE.toString());
+		} else {
+			// should not happen!
+		}
 		
 		linkageListBox.addItem(GutFloraConstant.CLUSTERING_LINKAGE_AVERAGE, GutFloraConstant.CLUSTERING_LINKAGE_AVERAGE_VALUE.toString());
 		linkageListBox.addItem(GutFloraConstant.CLUSTERING_LINKAGE_COMPLETE, GutFloraConstant.CLUSTERING_LINKAGE_COMPLETE_VALUE.toString());

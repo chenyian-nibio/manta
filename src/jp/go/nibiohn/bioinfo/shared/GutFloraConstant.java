@@ -22,12 +22,12 @@ public class GutFloraConstant {
 	
 	public static final int DEFAULT_NUM_OF_COLUMNS = 10;
 	
-	public static final List<String> RANK_LIST = Arrays.asList("kingdom", "phylum", "class", "order", "family", "genus");
+	public static final List<String> RANK_LIST = Arrays.asList("kingdom", "phylum", "class", "order", "family", "genus", "species");
 
 	public static final String[] DIVERSITY_INDEX = new String[]{"Shannon index", "Simpson index", "Chao1 index"};
 
-	public static final String[] ANALYSIS_TAB_TITLES = new String[] { "Microbiota composition", "Phenotypic parameters",
-			"Correlate two parameters", "Unranked categorical parameters" };
+	public static final String[] ANALYSIS_TAB_TITLES = new String[] { "Microbiota composition (16S)", "Phenotypic parameters",
+			"Correlate two parameters", "Unranked categorical parameters", "Microbiota composition (Shotgun)"}; 
 
 	public static final String NAVI_LINK_SAMPLE = "sample";
 	public static final String NAVI_LINK_ANALYSIS = "analysis";
@@ -37,7 +37,7 @@ public class GutFloraConstant {
 	public static final String NAVI_LINK_VIEW_PCOA = "pcoa";
 	public static final String NAVI_LINK_SUFFIX_PROFILE = "-profile";
 	public static final String NAVI_LINK_SUFFIX_READ = "-read";
-	public static final String NAVI_LINK_SUFFIX_IMMUN = "-immun";
+//	public static final String NAVI_LINK_SUFFIX_IMMUN = "-immun";
 	public static final String NAVI_LINK_SUBSET_SUFFIX = "-subset";
 	public static final String NAVI_LINK_MLR = "-mlr";
 	
@@ -72,6 +72,10 @@ public class GutFloraConstant {
 	public static final Integer SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE = Integer.valueOf(3);
 	public static final String SAMPLE_DISTANCE_BRAY_CURTIS_GENUS = "Bray-Curtis (by genus)";
 	public static final Integer SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE = Integer.valueOf(4);
+	public static final String SAMPLE_DISTANCE_BRAY_CURTIS_SPECIES = "Bray-Curtis (by species)";
+	public static final Integer SAMPLE_DISTANCE_BRAY_CURTIS_SPECIES_VALUE = Integer.valueOf(5);
+	public static final String SAMPLE_DISTANCE_JACCARD = "Jaccard";
+	public static final Integer SAMPLE_DISTANCE_JACCARD_VALUE = Integer.valueOf(6);
 
 	public static final String CLUSTERING_LINKAGE_AVERAGE = "Average";
 	public static final Integer CLUSTERING_LINKAGE_AVERAGE_VALUE = Integer.valueOf(0);

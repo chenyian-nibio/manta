@@ -49,16 +49,21 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 
 	private List<String> sampleIdList = new ArrayList<String>();
 
-	// maybe become an argument?
 	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
 	
-	public PcoaAnalysisWidget(Set<SampleEntry> selectedSamples, boolean isSubset, String lang) {
-		this("PCoA Chart", GutFloraConstant.NAVI_LINK_VIEW_PCOA, selectedSamples, isSubset, lang);
+	public PcoaAnalysisWidget(Set<SampleEntry> selectedSamples, Integer experimentMethod, boolean isSubset, String lang) {
+		this("PCoA Chart", GutFloraConstant.NAVI_LINK_VIEW_PCOA, selectedSamples, experimentMethod, isSubset, lang);
 	}
 
-	public PcoaAnalysisWidget(String name, String link, Set<SampleEntry> selectedSamples, boolean isSubset, String lang) {
+	public PcoaAnalysisWidget(String expTag, Set<SampleEntry> selectedSamples, Integer experimentMethod, boolean isSubset, String lang) {
+		this("PCoA Chart (" + expTag + ")", GutFloraConstant.NAVI_LINK_VIEW_PCOA, selectedSamples, experimentMethod, isSubset, lang);
+	}
+
+	public PcoaAnalysisWidget(String name, String link, Set<SampleEntry> selectedSamples, Integer experimentMethod,
+			boolean isSubset, String lang) {
 		super(name, lang + link);
 		this.selectedSamples = selectedSamples;
+		this.experimentMethod = experimentMethod;
 		this.currentLang = lang;
 
 		HorizontalPanel thisWidget = new HorizontalPanel();
@@ -122,10 +127,18 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 			}
 		});
 		
-		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
-		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE.toString());
-		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
-		sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE.toString());
+		if (experimentMethod.equals(GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
+			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE.toString());
+			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
+			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE.toString());
+		} else if (experimentMethod.equals(GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN)) {
+			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_SPECIES, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_SPECIES_VALUE.toString());
+			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_JACCARD, GutFloraConstant.SAMPLE_DISTANCE_JACCARD_VALUE.toString());
+		} else {
+			// should not happen!
+		}
+		
 		sampleDistanceListBox.addChangeHandler(new ChangeHandler() {
 			
 			@Override
@@ -133,7 +146,8 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 				Integer distanceType = Integer.valueOf(sampleDistanceListBox.getSelectedValue());
 				if (pcoaResultMap.get(distanceType) == null) {
 					loadingPopupPanel.show();
-					service.getPCoAResult(sampleIdList, experimentMethod, distanceType, new AsyncCallback<PcoaResult>() {
+					service.getPCoAResult(sampleIdList, PcoaAnalysisWidget.this.experimentMethod, distanceType,
+							new AsyncCallback<PcoaResult>() {
 						
 						@Override
 						public void onSuccess(PcoaResult result) {
@@ -278,7 +292,7 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 			sampleIdList.add(sampleEntry.getSampleId());
 		}
 		loadingPopupPanel.show();
-		service.getPCoAResult(sampleIdList, experimentMethod, Integer.valueOf(sampleDistanceListBox.getSelectedValue()),
+		service.getPCoAResult(sampleIdList, this.experimentMethod, Integer.valueOf(sampleDistanceListBox.getSelectedValue()),
 				new AsyncCallback<PcoaResult>() {
 			
 			@Override

@@ -40,7 +40,8 @@ public class SampleAnalysisWidget extends BaseWidget {
 	private TabPanel loadTabPanel(Set<SampleEntry> selectedSamples) {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
-		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
 		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
 		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.add(new CategoricalAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[3], false);
@@ -54,7 +55,8 @@ public class SampleAnalysisWidget extends BaseWidget {
 	private TabPanel loadSubsetTabPanel(Set<SampleEntry> selectedSamples, String initRank, String suffix) {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
-		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
 		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
 		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.selectTab(0);
@@ -74,11 +76,12 @@ public class SampleAnalysisWidget extends BaseWidget {
 		return null;
 	}
 	
-	public ReadsAnalysisWidget getReadsAnalysisWidget() {
-		return (ReadsAnalysisWidget) tabPanel.getWidget(0);
+	public ReadsAnalysisWidget getReadsAnalysisWidget(int tabIndex) {
+		return (ReadsAnalysisWidget) tabPanel.getWidget(tabIndex);
 	}
 	
 	public Set<SampleEntry> getSelectedSamples() {
 		return selectedSamples;
 	}
+	
 }

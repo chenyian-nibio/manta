@@ -189,11 +189,12 @@ public class Manta extends BasePage {
 					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 					return;
 				} else {
+					// TODO check carefully!!!!!!!!!
 					int tabIndex = 0;
 					if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
 						tabIndex = 1;
-					} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_IMMUN + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
-						tabIndex = 2;
+//					} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_IMMUN + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
+//						tabIndex = 2;
 					}
 					SearchResultData searchResultData = subsetAnalysisWidget.getCorrectionResults(tabIndex);
 					
@@ -206,7 +207,7 @@ public class Manta extends BasePage {
 					Set<SampleEntry> selectedSamples = subsetAnalysisWidget.getSelectedSamples();
 					BaseWidget resultWidget;
 					if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {
-						List<String> currentColumns = analysisWidget.getReadsAnalysisWidget().getCurrentColumns();
+						List<String> currentColumns = analysisWidget.getReadsAnalysisWidget(tabIndex).getCurrentColumns();
 						resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value, currentLang);
 					} else {
 						resultWidget = new SearchResultWidget(selectedSamples, searchResultData, value, currentLang);
@@ -225,12 +226,22 @@ public class Manta extends BasePage {
 					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 					return;
 				} else {
-					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget();
+					int tabIndex;
+					if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_16S + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
+						tabIndex = GutFloraConstant.EXPERIMENT_METHOD_16S - 1;
+					} else if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
+						tabIndex = GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN - 1;
+					} else {
+						// unexpected option, go back!
+						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+						return;
+					}
+					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget(tabIndex);
 					ClusteredBarChartWidget subsetClusteredBarChartWidget = new ClusteredBarChartWidget(
-							"Subset Clustering", GutFloraConstant.NAVI_LINK_VIEW_BARCHART
-									+ GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
-									readWidget.getSelectedSamples(), readWidget.getSelectedRank(),
-									true, currentLang);
+							"Bar Chart for subset",
+							GutFloraConstant.NAVI_LINK_VIEW_BARCHART + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
+							readWidget.getSelectedSamples(), readWidget.getSelectedRank(),
+							readWidget.getExperimentMethod(), true, currentLang);
 					
 					// subsetClusteredBarChart so far is always the last widget
 					widgetTrails.add(subsetClusteredBarChartWidget);
@@ -245,18 +256,58 @@ public class Manta extends BasePage {
 					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
 					return;
 				} else {
-					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget();
+					int tabIndex;
+					if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_16S + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
+						tabIndex = GutFloraConstant.EXPERIMENT_METHOD_16S - 1;
+					} else if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
+						tabIndex = GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN - 1;
+					} else {
+						// unexpected option, go back!
+						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+						return;
+					}
+					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget(tabIndex);
 					MicrobiotaHeatmapWidget subsetMicrobiotaHeatmapWidget = new MicrobiotaHeatmapWidget(
-							"Subset Clustering", GutFloraConstant.NAVI_LINK_VIEW_BARCHART
-							+ GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
+							"Heat Map for subset",
+							GutFloraConstant.NAVI_LINK_VIEW_HEATMAP + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
 							readWidget.getSelectedSamples(), readWidget.getSelectedRank(),
-							true, currentLang);
+							readWidget.getExperimentMethod(), true, currentLang);
 					
-					// subsetClusteredBarChart so far is always the last widget
+					// subsetMicrobiotaHeatmapWidget so far is always the last widget
 					widgetTrails.add(subsetMicrobiotaHeatmapWidget);
 					
 					mainPanel.clear();
 					mainPanel.add(subsetMicrobiotaHeatmapWidget);
+					
+					setNaviBar();
+				}
+			} else if (value.startsWith(GutFloraConstant.NAVI_LINK_VIEW_PCOA)) {
+				if (subsetAnalysisWidget == null) {
+					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+					return;
+				} else {
+					int tabIndex;
+					if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_16S + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
+						tabIndex = GutFloraConstant.EXPERIMENT_METHOD_16S - 1;
+					} else if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
+						tabIndex = GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN - 1;
+					} else {
+						// unexpected option, go back!
+						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+						return;
+					}
+					ReadsAnalysisWidget readWidget = subsetAnalysisWidget.getReadsAnalysisWidget(tabIndex);
+					PcoaAnalysisWidget subsetPcoaAnalysisWidget = new PcoaAnalysisWidget(
+							"PCoA Chart for the subset",
+							GutFloraConstant.NAVI_LINK_VIEW_PCOA + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX,
+							readWidget.getSelectedSamples(),
+							readWidget.getExperimentMethod(), true, currentLang);
+					
+					// subsetPcoaAnalysisWidget so far is always the last widget
+					widgetTrails.add(subsetPcoaAnalysisWidget);
+					
+					mainPanel.clear();
+					mainPanel.add(subsetPcoaAnalysisWidget);
 					
 					setNaviBar();
 				}
@@ -279,9 +330,7 @@ public class Manta extends BasePage {
 						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SAMPLE);
 						return;
 					}
-					
 					analysisWidget = new SampleAnalysisWidget(selectedSamples, currentLang);
-					
 				}
 			}
 			Iterator<BaseWidget> iterator = widgetTrails.iterator();
@@ -311,11 +360,12 @@ public class Manta extends BasePage {
 				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
 				return;
 			} else {
+				// TODO check carefully!!!!!!!!!
 				int tabIndex = 0;
 				if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE)) {
 					tabIndex = 1;
-				} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_IMMUN)) {
-					tabIndex = 2;
+//				} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_IMMUN)) {
+//					tabIndex = 2;
 				}
 				SearchResultData searchResultData = analysisWidget.getCorrectionResults(tabIndex);
 				
@@ -327,7 +377,7 @@ public class Manta extends BasePage {
 				Set<SampleEntry> selectedSamples = analysisWidget.getSelectedSamples();
 				BaseWidget resultWidget;
 				if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {
-					List<String> currentColumns = analysisWidget.getReadsAnalysisWidget().getCurrentColumns();
+					List<String> currentColumns = analysisWidget.getReadsAnalysisWidget(tabIndex).getCurrentColumns();
 					resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value, currentLang);
 				} else {
 					resultWidget = new SearchResultWidget(selectedSamples, searchResultData, value, currentLang);
@@ -342,15 +392,28 @@ public class Manta extends BasePage {
 				
 				infoPanel.setVisible(false);
 			}
-		} else if (value.equals(GutFloraConstant.NAVI_LINK_VIEW_BARCHART)) {
+		} else if (value.startsWith(GutFloraConstant.NAVI_LINK_VIEW_BARCHART)) {
 			if (analysisWidget == null) {
 				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
 				return;
 			} else {
+				int tabIndex;
+				String expTag;
+				if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+					tabIndex = GutFloraConstant.EXPERIMENT_METHOD_16S - 1;
+					expTag = "16S";
+				} else if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN)) {
+					tabIndex = GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN - 1;
+					expTag = "Shotgun";
+				} else {
+					// unexpected option, go back!
+					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+					return;
+				}
 				if (readVisualizeWidget == null) {
-					ReadsAnalysisWidget readWidget = analysisWidget.getReadsAnalysisWidget();
-					readVisualizeWidget = new ClusteredBarChartWidget(readWidget.getSelectedSamples(),
-							readWidget.getSelectedRank(), false, currentLang);
+					ReadsAnalysisWidget readWidget = analysisWidget.getReadsAnalysisWidget(tabIndex);
+					readVisualizeWidget = new ClusteredBarChartWidget(expTag, readWidget.getSelectedSamples(),
+							readWidget.getSelectedRank(), readWidget.getExperimentMethod(), false, currentLang);
 				}
 				
 				Iterator<BaseWidget> iterator = widgetTrails.iterator();
@@ -372,15 +435,28 @@ public class Manta extends BasePage {
 				
 				subsetAnalysisWidget = null;
 			}
-		} else if (value.equals(GutFloraConstant.NAVI_LINK_VIEW_HEATMAP)) {
+		} else if (value.startsWith(GutFloraConstant.NAVI_LINK_VIEW_HEATMAP)) {
 			if (analysisWidget == null) {
 				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
 				return;
 			} else {
+				int tabIndex;
+				String expTag;
+				if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+					tabIndex = GutFloraConstant.EXPERIMENT_METHOD_16S - 1;
+					expTag = "16S";
+				} else if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN)) {
+					tabIndex = GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN - 1;
+					expTag = "Shotgun";
+				} else {
+					// unexpected option, go back!
+					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+					return;
+				}
 				if (readVisualizeWidget == null) {
-					ReadsAnalysisWidget readWidget = analysisWidget.getReadsAnalysisWidget();
-					readVisualizeWidget = new MicrobiotaHeatmapWidget(readWidget.getSelectedSamples(),
-							readWidget.getSelectedRank(), false, currentLang);
+					ReadsAnalysisWidget readWidget = analysisWidget.getReadsAnalysisWidget(tabIndex);
+					readVisualizeWidget = new MicrobiotaHeatmapWidget(expTag, readWidget.getSelectedSamples(),
+							readWidget.getSelectedRank(), readWidget.getExperimentMethod(), false, currentLang);
 				}
 				
 				Iterator<BaseWidget> iterator = widgetTrails.iterator();
@@ -402,14 +478,28 @@ public class Manta extends BasePage {
 				
 				subsetAnalysisWidget = null;
 			}
-		} else if (value.equals(GutFloraConstant.NAVI_LINK_VIEW_PCOA)) {
+		} else if (value.startsWith(GutFloraConstant.NAVI_LINK_VIEW_PCOA)) {
 			if (analysisWidget == null) {
 				History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
 				return;
 			} else {
+				int tabIndex;
+				String expTag;
+				if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+					tabIndex = GutFloraConstant.EXPERIMENT_METHOD_16S - 1;
+					expTag = "16S";
+				} else if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN)) {
+					tabIndex = GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN - 1;
+					expTag = "Shotgun";
+				} else {
+					// unexpected option, go back!
+					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
+					return;
+				}
 				if (readVisualizeWidget == null) {
-					ReadsAnalysisWidget readWidget = analysisWidget.getReadsAnalysisWidget();
-					readVisualizeWidget = new PcoaAnalysisWidget(readWidget.getSelectedSamples(), false, currentLang);
+					ReadsAnalysisWidget readWidget = analysisWidget.getReadsAnalysisWidget(tabIndex);
+					readVisualizeWidget = new PcoaAnalysisWidget(expTag, readWidget.getSelectedSamples(),
+							readWidget.getExperimentMethod(), false, currentLang);
 				}
 				
 				Iterator<BaseWidget> iterator = widgetTrails.iterator();
