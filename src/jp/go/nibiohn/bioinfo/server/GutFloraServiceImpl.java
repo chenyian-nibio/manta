@@ -97,30 +97,14 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		try {
 			connection = ds.getConnection();
 
-			// TODO after adding the new columns, this part is no longer necessary. will be removed. 
-			Statement statement1 = connection.createStatement();
-			String sqlQuery1 = " select distinct mb.sample_id " + " from microbiota as mb "
-					+ " join project_sample as ps on ps.sample_id = mb.sample_id "
-					+ " join project as pj on pj.id = ps.project_id "
-					+ " join project_privilege as pp on pp.project_id = pj.id "
-					+ " join dbuser as du on du.id = pp.user_id " 
-					+ " where du.username = '" + currentUser + "'";
-			
-			ResultSet results1 = statement1.executeQuery(sqlQuery1);
-			Set<String> sampleSet = new HashSet<String>();
-			while (results1.next()) {
-				String string = results1.getString("sample_id");
-				sampleSet.add(string);
-			}
-			statement1.close();
-
 			String query_pjname = " pj.name as pj_name ";
 			if (lang.equals(GutFloraConstant.LANG_JP)) {
 				query_pjname = " pj.name_jp as pj_name ";
 			}
 
 			Statement statement = connection.createStatement();
-			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, " + query_pjname + " from sample as s "
+			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, s.has_metadata, s.has_16s, s.has_shotgun, " 
+					+ query_pjname + " from sample as s "
 					+ " join project_sample as ps on ps.sample_id = s.id "
 					+ " join project as pj on pj.id = ps.project_id "
 					+ " join project_privilege as pp on pp.project_id = pj.id "
@@ -132,8 +116,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			while (results.next()) {
 				String sampleId = results.getString("id");
 				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
-						results.getString("pj_name"), results.getDate("exp_date"), sampleSet.contains(sampleId)));
-
+						results.getString("pj_name"), results.getDate("exp_date"), results.getBoolean("has_metadata"),
+						results.getBoolean("has_16s"), results.getBoolean("has_shotgun")));
 			}
 			statement.close();
 			
@@ -412,7 +396,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			// no need to check if reads data is available, since the request is from the cluster
 			
 			Statement statement = connection.createStatement();
-			String sqlQuery = " select id, age, gender, exp_date from sample where id in ('"
+			String sqlQuery = " select id, age, gender, exp_date, s.has_metadata, s.has_16s, s.has_shotgun "
+					+ " from sample where id in ('"
 					+ StringUtils.join(ids, "','") + "')";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
@@ -420,7 +405,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			while (results.next()) {
 				String sampleId = results.getString("id");
 				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
-						results.getDate("exp_date"), true));
+						results.getDate("exp_date"), results.getBoolean("has_metadata"),
+						results.getBoolean("has_16s"), results.getBoolean("has_shotgun")));
 			}
 			statement.close();
 			
@@ -458,7 +444,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 
 			Statement statement = connection.createStatement();
-			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, " + query_pjname
+			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, s.has_metadata, s.has_16s, s.has_shotgun, "
+					+ query_pjname
 					+ " from sample as s "
 					+ " join project_sample as ps on ps.sample_id = s.id "
 					+ " join project as pj on pj.id = ps.project_id "
@@ -469,7 +456,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			while (results.next()) {
 				ret = new SampleEntry(results.getString("id"), results.getInt("age"),
 						results.getString("gender"), results.getString("pj_name"),
-						results.getDate("exp_date"), null);
+						results.getDate("exp_date"), results.getBoolean("has_metadata"),
+						results.getBoolean("has_16s"), results.getBoolean("has_shotgun"));
 			}
 			statement.close();
 			

@@ -11,7 +11,6 @@ public class SampleEntry implements IsSerializable {
 	private String gender;
 	private String project;
 	private Date expDate;
-	private Boolean hasReads;
 	private Boolean hasMetadata;
 	private Boolean has16S;
 	private Boolean hasShotgun;
@@ -19,23 +18,29 @@ public class SampleEntry implements IsSerializable {
 	public SampleEntry() {
 	}
 
-	public SampleEntry(String sampleId, Integer age, String gender, Date expDate, Boolean hasReads) {
+	public SampleEntry(String sampleId, Integer age, String gender, Date expDate, Boolean hasMetadata, Boolean has16s,
+			Boolean hasShotgun) {
 		super();
 		this.sampleId = sampleId;
 		this.age = age;
 		this.gender = gender;
 		this.expDate = expDate;
-		this.hasReads = hasReads;
+		this.hasMetadata = hasMetadata;
+		this.has16S = has16s;
+		this.hasShotgun = hasShotgun;
 	}
-	
-	public SampleEntry(String sampleId, Integer age, String gender, String project, Date expDate, Boolean hasReads) {
+
+	public SampleEntry(String sampleId, Integer age, String gender, String project, Date expDate, Boolean hasMetadata,
+			Boolean has16s, Boolean hasShotgun) {
 		super();
 		this.sampleId = sampleId;
 		this.age = age;
 		this.gender = gender;
 		this.project = project;
 		this.expDate = expDate;
-		this.hasReads = hasReads;
+		this.hasMetadata = hasMetadata;
+		this.has16S = has16s;
+		this.hasShotgun = hasShotgun;
 	}
 
 	public String getSampleId() {
@@ -58,12 +63,20 @@ public class SampleEntry implements IsSerializable {
 		return expDate;
 	}
 
-	public Boolean hasReads() {
-		return hasReads;
+	public Boolean hasMetadata() {
+		return hasMetadata;
 	}
 
-	public void setProject(String project) {
-		this.project = project;
+	public Boolean getHas16S() {
+		return has16S;
+	}
+
+	public Boolean getHasShotgun() {
+		return hasShotgun;
+	}
+
+	public Boolean hasReads() {
+		return hasMetadata && (has16S || hasShotgun);
 	}
 	
 }
