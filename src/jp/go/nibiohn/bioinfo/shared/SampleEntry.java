@@ -67,11 +67,11 @@ public class SampleEntry implements IsSerializable {
 		return hasMetadata;
 	}
 
-	public Boolean getHas16S() {
+	public Boolean has16S() {
 		return has16S;
 	}
 
-	public Boolean getHasShotgun() {
+	public Boolean hasShotgun() {
 		return hasShotgun;
 	}
 

@@ -401,3 +401,48 @@ div.taxonNaviLink:hover {
 	font-weight: bold;
 	font-size: 16px;
 }
+.datalabel {
+	display: inline-block;
+	padding: 2px 10px;
+	font-size: 10px;
+	font-weight: 400;
+	line-height: 1.42857143;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: middle;
+	user-select: none;
+	background-image: none;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	margin-right: 6px;
+}
+.bluelabel {
+	color: #fff;
+	background-color: #337ab7;
+	border-color: #2e6da4;
+}
+.greenlabel {
+	color: #fff;
+	background-color: #5cb85c;
+	border-color: #4cae4c;
+}
+.cyanlabel {
+	color: #fff;
+	background-color: #5bc0de;
+	border-color: #46b8da;
+}
+.yellowlabel {
+	color: #fff;
+	background-color: #f0ad4e;
+	border-color: #eea236;
+}
+.redlabel {
+	color: #fff;
+	background-color: #d9534f;
+	border-color: #d43f3a;
+}
+.nodata {
+	color: #fff;
+	background-color: #c0c0c0;
+	border-color: #a0a0a0;
+}

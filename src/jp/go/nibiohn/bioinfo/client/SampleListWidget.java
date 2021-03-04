@@ -7,18 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jp.go.nibiohn.bioinfo.client.generic.DisableableCheckboxCell;
-import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
-import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
-import jp.go.nibiohn.bioinfo.shared.GutFloraLanguagePack;
-import jp.go.nibiohn.bioinfo.shared.SampleEntry;
-
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -45,6 +42,12 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SetSelectionModel;
+
+import jp.go.nibiohn.bioinfo.client.generic.DisableableCheckboxCell;
+import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
+import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
+import jp.go.nibiohn.bioinfo.shared.GutFloraLanguagePack;
+import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 
 public class SampleListWidget extends BaseWidget {
 
@@ -344,26 +347,57 @@ public class SampleListWidget extends BaseWidget {
 			}
 		});
 
-		TextColumn<SampleEntry> colProject = new TextColumn<SampleEntry>() {
-			
+//		TextColumn<SampleEntry> colProject = new TextColumn<SampleEntry>() {
+//			
+//			@Override
+//			public String getValue(SampleEntry object) {
+//				return object.getProject();
+//			}
+//		};
+//		if (currentLang.equals(GutFloraConstant.LANG_JP)) {
+//			cellTable.addColumn(colProject, "コホート");
+//		} else {
+//			cellTable.addColumn(colProject, "Cohort name");
+//		}
+//		colProject.setSortable(true);
+//		sortHandler.setComparator(colProject, new Comparator<SampleEntry>() {
+//			
+//			@Override
+//			public int compare(SampleEntry o1, SampleEntry o2) {
+//				return o1.getProject().compareTo(o2.getProject());
+//			}
+//		});
+
+		Column<SampleEntry, SafeHtml> colAvailability = new Column<SampleEntry, SafeHtml>(new SafeHtmlCell()) {
+
 			@Override
-			public String getValue(SampleEntry object) {
-				return object.getProject();
+			public SafeHtml getValue(SampleEntry object) {
+				SafeHtmlBuilder sb = new SafeHtmlBuilder();
+				sb.appendHtmlConstant("<div>");
+				if (object.has16S()) {
+					sb.appendHtmlConstant("<span class=\"datalabel bluelabel\">16S</span>");
+				} else {
+					sb.appendHtmlConstant("<span class=\"datalabel nodata\">16S</span>");
+				}
+				if (object.hasShotgun()) {
+					sb.appendHtmlConstant("<span class=\"datalabel greenlabel\">Shotgun</span>");
+				} else {
+					sb.appendHtmlConstant("<span class=\"datalabel nodata\">Shotgun</span>");
+				}
+				if (object.hasMetadata()) {
+					sb.appendHtmlConstant("<span class=\"datalabel cyanlabel\">Meta data</span>");
+				} else {
+					sb.appendHtmlConstant("<span class=\"datalabel nodata\">Meta data</span>");
+				}
+				sb.appendHtmlConstant("</div>");
+				return sb.toSafeHtml();
 			}
 		};
 		if (currentLang.equals(GutFloraConstant.LANG_JP)) {
-			cellTable.addColumn(colProject, "コホート");
+			cellTable.addColumn(colAvailability, "収録データ");
 		} else {
-			cellTable.addColumn(colProject, "Cohort name");
+			cellTable.addColumn(colAvailability, "Data availability");
 		}
-		colProject.setSortable(true);
-		sortHandler.setComparator(colProject, new Comparator<SampleEntry>() {
-			
-			@Override
-			public int compare(SampleEntry o1, SampleEntry o2) {
-				return o1.getProject().compareTo(o2.getProject());
-			}
-		});
 
 		cellTable.getColumnSortList().push(colSampleId);
 
