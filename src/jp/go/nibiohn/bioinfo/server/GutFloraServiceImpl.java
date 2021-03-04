@@ -540,6 +540,25 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return sampleIdList;
 	}
 
+	private List<String> getSortedSampleList(Set<SampleEntry> selectedSamples, Integer experimentMethod) {
+		List<String> sampleIdList = new ArrayList<String>();
+		if (GutFloraConstant.EXPERIMENT_METHOD_16S.equals(experimentMethod)) {
+			for (SampleEntry se : selectedSamples) {
+				if (se.has16S()) {
+					sampleIdList.add(se.getSampleId());
+				}
+			}
+		} else {
+			for (SampleEntry se : selectedSamples) {
+				if (se.hasShotgun()) {
+					sampleIdList.add(se.getSampleId());
+				}
+			}
+		}
+		Collections.sort(sampleIdList);
+		return sampleIdList;
+	}
+
 	@Override
 	public GutFloraAnalysisData getReadsAnalysisData(Set<SampleEntry> selectedSamples, String rank, Integer experimentMethod) {
 		return getReadsAnalysisData(selectedSamples, rank, experimentMethod, GutFloraConstant.DEFAULT_NUM_OF_COLUMNS);
@@ -991,7 +1010,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		// suppose the minimal display number is 10
 		int minimalDisplayNumber = 10;
 		
-		List<String> sampleIdList = getSortedSampleList(selectedSamples);
+		List<String> sampleIdList = getSortedSampleList(selectedSamples, experimentMethod);
 		String q0Rank = rank;
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -1179,7 +1198,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	public VisualizationtResult getReadsClusteredBarChart(Set<SampleEntry> selectedSamples, String selectedRank,
 			String parentRank, String parentTaxonId, Integer experimentMethod, int distanceType, int linkageType, int numOfColumns,
 			Map<Integer, DendrogramCache> cacheMap) {
-		List<String> sampleIdList = getSortedSampleList(selectedSamples);
+		List<String> sampleIdList = getSortedSampleList(selectedSamples, experimentMethod);
 		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -3370,7 +3389,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		// suppose the minimal display number is 10
 		int minimalDisplayNumber = 10;
 		
-		List<String> sampleIdList = getSortedSampleList(selectedSamples);
+		List<String> sampleIdList = getSortedSampleList(selectedSamples, experimentMethod);
 		String q0Rank = rank;
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -3539,9 +3558,15 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				int x = shiftX + j * cellWidth;
 				int y = shiftY + topLabelHeight + i * cellHeight;
 				
-				Double readPct = microbiotaPctMap.get(sampleLabel).get(taxonLabel);
-				if (readPct == null) {
+				Double readPct;
+				Map<String, Double> taxPctMap = microbiotaPctMap.get(sampleLabel);
+				if (taxPctMap == null) {
 					readPct = Double.valueOf("0");
+				} else {
+					readPct = taxPctMap.get(taxonLabel);
+					if (readPct == null) {
+						readPct = Double.valueOf("0");
+					}
 				}
 				int baseColor = 224;
 				int rValue = baseColor + (int) (readPct.doubleValue() / 100 * (255- baseColor));
@@ -3666,8 +3691,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Statement statement3 = connection.createStatement();
 			String sqlQuery3 = " select * from sample_all_distance " + " where sample_id in (" + sampleIdString + ") "
 					+ " and distance_type_id = " + distanceType + " and method_id = " + experimentMethod;
-			
-			System.out.println(sqlQuery3);
 			
 			ResultSet results3 = statement3.executeQuery(sqlQuery3);
 			while (results3.next()) {

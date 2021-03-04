@@ -288,9 +288,20 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 
 		initWidget(thisWidget);
 
-		for (SampleEntry sampleEntry : selectedSamples) {
-			sampleIdList.add(sampleEntry.getSampleId());
+		if (GutFloraConstant.EXPERIMENT_METHOD_16S.equals(experimentMethod)) {
+			for (SampleEntry se : selectedSamples) {
+				if (se.has16S()) {
+					sampleIdList.add(se.getSampleId());
+				}
+			}
+		} else {
+			for (SampleEntry se : selectedSamples) {
+				if (se.hasShotgun()) {
+					sampleIdList.add(se.getSampleId());
+				}
+			}
 		}
+
 		loadingPopupPanel.show();
 		service.getPCoAResult(sampleIdList, this.experimentMethod, Integer.valueOf(sampleDistanceListBox.getSelectedValue()),
 				new AsyncCallback<PcoaResult>() {
