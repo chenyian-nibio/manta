@@ -65,27 +65,36 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	private LinkageType[] linkageTypes = new LinkageType[] { LinkageType.AVERAGE, LinkageType.COMPLETE,
 			LinkageType.SINGLE };
 	
-	private HikariConfig config;
+	private HikariDataSource hikariDataSource;
 	
-	private HikariDataSource getHikariDataSource() {
-		if (config == null) {
-			Properties props = new Properties();
-			try {
-				Class.forName("org.postgresql.Driver");
-				props.load(GutFloraServiceImpl.class.getClassLoader().getResourceAsStream(GutFloraConfig.PGSQL_PROP_FILE));
-			} catch (IOException e) {
-				throw new RuntimeException("Problem loading properties '" + GutFloraConfig.PGSQL_PROP_FILE + "'", e);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			config = new HikariConfig(props);
+	public GutFloraServiceImpl() {
+		super();
+		initHikariCP();
+	}
+	
+	private void initHikariCP() {
+		Properties props = new Properties();
+		try {
+			Class.forName("org.postgresql.Driver");
+			props.load(GutFloraServiceImpl.class.getClassLoader().getResourceAsStream(GutFloraConfig.PGSQL_PROP_FILE));
+		} catch (IOException e) {
+			throw new RuntimeException("Problem loading properties '" + GutFloraConfig.PGSQL_PROP_FILE + "'", e);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
 		}
-		HikariDataSource ds = new HikariDataSource(config);
+		HikariConfig config = new HikariConfig(props);
+		hikariDataSource = new HikariDataSource(config);
 		// somehow these properties wasn't able to set in the properties file
-		ds.setMaximumPoolSize(20);
-		ds.setMinimumIdle(20);
-		ds.setMaxLifetime(600000);
-		return ds;
+		hikariDataSource.setMaximumPoolSize(20);
+		hikariDataSource.setMinimumIdle(20);
+		hikariDataSource.setMaxLifetime(600000);
+	}
+
+	private HikariDataSource getHikariDataSource() {
+		if (hikariDataSource == null) {
+			initHikariCP();
+		}
+		return hikariDataSource;
 	}
 	
 	@Override
@@ -122,7 +131,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement.close();
 			
 			connection.close();
-			ds.close();
 			return ret;
 			
 		} catch (SQLException e) {
@@ -136,7 +144,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -195,7 +202,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement.close();
 			
 			connection.close();
-			ds.close();
 			return ret;
 			
 		} catch (SQLException e) {
@@ -209,7 +215,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -273,7 +278,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement.close();
 			
 			connection.close();
-			ds.close();
 			return ret;
 			
 		} catch (SQLException e) {
@@ -287,7 +291,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -318,7 +321,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement.close();
 			
 			connection.close();
-			ds.close();
 			return ret;
 			
 		} catch (SQLException e) {
@@ -332,7 +334,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -364,7 +365,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement.close();
 			
 			connection.close();
-			ds.close();
 			return ret;
 			
 		} catch (SQLException e) {
@@ -378,7 +378,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -411,7 +410,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement.close();
 			
 			connection.close();
-			ds.close();
 			return ret;
 			
 		} catch (SQLException e) {
@@ -425,7 +423,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -462,7 +459,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement.close();
 			
 			connection.close();
-			ds.close();
 			return ret;
 			
 		} catch (SQLException e) {
@@ -476,7 +472,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -513,7 +508,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement1.close();
 			
 			connection.close();
-			ds.close();
 			
 			// temporary use a fix order for kingdom categories
 			List<String> rhList = Arrays.asList("Bacteria", "Viruses", "Archaea", "Eukaryota", "Unclassified");
@@ -533,7 +527,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -574,7 +567,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 						+ " join taxonomy as t on t.id = " + rank + "_id "
 						+ " where sample_id in (" + sampleIdString + ") "
 						+ " and " + rank + "_id is not null " + " and method_id = " + experimentMethod
-						+ "group by " + rank + "_id, t.name order by sum(read_num) desc ";
+						+ " group by " + rank + "_id, t.name order by sum(read_num) desc ";
 				
 				ResultSet results0 = statement0.executeQuery(sqlQuery0);
 				List<String> rankNameList = new ArrayList<String>();
@@ -642,7 +635,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				statement2.close();
 
 				connection.close();
-				ds.close();
 				
 				List<String> rhList = new ArrayList<String>();
 				for (String tid: topNRankIdList) {
@@ -665,7 +657,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			ds.close();
 			
 		}
 
@@ -797,7 +788,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			// add bar chart
 			// shiftX depend on the sample id length
@@ -843,7 +833,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -942,7 +931,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			List<String> rhList = new ArrayList<String>();
 			for (String tid: topNRankIdList) {
@@ -993,7 +981,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -1123,7 +1110,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			List<String> sequence;
 			String svgDendrogram;
@@ -1281,7 +1267,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			List<String> rhList = new ArrayList<String>();
 			for (String tid: topNRankIdList) {
@@ -1600,7 +1585,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 
 			connection.close();
-			ds.close();
 			
 			GutFloraAnalysisData ret = new GutFloraAnalysisData(rows, sampleIdList);
 			ret.setReadsData(selectedcolumns, null);
@@ -1617,7 +1601,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -1729,7 +1712,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			List<String> phList = new ArrayList<String>();
 			for (int i = 0; i < profileNameList.size() && 
@@ -1754,7 +1736,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -1838,7 +1819,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			GutFloraAnalysisData ret = new GutFloraAnalysisData(rows, sampleIdList);
 			ret.setProfilesData(selectedcolumns, null, numericParameters);
@@ -1856,7 +1836,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -1890,7 +1869,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement0.close();
 			
 			connection.close();
-			ds.close();
 			
 			return rankNameList;
 			
@@ -1905,7 +1883,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		return null;
 	}
 
@@ -1945,7 +1922,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement0.close();
 			
 			connection.close();
-			ds.close();
 			
 			return profileNameList;
 			
@@ -1960,7 +1936,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -2000,7 +1975,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement0.close();
 			
 			connection.close();
-			ds.close();
 			
 			return profileNameList;
 			
@@ -2015,7 +1989,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -2054,7 +2027,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement.close();
 			
 			connection.close();
-			ds.close();
 			
 			return ret;
 			
@@ -2069,7 +2041,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -2110,7 +2081,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement0.close();
 			
 			connection.close();
-			ds.close();
 			
 			return profileNameList;
 			
@@ -2125,7 +2095,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -2156,7 +2125,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement1.close();
 
 			connection.close();
-			ds.close();
 			return new PairListData(getOriginalPctList(sampleIdList, readPctMap));
 			
 		} catch (SQLException e) {
@@ -2170,7 +2138,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -2202,7 +2169,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement1.close();
 			
 			connection.close();
-			ds.close();
 			return new PairListData(getOriginalPctList(sampleIdList, readPctMap));
 			
 		} catch (SQLException e) {
@@ -2216,7 +2182,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -2317,7 +2282,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 
 			return new PairListData(getOriginalList(sampleIdList, readMap, false));
 			
@@ -2332,7 +2296,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -2363,7 +2326,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement1.close();
 			
 			connection.close();
-			ds.close();
 			
 			PairListData ret = new PairListData(getOriginalList(sampleIdList, readMap, false));
 			return ret;
@@ -2379,7 +2341,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -2423,7 +2384,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			List<String> orderedList = new ArrayList<String>();
 			for (int i = 0; i < sampleIdList.size(); i++) {
@@ -2447,7 +2407,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -2636,7 +2595,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			double[][] referenceList = getOrderedMatrix(sampleIdList, readMap);
 			
@@ -2681,7 +2639,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -2770,7 +2727,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			double[] referenceList = getOrderedList(sampleIdList, readMap);
 			
@@ -2812,7 +2768,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -2871,7 +2826,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement1.close();
 
 			connection.close();
-			ds.close();
 
 			double[] referenceList = getOrderedList(sampleIdList, readMap);
 			
@@ -2913,7 +2867,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -3003,7 +2956,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement2.close();
 			
 			connection.close();
-			ds.close();
 			
 			double[] referenceList = getOrderedList(sampleIdList, readMap);
 			
@@ -3049,7 +3001,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -3088,7 +3039,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			
 			connection.close();
-			ds.close();
 			
 			return readMap;
 			
@@ -3103,7 +3053,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return null;
 	}
@@ -3147,9 +3096,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
-			if (ds != null) {
-				ds.close();
-			}
 		}
 		return diverMap;
 	}
@@ -3186,9 +3132,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 			} catch (SQLException e1) {
 				e1.printStackTrace();
-			}
-			if (ds != null) {
-				ds.close();
 			}
 		}
 		return ret;
@@ -3250,9 +3193,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
-				if (ds != null) {
-					ds.close();
-				}
 			}
 		}
 		return ret;
@@ -3288,9 +3228,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 				}
 			} catch (SQLException e1) {
 				e1.printStackTrace();
-			}
-			if (ds != null) {
-				ds.close();
 			}
 		}
 		return ret;
@@ -3395,7 +3332,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement1.close();
 			
 			connection.close();
-			ds.close();
 			// shiftX depend on the sample id length
 			int maxSampleLength = getMaxItemLength(sampleIdList);
 			String heatMap = createSvgHeatMap(rows, sampleIdList, selectedcolumns, 150 + maxSampleLength * 10, 0, 200,
@@ -3424,7 +3360,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -3524,7 +3459,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement1.close();
 			
 			connection.close();
-			ds.close();
 			
 			List<String> sequence;
 			String svgDendrogram;
@@ -3584,7 +3518,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -3770,9 +3703,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
-			if (ds != null) {
-				ds.close();
-			}
 		}
 		return ret;
 	}
@@ -3936,7 +3866,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			statement0.close();
 			
 			connection.close();
-			ds.close();
 			
 			return profileNameList;
 			
@@ -3951,7 +3880,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 		
 		return null;
 	}
@@ -4063,7 +3991,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 			
 			connection.close();
-			ds.close();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -4076,7 +4003,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		double interval = 0;
 		double max = 0;
@@ -4352,7 +4278,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			ret = results.next();
 			
 			connection.close();
-			ds.close();
 
 			return ret;
 			
@@ -4367,7 +4292,6 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		ds.close();
 
 		return ret;
 	}
