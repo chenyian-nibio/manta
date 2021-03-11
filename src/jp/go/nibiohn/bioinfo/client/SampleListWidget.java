@@ -45,6 +45,7 @@ import com.google.gwt.view.client.SetSelectionModel;
 
 import jp.go.nibiohn.bioinfo.client.generic.DisableableCheckboxCell;
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.GutFloraLanguagePack;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
@@ -65,16 +66,17 @@ public class SampleListWidget extends BaseWidget {
 	
 	private List<SampleEntry> allSamples;
 
-	public SampleListWidget(final List<SampleEntry> result, String lang) {
+	public SampleListWidget(final List<SampleEntry> result, DbUser currentUser, String lang) {
 		super("Select samples", lang + GutFloraConstant.NAVI_LINK_SAMPLE);
 		this.currentLang = lang;
 		this.allSamples = result;
+		this.currentUser = currentUser;
 		
 		Map<String, String> displayMap = GutFloraLanguagePack.DISPLAY_MAP.get(currentLang);
 
 		int i = 0;
 		for (SampleEntry se : result) {
-			if (se.hasReads()) {
+			if (isValidSample(currentUser, se)) {
 				i++;
 			}
 		}
@@ -108,7 +110,7 @@ public class SampleListWidget extends BaseWidget {
 			@Override
 			public void onClick(ClickEvent event) {
 				for (SampleEntry se : result) {
-					if (se.hasReads()) {
+					if (isValidSample(SampleListWidget.this.currentUser, se)) {
 						selectionModel.setSelected(se, true);
 						// TODO
 						infoMessage(messageForSelectedSamples(selectionModel.getSelectedSet().size()));
@@ -145,7 +147,7 @@ public class SampleListWidget extends BaseWidget {
 			@Override
 			public void onClick(ClickEvent event) {
 				for (SampleEntry se : cellTable.getVisibleItems()) {
-					if (se.hasReads()) {
+					if (isValidSample(SampleListWidget.this.currentUser, se)) {
 						selectionModel.setSelected(se, true);
 						infoMessage(messageForSelectedSamples(selectionModel.getSelectedSet().size()));
 					}
@@ -165,7 +167,7 @@ public class SampleListWidget extends BaseWidget {
 			@Override
 			public void onClick(ClickEvent event) {
 				for (SampleEntry se : cellTable.getVisibleItems()) {
-					if (se.hasReads()) {
+					if (isValidSample(SampleListWidget.this.currentUser, se)) {
 						selectionModel.setSelected(se, false);
 						infoMessage(messageForSelectedSamples(selectionModel.getSelectedSet().size()));
 					}
@@ -224,10 +226,10 @@ public class SampleListWidget extends BaseWidget {
 		Column<SampleEntry, Integer> checkColumn = new Column<SampleEntry, Integer>(new DisableableCheckboxCell(true,
 				false)) {
 			@Override
-			public Integer getValue(SampleEntry object) {
+			public Integer getValue(SampleEntry se) {
 				// Get the value from the selection model.
-				if (object.hasReads()) {
-					return selectionModel.isSelected(object) ? 1 : -1;
+				if (isValidSample(currentUser, se)) {
+					return selectionModel.isSelected(se) ? 1 : -1;
 				}
 				return 0;
 			}
@@ -244,7 +246,7 @@ public class SampleListWidget extends BaseWidget {
 			public void update(Boolean value) {
 				if (value) {
 					for (SampleEntry se : result) {
-						if (se.hasReads()) {
+						if (isValidSample(currentUser, se)) {
 							selectionModel.setSelected(se, true);
 							infoMessage(messageForSelectedSamples(selectionModel.getSelectedSet().size()));
 						}
@@ -266,9 +268,9 @@ public class SampleListWidget extends BaseWidget {
 			}
 
 			@Override
-			public String getCellStyleNames(Context context, SampleEntry object) {
-				if (object.hasReads()) {
-					return super.getCellStyleNames(context, object);
+			public String getCellStyleNames(Context context, SampleEntry se) {
+				if (isValidSample(currentUser, se)) {
+					return super.getCellStyleNames(context, se);
 				} else {
 					return "disabledSample";
 				}
@@ -374,12 +376,12 @@ public class SampleListWidget extends BaseWidget {
 			public SafeHtml getValue(SampleEntry object) {
 				SafeHtmlBuilder sb = new SafeHtmlBuilder();
 				sb.appendHtmlConstant("<div>");
-				if (object.has16S()) {
+				if (object.has16SData() && currentUser.canSee16sData()) {
 					sb.appendHtmlConstant("<span class=\"datalabel bluelabel\">16S</span>");
 				} else {
 					sb.appendHtmlConstant("<span class=\"datalabel nodata\">16S</span>");
 				}
-				if (object.hasShotgun()) {
+				if (object.hasShotgunData() && currentUser.canSeeShotgunData()) {
 					sb.appendHtmlConstant("<span class=\"datalabel greenlabel\">Shotgun</span>");
 				} else {
 					sb.appendHtmlConstant("<span class=\"datalabel nodata\">Shotgun</span>");
@@ -524,7 +526,7 @@ public class SampleListWidget extends BaseWidget {
 			public void onClick(ClickEvent event) {
 				Set<String> idSet = new HashSet<String>(Arrays.asList(processQueryString(textArea.getText())));
 				for (SampleEntry se : allSamples) {
-					if (se.hasReads() && idSet.contains(se.getSampleId())) {
+					if (isValidSample(currentUser, se) && idSet.contains(se.getSampleId())) {
 						selectionModel.setSelected(se, true);
 					}
 				}
@@ -567,4 +569,7 @@ public class SampleListWidget extends BaseWidget {
 		return ids;
 	}
 
+	private boolean isValidSample (DbUser user, SampleEntry se) {
+		return se.hasMetadata() && ((se.has16SData() && user.canSee16sData()) || se.hasShotgunData() && user.canSeeShotgunData());
+	}
 }

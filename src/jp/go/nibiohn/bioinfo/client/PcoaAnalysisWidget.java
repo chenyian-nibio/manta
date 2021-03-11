@@ -290,13 +290,13 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 
 		if (GutFloraConstant.EXPERIMENT_METHOD_16S.equals(experimentMethod)) {
 			for (SampleEntry se : selectedSamples) {
-				if (se.has16S()) {
+				if (se.has16SData()) {
 					sampleIdList.add(se.getSampleId());
 				}
 			}
 		} else {
 			for (SampleEntry se : selectedSamples) {
-				if (se.hasShotgun()) {
+				if (se.hasShotgunData()) {
 					sampleIdList.add(se.getSampleId());
 				}
 			}

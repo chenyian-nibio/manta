@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.DendrogramCache;
 import jp.go.nibiohn.bioinfo.shared.GutFloraAnalysisData;
 import jp.go.nibiohn.bioinfo.shared.PairListData;
@@ -13,8 +16,6 @@ import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 import jp.go.nibiohn.bioinfo.shared.TaxonEntry;
 import jp.go.nibiohn.bioinfo.shared.VisualizationtResult;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * The async counterpart of <code>GutFloraService</code>.
@@ -107,7 +108,7 @@ public interface GutFloraServiceAsync {
 
 	void getSampleDiversity(String sampleId, Integer experimentMethod, AsyncCallback<List<String>> callback);
 
-	void getCurrentUser(AsyncCallback<String> callback);
+	void getCurrentUser(AsyncCallback<DbUser> callback);
 
 	void loginUser(String username, String password, AsyncCallback<Boolean> callback);
 

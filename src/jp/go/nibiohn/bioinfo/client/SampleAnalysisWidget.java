@@ -5,6 +5,7 @@ import java.util.Set;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
@@ -20,9 +21,10 @@ public class SampleAnalysisWidget extends BaseWidget {
 
 	private TabPanel tabPanel;
 
-	public SampleAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
+	public SampleAnalysisWidget(Set<SampleEntry> selectedSamples, DbUser currentUser, String lang) {
 		super("Analysis", lang + GutFloraConstant.NAVI_LINK_ANALYSIS);
 		this.selectedSamples = selectedSamples;
+		this.currentUser = currentUser;
 		this.currentLang = lang;
 		tabPanel = loadTabPanel(selectedSamples);
 	    initWidget(tabPanel);
@@ -40,8 +42,12 @@ public class SampleAnalysisWidget extends BaseWidget {
 	private TabPanel loadTabPanel(Set<SampleEntry> selectedSamples) {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
-		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
-		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
+		if (currentUser.canSee16sData()) {
+			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+		}
+		if (currentUser.canSeeShotgunData()) {
+			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
+		}
 		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
 		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.add(new CategoricalAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[3], false);
@@ -66,6 +72,7 @@ public class SampleAnalysisWidget extends BaseWidget {
 		return tabPanel;
 	}
 
+	// TODO
 	public SearchResultData getCorrectionResults(int tabIndex) {
 		if (tabPanel != null) {
 			Widget widget = tabPanel.getWidget(tabIndex);
@@ -76,8 +83,19 @@ public class SampleAnalysisWidget extends BaseWidget {
 		return null;
 	}
 	
-	public ReadsAnalysisWidget getReadsAnalysisWidget(int tabIndex) {
-		return (ReadsAnalysisWidget) tabPanel.getWidget(tabIndex);
+	public ReadsAnalysisWidget getReadsAnalysisWidgetByExpMethod(Integer expMethod) {
+		if (tabPanel != null) {
+			for (int i = 0; i < tabPanel.getWidgetCount(); i++) {
+				Widget widget = tabPanel.getWidget(i);
+				if (widget instanceof ReadsAnalysisWidget) {
+					ReadsAnalysisWidget ret = (ReadsAnalysisWidget) widget;
+					if (expMethod.equals(ret.getExperimentMethod())) {
+						return ret;
+					}
+				}
+			}
+		}
+		return null;
 	}
 	
 	public Set<SampleEntry> getSelectedSamples() {

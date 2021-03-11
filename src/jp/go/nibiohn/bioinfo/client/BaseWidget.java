@@ -8,6 +8,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
+import jp.go.nibiohn.bioinfo.shared.DbUser;
+
 public abstract class BaseWidget extends Composite {
 	protected static final String SERVER_ERROR = "An error occurred while attempting to contact the server. "
 			+ "Please check your network connection and try again.";
@@ -26,7 +28,9 @@ public abstract class BaseWidget extends Composite {
 
 	// default is English
 	protected String currentLang = "en_";
-	
+
+	protected DbUser currentUser;
+
 	public BaseWidget(String name, String link) {
 		this.name = name;
 		this.link = link;

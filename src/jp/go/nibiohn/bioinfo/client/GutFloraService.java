@@ -7,6 +7,7 @@ import java.util.Set;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.DendrogramCache;
 import jp.go.nibiohn.bioinfo.shared.GutFloraAnalysisData;
 import jp.go.nibiohn.bioinfo.shared.PairListData;
@@ -95,7 +96,7 @@ public interface GutFloraService extends RemoteService {
 
 	List<String> getSampleDiversity(String sampleId, Integer experimentMethod);
 	
-	String getCurrentUser();
+	DbUser getCurrentUser();
 
 	boolean loginUser(String username, String password);
 

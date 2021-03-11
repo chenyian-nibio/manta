@@ -11,9 +11,9 @@ public class SampleEntry implements IsSerializable {
 	private String gender;
 	private String project;
 	private Date expDate;
-	private Boolean hasMetadata;
-	private Boolean has16S;
-	private Boolean hasShotgun;
+	private boolean hasMetadata;
+	private boolean has16S;
+	private boolean hasShotgun;
 	
 	public SampleEntry() {
 	}
@@ -63,20 +63,16 @@ public class SampleEntry implements IsSerializable {
 		return expDate;
 	}
 
-	public Boolean hasMetadata() {
+	public boolean hasMetadata() {
 		return hasMetadata;
 	}
 
-	public Boolean has16S() {
+	public boolean has16SData() {
 		return has16S;
 	}
 
-	public Boolean hasShotgun() {
+	public boolean hasShotgunData() {
 		return hasShotgun;
 	}
 
-	public Boolean hasReads() {
-		return hasMetadata && (has16S || hasShotgun);
-	}
-	
 }

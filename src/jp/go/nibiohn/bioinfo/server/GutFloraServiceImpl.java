@@ -42,6 +42,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import jp.go.nibiohn.bioinfo.client.GutFloraService;
 import jp.go.nibiohn.bioinfo.server.clustering.Dendrogram;
 import jp.go.nibiohn.bioinfo.server.clustering.HierarchicalClustering.LinkageType;
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.DendrogramCache;
 import jp.go.nibiohn.bioinfo.shared.GutFloraAnalysisData;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConfig;
@@ -544,13 +545,13 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		List<String> sampleIdList = new ArrayList<String>();
 		if (GutFloraConstant.EXPERIMENT_METHOD_16S.equals(experimentMethod)) {
 			for (SampleEntry se : selectedSamples) {
-				if (se.has16S()) {
+				if (se.has16SData()) {
 					sampleIdList.add(se.getSampleId());
 				}
 			}
 		} else {
 			for (SampleEntry se : selectedSamples) {
-				if (se.hasShotgun()) {
+				if (se.hasShotgunData()) {
 					sampleIdList.add(se.getSampleId());
 				}
 			}
@@ -3161,8 +3162,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	private String getUserForQuery() {
 		String currentUser = getCurrentUserFromSession();
 		if (currentUser == null) {
-			// TODO or use "guest"?
-			currentUser = "demo";
+			currentUser = GutFloraConstant.GUEST_USERNAME;
 		}
 		return currentUser;
 	}
@@ -3183,35 +3183,39 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	 * get display name (not account) 
 	 */
 	@Override
-	public String getCurrentUser() {
-		String ret = null;
+	public DbUser getCurrentUser() {
+		DbUser ret = null;
 		String username = getCurrentUserFromSession();
 		
-		if (username != null) {
-			HikariDataSource ds = getHikariDataSource();
-			Connection connection = null;
+		if (username == null) {
+			username = GutFloraConstant.GUEST_USERNAME;
+		}
+		HikariDataSource ds = getHikariDataSource();
+		Connection connection = null;
+		try {
+			connection = ds.getConnection();
+			
+			Statement statement = connection.createStatement();
+			String sqlQuery = "select name, r16s, shotgun from dbuser where username = '" + username + "'";
+			
+			ResultSet results = statement.executeQuery(sqlQuery);
+			if (results.next()) {
+				String name = results.getString("name");
+				boolean r16s = results.getBoolean("r16s");
+				boolean shotgun = results.getBoolean("shotgun");
+				ret = new DbUser(username, name, r16s, shotgun);
+			}
+			statement.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
 			try {
-				connection = ds.getConnection();
-				
-				Statement statement = connection.createStatement();
-				String sqlQuery = "select name from dbuser where username = '" + username + "'";
-				
-				ResultSet results = statement.executeQuery(sqlQuery);
-				if (results.next()) {
-					ret = results.getString("name");
+				if (connection != null) {
+					connection.close();
 				}
-				statement.close();
-				
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					if (connection != null) {
-						connection.close();
-					}
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
 			}
 		}
 		return ret;

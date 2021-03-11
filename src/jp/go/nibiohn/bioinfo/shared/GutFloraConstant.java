@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class GutFloraConstant {
 	
+	public static final String GUEST_USERNAME = "demo";
+	
 	// a short cut
 	public static final Map<String, Integer> RANK_MAP = new HashMap<String, Integer>(); 
 	static {
@@ -46,7 +48,7 @@ public class GutFloraConstant {
 
 	public static final String COLUMN_HEADER_OTHERS = "Others";
 
-	public static final String USER_NAME_GUEST = "Guest";
+//	public static final String USER_NAME_GUEST = "Guest";
 	
 	public static final String PARA_TYPE_CONTINUOUS = "continuous";
 	public static final String PARA_TYPE_UNRANKED_CATEGORY = "category_u";

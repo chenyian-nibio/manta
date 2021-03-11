@@ -134,7 +134,9 @@ CREATE TABLE dbuser (
 	password text,
 	is_active boolean NOT NULL,
 	role_id integer REFERENCES user_role,
-	name text
+	name text,
+	r16s boolean NOT NULL default false,
+	shotgun boolean NOT NULL default false
 );
 
 CREATE TABLE project_privilege (
@@ -188,3 +190,5 @@ CREATE TABLE sample_all_distance (
 	method_id integer REFERENCES exp_method
 );
 CREATE INDEX sample_all_distance_idx ON sample_all_distance (sample_id, distance_type_id, method_id);
+
+CREATE INDEX microbiota_sample_id_idx ON microbiota (sample_id, method_id);
