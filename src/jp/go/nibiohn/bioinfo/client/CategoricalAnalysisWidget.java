@@ -37,7 +37,9 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 	private ListBox rankListBoxY = new ListBox();
 	private ListBox paraListBoxX = new ListBox();
 	private ListBox paraListBoxY = new ListBox();
-	
+
+	private ListBox expTypeListBox = new ListBox();
+
 	private SimplePanel corrValuePanel = new SimplePanel();
 
 	private SimplePanel chartInfoPanel = new SimplePanel();
@@ -49,10 +51,7 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 	
 	private Map<String, String> parameterUnitMap = new HashMap<String, String>();
 	
-	// maybe become an argument?
-	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
-	
-	public CategoricalAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
+	public CategoricalAnalysisWidget(Set<SampleEntry> selectedSamples, boolean canSee16sData, boolean canSeeShotgunData, String lang) {
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
 		
@@ -66,6 +65,18 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 		
 		VerticalPanel parameterVp = new VerticalPanel();
 		
+		HorizontalPanel pairSelectionHpExp = new HorizontalPanel();
+		pairSelectionHpExp.setSpacing(6);
+		pairSelectionHpExp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		pairSelectionHpExp.add(new HTML("<b>Experiment Method:</b> "));
+		if (canSee16sData) {
+			expTypeListBox.addItem("16S", GutFloraConstant.EXPERIMENT_METHOD_16S.toString());
+		}
+		if (canSeeShotgunData) {
+			expTypeListBox.addItem("Shotgun", GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN.toString());
+		}
+		pairSelectionHpExp.add(expTypeListBox);
+
 		HorizontalPanel pairSelectionHp1 = new HorizontalPanel();
 		pairSelectionHp1.setSpacing(6);
 		pairSelectionHp1.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
@@ -89,6 +100,17 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onChange(ChangeEvent event) {
+				chartInfoPanel.clear();
+				chartPanel.clear();
+				updateReadListBox();
+			}
+		});
+
+		expTypeListBox.addChangeHandler(new ChangeHandler() {
+			
+			@Override
+			public void onChange(ChangeEvent event) {
+				chartInfoPanel.clear();
 				chartPanel.clear();
 				updateReadListBox();
 			}
@@ -106,6 +128,7 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 		pairSelectionHp2.add(rankListBoxY);
 		pairSelectionHp2.add(paraListBoxY);
 
+		parameterVp.add(pairSelectionHpExp);
 		parameterVp.add(pairSelectionHp1);
 		parameterVp.add(pairSelectionHp2);
 		pairSelectionSp.add(parameterVp);
@@ -165,7 +188,7 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 					String taxonId = paraListBoxX.getSelectedValue();
 					if (taxonId != null && !taxonId.equals("")) {
 						service.getReadsAndPctListById(CategoricalAnalysisWidget.this.selectedSamples, rank, taxonId,
-								experimentMethod, new AsyncCallback<PairListData>() {
+								getExperimentMethod(), new AsyncCallback<PairListData>() {
 							
 							@Override
 							public void onSuccess(PairListData result) {
@@ -235,7 +258,7 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 			});
 			
 		} else {
-			service.getAllTaxonEntries(selectedSamples, rank, experimentMethod, new AsyncCallback<List<TaxonEntry>>() {
+			service.getAllTaxonEntries(selectedSamples, rank, getExperimentMethod(), new AsyncCallback<List<TaxonEntry>>() {
 				
 				@Override
 				public void onSuccess(List<TaxonEntry> result) {
@@ -340,6 +363,10 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 				}
 			});
 		}
+	}
+
+	private Integer getExperimentMethod() {
+		return Integer.valueOf(expTypeListBox.getValue(expTypeListBox.getSelectedIndex()));
 	}
 
 }

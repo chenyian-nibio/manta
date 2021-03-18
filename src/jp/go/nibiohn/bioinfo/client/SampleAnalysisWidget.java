@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.Widget;
 import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
-import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 
 /**
  * 
@@ -49,8 +48,8 @@ public class SampleAnalysisWidget extends BaseWidget {
 			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
 		}
 		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
-		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
-		tabPanel.add(new CategoricalAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[3], false);
+		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
+		tabPanel.add(new CategoricalAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[3], false);
 		tabPanel.selectTab(0);
 		
 		// the border around the tab panel is not very good looking
@@ -68,7 +67,7 @@ public class SampleAnalysisWidget extends BaseWidget {
 			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
 		}
 		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
-		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
+		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.selectTab(0);
 		
 		// the border around the tab panel is not very good looking
@@ -76,17 +75,6 @@ public class SampleAnalysisWidget extends BaseWidget {
 		return tabPanel;
 	}
 
-	// TODO
-	public SearchResultData getCorrectionResults(int tabIndex) {
-		if (tabPanel != null) {
-			Widget widget = tabPanel.getWidget(tabIndex);
-			if (widget instanceof AnalysisWidget) {
-				return ((AnalysisWidget) widget).getSearchResultData();
-			}
-		}
-		return null;
-	}
-	
 	public ReadsAnalysisWidget getReadsAnalysisWidgetByExpMethod(Integer expMethod) {
 		if (tabPanel != null) {
 			for (int i = 0; i < tabPanel.getWidgetCount(); i++) {
