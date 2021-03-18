@@ -70,6 +70,8 @@ public interface GutFloraService extends RemoteService {
 
 	PairListData getProfilesList(Set<SampleEntry> selectedSamples, String name, String lang);
 
+	PairListData getProfilesList(List<String> sampleIdList, String name, String lang);
+
 	PairListData getNumericParameterValueById(Set<SampleEntry> selectedSamples, String paraId);
 	
 	PairListData getStringParameterValueById(Set<SampleEntry> selectedSamples, String paraId);

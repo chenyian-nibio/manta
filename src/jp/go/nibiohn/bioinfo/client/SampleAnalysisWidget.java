@@ -48,7 +48,7 @@ public class SampleAnalysisWidget extends BaseWidget {
 		if (currentUser.canSeeShotgunData()) {
 			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
 		}
-		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
+		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
 		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.add(new CategoricalAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[3], false);
 		tabPanel.selectTab(0);
@@ -61,9 +61,13 @@ public class SampleAnalysisWidget extends BaseWidget {
 	private TabPanel loadSubsetTabPanel(Set<SampleEntry> selectedSamples, String initRank, String suffix) {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
-		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
-		tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
-		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
+		if (currentUser.canSee16sData()) {
+			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+		}
+		if (currentUser.canSeeShotgunData()) {
+			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
+		}
+		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
 		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.selectTab(0);
 		
@@ -92,6 +96,19 @@ public class SampleAnalysisWidget extends BaseWidget {
 					if (expMethod.equals(ret.getExperimentMethod())) {
 						return ret;
 					}
+				}
+			}
+		}
+		return null;
+	}
+
+	public ProfilesAnalysisWidget getProfilesAnalysisWidget() {
+		if (tabPanel != null) {
+			for (int i = 0; i < tabPanel.getWidgetCount(); i++) {
+				Widget widget = tabPanel.getWidget(i);
+				if (widget instanceof ProfilesAnalysisWidget) {
+					ProfilesAnalysisWidget ret = (ProfilesAnalysisWidget) widget;
+					return ret;
 				}
 			}
 		}

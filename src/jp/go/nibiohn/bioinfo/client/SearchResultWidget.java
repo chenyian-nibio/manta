@@ -30,8 +30,8 @@ public class SearchResultWidget extends BaseWidget {
 
 	private VisualizeResultWidget vrWidget;
 	
-	public SearchResultWidget(Set<SampleEntry> selectedSamples, SearchResultData searchResultData, String historyTag,
-			String lang) {
+	public SearchResultWidget(Set<SampleEntry> selectedSamples, Integer experimentMethod,
+			SearchResultData searchResultData, String historyTag, String lang) {
 		super("Search results", historyTag);
 		this.currentLang = lang;
 		
@@ -40,8 +40,9 @@ public class SearchResultWidget extends BaseWidget {
 		thisWidget.add(createCorrelationTable(searchResultData.getCorreationList()));
 		thisWidget.add(visualPanel);
 		
-		vrWidget = new VisualizeResultWidget(selectedSamples, searchResultData.getRank(), searchResultData.getReferenceType(),
-				searchResultData.getReferenceName(), searchResultData.getCorrelationMethod(), currentLang);
+		vrWidget = new VisualizeResultWidget(selectedSamples, experimentMethod, searchResultData.getRank(),
+				searchResultData.getReferenceType(), searchResultData.getReferenceName(),
+				searchResultData.getCorrelationMethod(), currentLang);
 		visualPanel.add(vrWidget);
 		
 		initWidget(thisWidget);

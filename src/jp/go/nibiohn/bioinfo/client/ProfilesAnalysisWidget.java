@@ -72,11 +72,13 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
-	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, String lang) {
-		this(selectedSamples, "", lang);
+	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, boolean canSee16sData, boolean canSeeShotgunData,
+			String lang) {
+		this(selectedSamples, canSee16sData, canSeeShotgunData, "", lang);
 	}
 	
-	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, final String suffix, String lang) {
+	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, boolean canSee16sData, boolean canSeeShotgunData,
+			final String suffix, String lang) {
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
 		
@@ -96,10 +98,13 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		// 2) Search gut microbiota compositions at the *** level, correlated with:".
 		itemSelectionHp.add(new Label("Search"));
 		itemSelectionHp.add(refTypeListBox);
-		refTypeListBox.addItem("gut microbiota compositions", "R");
-		refTypeListBox.addItem("other diet and fitness parameters", "F");
-		refTypeListBox.addItem("immunological parameters", "I");
-		refTypeListBox.addItem("all other available parameters", "A");
+		if (canSee16sData) {
+			refTypeListBox.addItem("gut microbiota compositions (16S)", GutFloraConstant.EXPERIMENT_METHOD_16S.toString());
+		}
+		if (canSeeShotgunData) {
+			refTypeListBox.addItem("gut microbiota compositions (Shotgun)", GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN.toString());
+		}
+		refTypeListBox.addItem("other diet and fitness parameters", GutFloraConstant.ANALYSIS_TYPE_PROFILE);
 		
 		final Label rankLabel1 = new Label("at the");
 		itemSelectionHp.add(rankLabel1);
@@ -111,7 +116,7 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 			
 			@Override
 			public void onChange(ChangeEvent event) {
-				if (refTypeListBox.getSelectedIndex() == 0) {
+				if (!GutFloraConstant.ANALYSIS_TYPE_PROFILE.equals(refTypeListBox.getValue(refTypeListBox.getSelectedIndex()))) {
 					rankLabel1.setVisible(true);
 					rankListBox.setVisible(true);
 					rankLabel2.setText("level, correlated with:");
@@ -140,18 +145,20 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 					return;
 				}
 				loadingPopupPanel.show();
-				if (refTypeListBox.getSelectedIndex() == 0) {
+				final String refType = refTypeListBox.getValue(refTypeListBox.getSelectedIndex());
+				if (!GutFloraConstant.ANALYSIS_TYPE_PROFILE.equals(refType)) {
+					// the value of refType is the expMethod
 					String rank = rankListBox.getValue(rankListBox.getSelectedIndex());
-					// TODO exp_method should not hardcode here
 					service.searchForSimilarReads(ProfilesAnalysisWidget.this.selectedSamples, rank,
-							GutFloraConstant.EXPERIMENT_METHOD_16S, targetName,
+							Integer.valueOf(refType), targetName,
 							Integer.valueOf(correlationListBox.getSelectedValue()), currentLang,
 							new AsyncCallback<SearchResultData>() {
 						
 						@Override
 						public void onSuccess(SearchResultData result) {
 							searchResultData = result;
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH + GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + suffix);
+									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH
+											+ GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + "-" + refType + suffix);
 							loadingPopupPanel.hide();
 						}
 						
@@ -162,15 +169,15 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 						}
 					});
 				} else {
-					String refType = refTypeListBox.getValue(refTypeListBox.getSelectedIndex());
 					service.searchForSimilerProfilesbyProfile(ProfilesAnalysisWidget.this.selectedSamples, targetName,
 							refType, Integer.valueOf(correlationListBox.getSelectedValue()), currentLang, new AsyncCallback<SearchResultData>() {
 						
 						@Override
 						public void onSuccess(SearchResultData result) {
 							searchResultData = result;
-							History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH + GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + suffix);
-							loadingPopupPanel.hide();
+									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH
+											+ GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + suffix);
+									loadingPopupPanel.hide();
 						}
 						
 						@Override
@@ -284,24 +291,6 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		loadingVp.add(loadingLabel);
 		loadingPopupPanel.add(loadingVp);
 		
-		service.hasImmunologicalData(new AsyncCallback<Boolean>() {
-			
-			@Override
-			public void onSuccess(Boolean result) {
-				if (!result.booleanValue()) {
-					refTypeListBox.removeItem(3);
-					refTypeListBox.removeItem(2);
-				}
-			}
-			
-			@Override
-			public void onFailure(Throwable caught) {
-				// remove it, whatever ...
-				refTypeListBox.removeItem(3);
-				refTypeListBox.removeItem(2);
-			}
-		});
-
 		initWidget(vp);
 	}
 	

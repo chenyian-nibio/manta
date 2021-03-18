@@ -79,6 +79,8 @@ public interface GutFloraServiceAsync {
 	
 	void getProfilesList(Set<SampleEntry> selectedSamples, String name, String lang, AsyncCallback<PairListData> callback);
 
+	void getProfilesList(List<String> sampleIdList, String name, String lang, AsyncCallback<PairListData> callback);
+
 	void getNumericParameterValueById(Set<SampleEntry> selectedSamples, String paraId, AsyncCallback<PairListData> callback);
 
 	void getStringParameterValueById(Set<SampleEntry> selectedSamples, String paraId, AsyncCallback<PairListData> callback);

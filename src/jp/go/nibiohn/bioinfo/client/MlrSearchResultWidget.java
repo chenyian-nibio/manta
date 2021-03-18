@@ -8,12 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
-import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
-import jp.go.nibiohn.bioinfo.shared.PairListData;
-import jp.go.nibiohn.bioinfo.shared.SampleEntry;
-import jp.go.nibiohn.bioinfo.shared.SearchResultData;
-
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -42,6 +36,11 @@ import com.google.gwt.visualization.client.visualizations.corechart.CoreChart;
 import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.ScatterChart;
 
+import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
+import jp.go.nibiohn.bioinfo.shared.PairListData;
+import jp.go.nibiohn.bioinfo.shared.SampleEntry;
+import jp.go.nibiohn.bioinfo.shared.SearchResultData;
+
 /**
  * For displaying multiple linear regression(MLR) results
  * 
@@ -56,7 +55,9 @@ public class MlrSearchResultWidget extends BaseWidget {
 
 	private Set<SampleEntry> selectedSamples;
 	
-	private List<String> sortedSampleIds;
+	// valid samples are those samples with microbiota
+	private List<String> validSampleIdLists;
+	
 	private Label profileNameLabel = new Label("TO BE SELECTED");
 	private SimplePanel corrValuePanel = new SimplePanel();
 	private SimplePanel chartPanel = new SimplePanel();
@@ -67,10 +68,7 @@ public class MlrSearchResultWidget extends BaseWidget {
 
 	private List<String> currentColumns;
 	
-	// maybe become an argument?
-	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
-	
-	public MlrSearchResultWidget(Set<SampleEntry> selectedSamples, SearchResultData searchResultData,
+	public MlrSearchResultWidget(Set<SampleEntry> selectedSamples, SearchResultData searchResultData, Integer experimentMethod,
 			List<String> currentColumns, String historyTag, String lang) {
 		super("Search results (MLR)", lang + historyTag);
 		
@@ -84,13 +82,14 @@ public class MlrSearchResultWidget extends BaseWidget {
 		thisWidget.add(visualPanel);
 
 		// start to construct plot panel
-		sortedSampleIds = getSortedSampleList(selectedSamples); 
 		service.getAllReadsPctList(selectedSamples, searchResultData.getRank(), currentColumns, experimentMethod, 
 				new AsyncCallback<Map<String, Double[]>>() {
 			
 			@Override
 			public void onSuccess(Map<String, Double[]> result) {
 				allReadsMap = result;
+				validSampleIdLists = new ArrayList<String>(result.keySet());
+				Collections.sort(validSampleIdLists);
 			}
 			
 			@Override
@@ -172,12 +171,13 @@ public class MlrSearchResultWidget extends BaseWidget {
 		for (int i = 0; i < currentColumns.size(); i++) {
 			data.addColumn(ColumnType.NUMBER, currentColumns.get(i));
 		}
-		int sampleSize = selectedSamples.size();
+		List<String> sampleIdList = getSortedSampleIdList();
+		int sampleSize = sampleIdList.size();
 		data.addRows(sampleSize);
 		if (allReadsMap.size() > 0) {
-			for (int i = 0; i < sortedSampleIds.size(); i++) {
+			for (int i = 0; i < sampleIdList.size(); i++) {
 				data.setValue(i, 0, profilesOriList.get(i));
-				String sid = sortedSampleIds.get(i);
+				String sid = sampleIdList.get(i);
 				Double[] reads = allReadsMap.get(sid);
 				for (int j = 0; j < reads.length; j++) {
 					Double value = reads[j];
@@ -305,8 +305,8 @@ public class MlrSearchResultWidget extends BaseWidget {
 					corrValuePanel.setWidget(new Label(value.get(1)));
 					final String profileName = value.get(0);
 					profileNameLabel.setText(profileName);
-					
-					service.getProfilesList(selectedSamples, value.get(0), currentLang, 
+					List<String> sampleIdList = getSortedSampleIdList();
+					service.getProfilesList(sampleIdList, value.get(0), currentLang, 
 							new AsyncCallback<PairListData>() {
 						
 						@Override
@@ -328,6 +328,15 @@ public class MlrSearchResultWidget extends BaseWidget {
 		return vp;
 	}
 	
+	private List<String> getSortedSampleIdList() {
+		// just to prevent if the method is called before the ajax response
+		if (validSampleIdLists == null || validSampleIdLists.isEmpty()) {
+			return getSortedSampleList(selectedSamples);
+		} else {
+			return validSampleIdLists;
+		}
+	}
+
 	private void drawLineChart(String profileName) {
 		clearMessage();
 		if (chart != null && allReadsMap.size() == profilesOriList.size()) {

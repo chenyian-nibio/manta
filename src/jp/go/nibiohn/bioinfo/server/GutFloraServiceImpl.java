@@ -1156,7 +1156,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			// add bar chart
 			// shiftX depend on the sample id length
-			int maxSampleLength = getMaxItemLength(sequence);
+//			int maxSampleLength = getMaxItemLength(sequence);
 			
 			String svgBarChart = createSvgBarChart(rows, sequence.toArray(new String[] {}), selectedcolumns, rankIdList,
 					allReadsMap, dendrogramWidth + 10);
@@ -1318,7 +1318,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 			// add bar chart
 			// shiftX depend on the sample id length
-			int maxSampleLength = getMaxItemLength(sequence);
+//			int maxSampleLength = getMaxItemLength(sequence);
 			
 			String svgBarChart = createSvgBarChart(rows, sequence.toArray(new String[] {}), rhList, topNRankIdList,
 					allReadsMap, dendrogramWidth + 10);
@@ -2251,18 +2251,19 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 		return ret;
 	}
 
-	private double[][] getOrderedMatrix(List<String> sampleIdList, Map<String, Double[]> valueMap) {
+	private double[][] getOrderedMatrix(List<String> sampleIdList, Map<String, Double[]> valueMap, int valueMapDim) {
 		double[][] ret = new double[sampleIdList.size()][];
 		for (int i = 0; i < sampleIdList.size(); i++) {
 			Double[] values = valueMap.get(sampleIdList.get(i));
-			ret[i] = new double[values.length];
-			for (int j = 0; j < values.length; j++) {
-				Double value = values[j];
-				if (value == null) {
-					// TODO should be able to deal with the missing values...
-					value = Double.valueOf(0);
+			ret[i] = new double[valueMapDim];
+			// missing will be 0, this should be refined in the future
+			if (values != null) {
+				for (int j = 0; j < valueMapDim; j++) {
+					Double value = values[j];
+					if (value != null) {
+						ret[i][j] = value.doubleValue();
+					}
 				}
-				ret[i][j] = value.doubleValue();
 			}
 		}
 		return ret;
@@ -2270,8 +2271,13 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 	@Override
 	public PairListData getProfilesList(Set<SampleEntry> selectedSamples, String name, String lang) {
-		// TODO [to be improved] should be better to use parameter id ...
 		List<String> sampleIdList = getSortedSampleList(selectedSamples);
+		return getProfilesList(sampleIdList, name, lang);
+	}
+	
+	@Override
+	public PairListData getProfilesList(List<String> sampleIdList, String name, String lang) {
+		// TODO [to be improved] should be better to use parameter id ...
 
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
@@ -2616,7 +2622,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			
 			connection.close();
 			
-			double[][] referenceList = getOrderedMatrix(sampleIdList, readMap);
+			double[][] referenceList = getOrderedMatrix(sampleIdList, readMap, taxonNames.size());
 			
 			final Map<String, Double> results = new HashMap<String, Double>();
 			for (String key : rows.keySet()) {
@@ -3508,7 +3514,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 
 			// add heat map
 			// shiftX depend on the sample id length
-			int maxSampleLength = getMaxItemLength(sampleIdList);
+//			int maxSampleLength = getMaxItemLength(sampleIdList);
 			String heatMap = createSvgHeatMap(rows, sequence, selectedcolumns, dendrogramWidth, 0, 200,
 					false);
 			

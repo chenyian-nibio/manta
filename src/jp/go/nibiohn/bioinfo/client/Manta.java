@@ -193,27 +193,32 @@ public class Manta extends BasePage {
 					return;
 				} else {
 					// TODO check carefully!!!!!!!!!
-					int tabIndex = 0;
-					if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
-						tabIndex = 1;
-//					} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_IMMUN + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX)) {
-//						tabIndex = 2;
+					Integer expMethod = -1;
+					if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+						expMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+					} else if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN)) {
+						expMethod = GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN;
 					}
-					SearchResultData searchResultData = subsetAnalysisWidget.getCorrectionResults(tabIndex);
+					AnalysisWidget widget;
+					if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE)) {
+						widget = analysisWidget.getProfilesAnalysisWidget();
+					} else {
+						widget = analysisWidget.getReadsAnalysisWidgetByExpMethod(expMethod);
+					}
+					SearchResultData searchResultData = widget.getSearchResultData();
 					
 					if (searchResultData == null) {
-						// TODO to be defined!
-						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS + GutFloraConstant.NAVI_LINK_SUBSET_SUFFIX);
+						History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
 						return;
 					}
 					// TODO uncheck!
 					Set<SampleEntry> selectedSamples = subsetAnalysisWidget.getSelectedSamples();
 					BaseWidget resultWidget;
 					if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {
-						List<String> currentColumns = analysisWidget.getReadsAnalysisWidgetByExpMethod(tabIndex).getCurrentColumns();
-						resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value, currentLang);
+						List<String> currentColumns = analysisWidget.getReadsAnalysisWidgetByExpMethod(expMethod).getCurrentColumns();
+						resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, expMethod, currentColumns, value, currentLang);
 					} else {
-						resultWidget = new SearchResultWidget(selectedSamples, searchResultData, value, currentLang);
+						resultWidget = new SearchResultWidget(selectedSamples, expMethod, searchResultData, value, currentLang);
 					}
 					widgetTrails.add(resultWidget);
 
@@ -364,13 +369,19 @@ public class Manta extends BasePage {
 				return;
 			} else {
 				// TODO check carefully!!!!!!!!!
-				int tabIndex = 0;
-				if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE)) {
-					tabIndex = 1;
-//				} else if (value.endsWith(GutFloraConstant.NAVI_LINK_SUFFIX_IMMUN)) {
-//					tabIndex = 2;
+				Integer expMethod = -1;
+				if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_16S)) {
+					expMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+				} else if (value.endsWith("-" + GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN)) {
+					expMethod = GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN;
 				}
-				SearchResultData searchResultData = analysisWidget.getCorrectionResults(tabIndex);
+				AnalysisWidget widget;
+				if (value.contains(GutFloraConstant.NAVI_LINK_SUFFIX_PROFILE)) {
+					widget = analysisWidget.getProfilesAnalysisWidget();
+				} else {
+					widget = analysisWidget.getReadsAnalysisWidgetByExpMethod(expMethod);
+				}
+				SearchResultData searchResultData = widget.getSearchResultData();
 				
 				if (searchResultData == null) {
 					History.newItem(currentLang + GutFloraConstant.NAVI_LINK_ANALYSIS);
@@ -380,10 +391,10 @@ public class Manta extends BasePage {
 				Set<SampleEntry> selectedSamples = analysisWidget.getSelectedSamples();
 				BaseWidget resultWidget;
 				if (value.contains(GutFloraConstant.NAVI_LINK_MLR + "-")) {
-					List<String> currentColumns = analysisWidget.getReadsAnalysisWidgetByExpMethod(tabIndex).getCurrentColumns();
-					resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, currentColumns, value, currentLang);
+					List<String> currentColumns = analysisWidget.getReadsAnalysisWidgetByExpMethod(expMethod).getCurrentColumns();
+					resultWidget = new MlrSearchResultWidget(selectedSamples, searchResultData, expMethod, currentColumns, value, currentLang);
 				} else {
-					resultWidget = new SearchResultWidget(selectedSamples, searchResultData, value, currentLang);
+					resultWidget = new SearchResultWidget(selectedSamples, expMethod, searchResultData, value, currentLang);
 				}
 				
 				widgetTrails.add(resultWidget);

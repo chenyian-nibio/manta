@@ -156,7 +156,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 									searchResultData = result;
 									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH
 											+ GutFloraConstant.NAVI_LINK_MLR + GutFloraConstant.NAVI_LINK_SUFFIX_READ
-											+ suffix);
+											+ "-" + ReadsAnalysisWidget.this.experimentMethod + suffix);
 									loadingPopupPanel.hide();
 								}
 
@@ -177,7 +177,8 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 								public void onSuccess(SearchResultData result) {
 									searchResultData = result;
 									History.newItem(currentLang + GutFloraConstant.NAVI_LINK_SEARCH
-											+ GutFloraConstant.NAVI_LINK_SUFFIX_READ + suffix);
+											+ GutFloraConstant.NAVI_LINK_SUFFIX_READ + "-"
+											+ ReadsAnalysisWidget.this.experimentMethod + suffix);
 									loadingPopupPanel.hide();
 								}
 

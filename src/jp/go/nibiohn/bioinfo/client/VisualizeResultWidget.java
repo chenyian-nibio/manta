@@ -71,14 +71,15 @@ public class VisualizeResultWidget extends AnalysisWidget {
 	private String rank;
 
 	// maybe become an argument?
-	private Integer experimentMethod = GutFloraConstant.EXPERIMENT_METHOD_16S;
+	private Integer experimentMethod = -1;
 	
-	public VisualizeResultWidget(Set<SampleEntry> selectedSamples, 
+	public VisualizeResultWidget(Set<SampleEntry> selectedSamples, Integer experimentMethod,
 			String rank, String referenceType, String referenceName, String correlationMethod, String lang) {
 		this.selectedSamples = selectedSamples;
 		this.referenceType = referenceType;
 		this.rank = rank;
 		this.currentLang = lang;
+		this.experimentMethod = experimentMethod;
 		
 		sortedSampleIds = getSortedSampleList(selectedSamples); 
 				
@@ -150,6 +151,11 @@ public class VisualizeResultWidget extends AnalysisWidget {
 		}
 		readHp.add(readNameLabel);
 		readNameLabel.addStyleName("pairCorrLabel");
+
+		if (experimentMethod != -1) {
+			Label methodLabel = new Label("(" + getExperimentMethod() + ")");
+			readHp.add(methodLabel);
+		}
 
 		HorizontalPanel profileHp = new HorizontalPanel();
 		profileHp.setSpacing(6);
@@ -462,5 +468,16 @@ public class VisualizeResultWidget extends AnalysisWidget {
 			// TODO unchecked! should never happen
 		}
 		
+	}
+	
+	private String getExperimentMethod() {
+		if (GutFloraConstant.EXPERIMENT_METHOD_16S.equals(experimentMethod)) {
+			return "16S";
+		} else if (GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN.equals(experimentMethod)) {
+			return "Shotgun";
+		} else {
+			// should never happen
+			return "Unknown";
+		}
 	}
 }
