@@ -13,7 +13,7 @@
   
   <servlet-mapping>
     <servlet-name>gutfloraServlet</servlet-name>
-    <url-pattern>/manta/analysis</url-pattern>
+    <url-pattern>/nibiohn_cohort_db/analysis</url-pattern>
   </servlet-mapping>
   
   <servlet>
@@ -23,7 +23,7 @@
   
   <servlet-mapping>
     <servlet-name>gwtExportDataServlet</servlet-name>
-    <url-pattern>/manta/export</url-pattern>
+    <url-pattern>/nibiohn_cohort_db/export</url-pattern>
   </servlet-mapping>
   
   <!-- Default page to serve -->
