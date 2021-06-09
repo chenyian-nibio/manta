@@ -128,10 +128,11 @@ public class PcoaAnalysisWidget extends ReadVisualizeWidget {
 		});
 		
 		if (experimentMethod.equals(GutFloraConstant.EXPERIMENT_METHOD_16S)) {
-			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
+//			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_UNWEIGHTED_UNIFRAC_VALUE.toString());
 			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC, GutFloraConstant.SAMPLE_DISTANCE_WEIGHTED_UNIFRAC_VALUE.toString());
-			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
+//			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_OTU_VALUE.toString());
 			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_GENUS_VALUE.toString());
+			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_JACCARD, GutFloraConstant.SAMPLE_DISTANCE_JACCARD_VALUE.toString());
 		} else if (experimentMethod.equals(GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN)) {
 			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_SPECIES, GutFloraConstant.SAMPLE_DISTANCE_BRAY_CURTIS_SPECIES_VALUE.toString());
 			sampleDistanceListBox.addItem(GutFloraConstant.SAMPLE_DISTANCE_JACCARD, GutFloraConstant.SAMPLE_DISTANCE_JACCARD_VALUE.toString());
