@@ -290,7 +290,11 @@ public class SampleListWidget extends BaseWidget {
 
 			@Override
 			public String getValue(SampleEntry object) {
-				return object.getAge().toString();
+				String displayAge = object.getDisplayAge();
+				if (displayAge == null) {
+					displayAge = "-";
+				}
+				return displayAge;
 			}
 		};
 		if (currentLang.equals(GutFloraConstant.LANG_JP)) {
@@ -311,7 +315,11 @@ public class SampleListWidget extends BaseWidget {
 
 			@Override
 			public String getValue(SampleEntry object) {
-				return object.getGender();
+				String gender = object.getGender();
+				if (gender == null) {
+					gender = "-";
+				}
+				return gender;
 			}
 		};
 		if (currentLang.equals(GutFloraConstant.LANG_JP)) {
@@ -332,19 +340,25 @@ public class SampleListWidget extends BaseWidget {
 
 			@Override
 			public String getValue(SampleEntry object) {
-				return object.getExpDate().toString();
+				return object.getExpMonth();
 			}
 		};
 		if (currentLang.equals(GutFloraConstant.LANG_JP)) {
-			cellTable.addColumn(colExpDate, "測定日");
+			cellTable.addColumn(colExpDate, "測定月");
 		} else {
-			cellTable.addColumn(colExpDate, "Measurement date");
+			cellTable.addColumn(colExpDate, "Sampling month");
 		}
 		colExpDate.setSortable(true);
 		sortHandler.setComparator(colExpDate, new Comparator<SampleEntry>() {
 
 			@Override
 			public int compare(SampleEntry o1, SampleEntry o2) {
+				if (o1.getExpDate() == null) {
+					return -1;
+				}
+				if (o2.getExpDate() == null) {
+					return 1;
+				}
 				return o1.getExpDate().compareTo(o2.getExpDate());
 			}
 		});
@@ -473,7 +487,7 @@ public class SampleListWidget extends BaseWidget {
 		dialogContents.setSpacing(4);
 		dialogBox.setWidget(dialogContents);
 
-		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(entry.getSampleId(), currentLang);
+		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(entry.getSampleId(), currentUser, currentLang);
 		dialogContents.add(sampleInfoWidget);
 
 		// Add a close button at the bottom of the dialog

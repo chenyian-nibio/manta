@@ -40,6 +40,7 @@ import com.google.gwt.visualization.client.visualizations.corechart.Options;
 import com.google.gwt.visualization.client.visualizations.corechart.ScatterChart;
 
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.PairListData;
 import jp.go.nibiohn.bioinfo.shared.ParameterEntry;
@@ -78,9 +79,10 @@ public class PairAnalysisWidget extends AnalysisWidget {
 	
 	private List<List<String>> pairDataList = new ArrayList<List<String>>();
 	
-	public PairAnalysisWidget(Set<SampleEntry> selectedSamples, boolean canSee16sData, boolean canSeeShotgunData, String lang) {
+	public PairAnalysisWidget(Set<SampleEntry> selectedSamples, DbUser currentUser, String lang) {
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
+		this.currentUser = currentUser;
 		sortedSampleIds = getSortedSampleList(selectedSamples);
 		
 		HorizontalPanel topHp = new HorizontalPanel();
@@ -105,10 +107,10 @@ public class PairAnalysisWidget extends AnalysisWidget {
 		pairSelectionHpExp.setSpacing(6);
 		pairSelectionHpExp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		pairSelectionHpExp.add(new HTML("<b>Experiment Method:</b> "));
-		if (canSee16sData) {
+		if (currentUser.canSee16sData()) {
 			expTypeListBox.addItem("16S", GutFloraConstant.EXPERIMENT_METHOD_16S.toString());
 		}
-		if (canSeeShotgunData) {
+		if (currentUser.canSeeShotgunData()) {
 			expTypeListBox.addItem("Shotgun", GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN.toString());
 		}
 		pairSelectionHpExp.add(expTypeListBox);

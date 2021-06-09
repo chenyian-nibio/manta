@@ -113,7 +113,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 
 			Statement statement = connection.createStatement();
-			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, s.has_metadata, s.has_16s, s.has_shotgun, " 
+			String sqlQuery = " select s.id, s.age, s.display_age, s.gender, s.exp_date, s.has_metadata, s.has_16s, s.has_shotgun, " 
 					+ query_pjname + " from sample as s "
 					+ " join project_sample as ps on ps.sample_id = s.id "
 					+ " join project as pj on pj.id = ps.project_id "
@@ -125,9 +125,10 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			List<SampleEntry> ret = new ArrayList<SampleEntry>();
 			while (results.next()) {
 				String sampleId = results.getString("id");
-				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
-						results.getString("pj_name"), results.getDate("exp_date"), results.getBoolean("has_metadata"),
-						results.getBoolean("has_16s"), results.getBoolean("has_shotgun")));
+				ret.add(new SampleEntry(sampleId, results.getFloat("age"), results.getString("display_age"),
+						results.getString("gender"), results.getString("pj_name"), results.getDate("exp_date"),
+						results.getBoolean("has_metadata"), results.getBoolean("has_16s"),
+						results.getBoolean("has_shotgun")));
 			}
 			statement.close();
 			
@@ -396,7 +397,7 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			// no need to check if reads data is available, since the request is from the cluster
 			
 			Statement statement = connection.createStatement();
-			String sqlQuery = " select id, age, gender, exp_date, s.has_metadata, s.has_16s, s.has_shotgun "
+			String sqlQuery = " select id, age, display_age, gender, exp_date, s.has_metadata, s.has_16s, s.has_shotgun "
 					+ " from sample where id in ('"
 					+ StringUtils.join(ids, "','") + "')";
 			
@@ -404,8 +405,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			Set<SampleEntry> ret = new HashSet<SampleEntry>();
 			while (results.next()) {
 				String sampleId = results.getString("id");
-				ret.add(new SampleEntry(sampleId, results.getInt("age"), results.getString("gender"),
-						results.getDate("exp_date"), results.getBoolean("has_metadata"),
+				ret.add(new SampleEntry(sampleId, results.getFloat("age"), results.getString("display_age"),
+						results.getString("gender"), results.getDate("exp_date"), results.getBoolean("has_metadata"),
 						results.getBoolean("has_16s"), results.getBoolean("has_shotgun")));
 			}
 			statement.close();
@@ -430,6 +431,8 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 	
 	@Override
 	public SampleEntry getSampleEntry(String sampleId, String lang) {
+		String currentUser = getUserForQuery();
+		
 		HikariDataSource ds = getHikariDataSource();
 		Connection connection = null;
 		try {
@@ -442,20 +445,29 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			}
 
 			Statement statement = connection.createStatement();
-			String sqlQuery = " select s.id, s.age, s.gender, s.exp_date, s.has_metadata, s.has_16s, s.has_shotgun, "
-					+ query_pjname
-					+ " from sample as s "
+//			String sqlQuery = " select s.id, s.age, s.display_age, s.gender, s.exp_date, s.has_metadata, s.has_16s, s.has_shotgun, "
+//					+ query_pjname
+//					+ " from sample as s "
+//					+ " join project_sample as ps on ps.sample_id = s.id "
+//					+ " join project as pj on pj.id = ps.project_id "
+//					+ " where s.id ='" + sampleId + "' ";
+			
+			String sqlQuery = " select s.id, s.age, s.display_age, s.gender, s.exp_date, s.has_metadata, s.has_16s, s.has_shotgun, " 
+					+ query_pjname + " from sample as s "
 					+ " join project_sample as ps on ps.sample_id = s.id "
 					+ " join project as pj on pj.id = ps.project_id "
-					+ " where s.id ='" + sampleId + "' ";
+					+ " join project_privilege as pp on pp.project_id = pj.id "
+					+ " join dbuser as du on du.id = pp.user_id " 
+					+ " where du.username = '" + currentUser + "' "
+					+ " and s.id ='" + sampleId + "' ";
 			
 			ResultSet results = statement.executeQuery(sqlQuery);
 			SampleEntry ret = null;
 			while (results.next()) {
-				ret = new SampleEntry(results.getString("id"), results.getInt("age"),
-						results.getString("gender"), results.getString("pj_name"),
-						results.getDate("exp_date"), results.getBoolean("has_metadata"),
-						results.getBoolean("has_16s"), results.getBoolean("has_shotgun"));
+				ret = new SampleEntry(results.getString("id"), results.getFloat("age"),
+						results.getString("display_age"), results.getString("gender"), results.getString("pj_name"),
+						results.getDate("exp_date"), results.getBoolean("has_metadata"), results.getBoolean("has_16s"),
+						results.getBoolean("has_shotgun"));
 			}
 			statement.close();
 			
@@ -1935,9 +1947,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			List<ParameterEntry> profileNameList = new ArrayList<ParameterEntry>();
 			while (results0.next()) {
 				String name = results0.getString("title");
-				int paraId = results0.getInt("id");
+				String paraId = results0.getString("id");
 				String unit = results0.getString("unit");
-				profileNameList.add(new ParameterEntry(String.valueOf(paraId), name, unit));
+				profileNameList.add(new ParameterEntry(paraId, name, unit));
 			}
 			statement0.close();
 			
@@ -1988,9 +2000,9 @@ public class GutFloraServiceImpl extends RemoteServiceServlet implements GutFlor
 			List<ParameterEntry> profileNameList = new ArrayList<ParameterEntry>();
 			while (results0.next()) {
 				String name = results0.getString("title");
-				int paraId = results0.getInt("id");
+				String paraId = results0.getString("id");
 				String unit = results0.getString("unit");
-				profileNameList.add(new ParameterEntry(String.valueOf(paraId), name, unit));
+				profileNameList.add(new ParameterEntry(paraId, name, unit));
 			}
 			statement0.close();
 			

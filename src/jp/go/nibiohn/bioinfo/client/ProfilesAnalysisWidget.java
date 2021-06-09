@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.GutFloraAnalysisData;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
@@ -72,15 +73,16 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 
 	private PopupPanel loadingPopupPanel = new PopupPanel();
 	
-	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, boolean canSee16sData, boolean canSeeShotgunData,
+	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, DbUser currentUser,
 			String lang) {
-		this(selectedSamples, canSee16sData, canSeeShotgunData, "", lang);
+		this(selectedSamples, currentUser, "", lang);
 	}
 	
-	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, boolean canSee16sData, boolean canSeeShotgunData,
+	public ProfilesAnalysisWidget(Set<SampleEntry> selectedSamples, DbUser currentUser,
 			final String suffix, String lang) {
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
+		this.currentUser = currentUser;
 		
 		HorizontalPanel topHp = new HorizontalPanel();
 		
@@ -98,10 +100,10 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		// 2) Search gut microbiota compositions at the *** level, correlated with:".
 		itemSelectionHp.add(new Label("Search"));
 		itemSelectionHp.add(refTypeListBox);
-		if (canSee16sData) {
+		if (currentUser.canSee16sData()) {
 			refTypeListBox.addItem("gut microbiota compositions (16S)", GutFloraConstant.EXPERIMENT_METHOD_16S.toString());
 		}
-		if (canSeeShotgunData) {
+		if (currentUser.canSeeShotgunData()) {
 			refTypeListBox.addItem("gut microbiota compositions (Shotgun)", GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN.toString());
 		}
 		refTypeListBox.addItem("other diet and fitness parameters", GutFloraConstant.ANALYSIS_TYPE_PROFILE);
@@ -628,7 +630,7 @@ public class ProfilesAnalysisWidget extends AnalysisWidget {
 		dialogContents.setSpacing(4);
 		dialogBox.setWidget(dialogContents);
 
-		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(sampleId, currentLang);
+		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(sampleId, currentUser, currentLang);
 		dialogContents.add(sampleInfoWidget);
 
 		// Add a close button at the bottom of the dialog

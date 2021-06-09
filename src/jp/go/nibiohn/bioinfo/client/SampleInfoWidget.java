@@ -2,6 +2,7 @@ package jp.go.nibiohn.bioinfo.client;
 
 import java.util.List;
 
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 
@@ -51,7 +52,7 @@ public class SampleInfoWidget extends Composite {
 
 	private String currentLang;
 
-	public SampleInfoWidget(final String sampleId, String lang) {
+	public SampleInfoWidget(final String sampleId, DbUser currentUser, String lang) {
 		this.currentLang = lang;
 
 		VerticalPanel thisWidget = new VerticalPanel();
@@ -95,23 +96,31 @@ public class SampleInfoWidget extends Composite {
 		HorizontalPanel expMethodHp = new HorizontalPanel();
 		expMethodHp.setSpacing(12);
 		expMethodHp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-		expMethodHp.add(exp16SRb);
-		expMethodHp.add(expShotgunRb);
-		exp16SRb.setValue(Boolean.TRUE);
-		exp16SRb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				getMicrobiotaInfo(sampleId);
-			}
-		});
-		expShotgunRb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				getMicrobiotaInfo(sampleId);
-			}
-		});
+		if (currentUser.canSee16sData()) {
+			expMethodHp.add(exp16SRb);
+			exp16SRb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+				
+				@Override
+				public void onValueChange(ValueChangeEvent<Boolean> event) {
+					getMicrobiotaInfo(sampleId);
+				}
+			});
+		}
+		if (currentUser.canSeeShotgunData()) {
+			expMethodHp.add(expShotgunRb);
+			expShotgunRb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+				
+				@Override
+				public void onValueChange(ValueChangeEvent<Boolean> event) {
+					getMicrobiotaInfo(sampleId);
+				}
+			});
+		}
+		if (currentUser.canSee16sData()) {
+			exp16SRb.setValue(Boolean.TRUE);
+		} else if (currentUser.canSeeShotgunData()) {
+			expShotgunRb.setValue(Boolean.TRUE);
+		}
 		
 		readHp.add(readChevron);
 		readHp.add(new HTML("<h3>Microbiota</h3>"));
@@ -207,9 +216,9 @@ public class SampleInfoWidget extends Composite {
 				sb.append("<tr><th>Project</th><td colspan=\"2\">" + entry.getProject() + "</td></tr>");
 				sb.append("<tr><th>Sample ID</th><td>" + entry.getSampleId() + "</td>");
 				if (currentLang.equals(GutFloraConstant.LANG_JP)) {
-					sb.append("<td colspan=\"2\">年齢 " + entry.getAge() + " 歳, " + entry.getGender() + "</td></tr>\n");
+					sb.append("<td colspan=\"2\">年齢 " + entry.getDisplayAge() + " 歳, " + entry.getGender() + "</td></tr>\n");
 				} else {
-					sb.append("<td colspan=\"2\">Age " + entry.getAge() + ", " + entry.getGender() + "</td></tr>\n");
+					sb.append("<td colspan=\"2\">Age " + entry.getDisplayAge() + ", " + entry.getGender() + "</td></tr>\n");
 				}
 				sb.append("</table>");
 				sampleInfoPanel.setWidget(new HTML(sb.toString()));

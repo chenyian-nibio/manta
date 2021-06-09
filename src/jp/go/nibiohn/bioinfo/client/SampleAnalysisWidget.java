@@ -42,14 +42,14 @@ public class SampleAnalysisWidget extends BaseWidget {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
 		if (currentUser.canSee16sData()) {
-			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, currentUser, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
 		}
 		if (currentUser.canSeeShotgunData()) {
-			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
+			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, currentUser, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
 		}
-		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
-		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
-		tabPanel.add(new CategoricalAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[3], false);
+		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentUser, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
+		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentUser, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
+		tabPanel.add(new CategoricalAnalysisWidget(selectedSamples, currentUser, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[3], false);
 		tabPanel.selectTab(0);
 		
 		// the border around the tab panel is not very good looking
@@ -61,13 +61,13 @@ public class SampleAnalysisWidget extends BaseWidget {
 		final TabPanel tabPanel = new TabPanel();
 		tabPanel.setSize("100%", "100%");
 		if (currentUser.canSee16sData()) {
-			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
+			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_16S, initRank, currentUser, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[0], false);
 		}
 		if (currentUser.canSeeShotgunData()) {
-			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, initRank, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
+			tabPanel.add(new ReadsAnalysisWidget(selectedSamples, GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN, initRank, currentUser, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[4], false);
 		}
-		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
-		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentUser.canSee16sData(), currentUser.canSeeShotgunData(), currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
+		tabPanel.add(new ProfilesAnalysisWidget(selectedSamples, currentUser, suffix, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[1], false);
+		tabPanel.add(new PairAnalysisWidget(selectedSamples, currentUser, currentLang), GutFloraConstant.ANALYSIS_TAB_TITLES[2], false);
 		tabPanel.selectTab(0);
 		
 		// the border around the tab panel is not very good looking

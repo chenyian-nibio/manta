@@ -3,6 +3,7 @@ package jp.go.nibiohn.bioinfo.client;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
 import jp.go.nibiohn.bioinfo.shared.SearchResultData;
 
@@ -41,6 +42,8 @@ public class AnalysisWidget extends Composite {
 	// default is English
 	protected String currentLang = "en_";
 	
+	protected DbUser currentUser;
+
 	protected void warnMessage(String message) {
 		Label label = (Label) ((HorizontalPanel) mesgPanel.getWidget(0)).getWidget(0);
 		label.setText(message);

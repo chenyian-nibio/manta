@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import jp.go.nibiohn.bioinfo.client.generic.ModifiedSimplePager;
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.GutFloraAnalysisData;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.SampleEntry;
@@ -93,16 +94,17 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 
 	private int indexOfPiechartIcon = 3;
 	
-	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, Integer experimentMethod, String lang) {
-		this(selectedSamples, experimentMethod, "phylum", "", lang);
+	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, Integer experimentMethod, DbUser currentUser, String lang) {
+		this(selectedSamples, experimentMethod, "phylum", currentUser, "", lang);
 	}
 	
 	public ReadsAnalysisWidget(Set<SampleEntry> selectedSamples, Integer experimentMethod, String initRank,
-			final String suffix, String lang) {
+			DbUser currentUser, final String suffix, String lang) {
 		showOthersCb.setValue(true);
 		
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
+		this.currentUser = currentUser;
 		this.experimentMethod = experimentMethod;
 
 		HorizontalPanel topHp = new HorizontalPanel();
@@ -728,7 +730,7 @@ public class ReadsAnalysisWidget extends AnalysisWidget {
 		dialogContents.setSpacing(4);
 		dialogBox.setWidget(dialogContents);
 
-		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(sampleId, currentLang);
+		SampleInfoWidget sampleInfoWidget = new SampleInfoWidget(sampleId, currentUser, currentLang);
 		dialogContents.add(sampleInfoWidget);
 
 		// Add a close button at the bottom of the dialog

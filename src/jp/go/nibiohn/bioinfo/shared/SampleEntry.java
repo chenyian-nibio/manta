@@ -7,7 +7,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class SampleEntry implements IsSerializable {
 
 	private String sampleId;
-	private Integer age;
+	private Float age;
+	private String displayAge;
 	private String gender;
 	private String project;
 	private Date expDate;
@@ -18,11 +19,12 @@ public class SampleEntry implements IsSerializable {
 	public SampleEntry() {
 	}
 
-	public SampleEntry(String sampleId, Integer age, String gender, Date expDate, Boolean hasMetadata, Boolean has16s,
+	public SampleEntry(String sampleId, Float age, String displayAge, String gender, Date expDate, Boolean hasMetadata, Boolean has16s,
 			Boolean hasShotgun) {
 		super();
 		this.sampleId = sampleId;
 		this.age = age;
+		this.displayAge = displayAge;
 		this.gender = gender;
 		this.expDate = expDate;
 		this.hasMetadata = hasMetadata;
@@ -30,11 +32,12 @@ public class SampleEntry implements IsSerializable {
 		this.hasShotgun = hasShotgun;
 	}
 
-	public SampleEntry(String sampleId, Integer age, String gender, String project, Date expDate, Boolean hasMetadata,
+	public SampleEntry(String sampleId, Float age, String displayAge, String gender, String project, Date expDate, Boolean hasMetadata,
 			Boolean has16s, Boolean hasShotgun) {
 		super();
 		this.sampleId = sampleId;
 		this.age = age;
+		this.displayAge = displayAge;
 		this.gender = gender;
 		this.project = project;
 		this.expDate = expDate;
@@ -47,7 +50,7 @@ public class SampleEntry implements IsSerializable {
 		return sampleId;
 	}
 
-	public Integer getAge() {
+	public Float getAge() {
 		return age;
 	}
 
@@ -63,6 +66,15 @@ public class SampleEntry implements IsSerializable {
 		return expDate;
 	}
 
+	public String getExpMonth() {
+		if (expDate != null) {
+			String string = expDate.toString();
+			return string.substring(0, string.lastIndexOf("-"));
+		} else {
+			return "-";
+		}
+	}
+
 	public boolean hasMetadata() {
 		return hasMetadata;
 	}
@@ -75,4 +87,8 @@ public class SampleEntry implements IsSerializable {
 		return hasShotgun;
 	}
 
+	public String getDisplayAge() {
+		return displayAge;
+	}
+	
 }

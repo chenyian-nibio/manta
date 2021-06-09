@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import jp.go.nibiohn.bioinfo.shared.DbUser;
 import jp.go.nibiohn.bioinfo.shared.GutFloraConstant;
 import jp.go.nibiohn.bioinfo.shared.PairListData;
 import jp.go.nibiohn.bioinfo.shared.ParameterEntry;
@@ -51,9 +52,10 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 	
 	private Map<String, String> parameterUnitMap = new HashMap<String, String>();
 	
-	public CategoricalAnalysisWidget(Set<SampleEntry> selectedSamples, boolean canSee16sData, boolean canSeeShotgunData, String lang) {
+	public CategoricalAnalysisWidget(Set<SampleEntry> selectedSamples, DbUser currentUser, String lang) {
 		this.selectedSamples = selectedSamples;
 		this.currentLang = lang;
+		this.currentUser = currentUser;
 		
 		HorizontalPanel topHp = new HorizontalPanel();
 		DecoratorPanel pairSelectionDec = new DecoratorPanel();
@@ -69,10 +71,10 @@ public class CategoricalAnalysisWidget extends AnalysisWidget {
 		pairSelectionHpExp.setSpacing(6);
 		pairSelectionHpExp.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		pairSelectionHpExp.add(new HTML("<b>Experiment Method:</b> "));
-		if (canSee16sData) {
+		if (currentUser.canSee16sData()) {
 			expTypeListBox.addItem("16S", GutFloraConstant.EXPERIMENT_METHOD_16S.toString());
 		}
-		if (canSeeShotgunData) {
+		if (currentUser.canSeeShotgunData()) {
 			expTypeListBox.addItem("Shotgun", GutFloraConstant.EXPERIMENT_METHOD_SHOTGUN.toString());
 		}
 		pairSelectionHpExp.add(expTypeListBox);
