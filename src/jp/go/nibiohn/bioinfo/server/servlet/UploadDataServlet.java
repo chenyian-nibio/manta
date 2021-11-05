@@ -32,7 +32,7 @@ public class UploadDataServlet extends HttpServlet {
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		try {
 			ServletFileUpload upload = new ServletFileUpload(factory);
-			upload.setFileSizeMax(1000000);
+			upload.setFileSizeMax(45000000);
 			List<FileItem> items = upload.parseRequest(request);
 			for (FileItem item : items) {
 				if (item.isFormField()) {
